@@ -9,7 +9,7 @@ export interface ILinkProps {
 
 const baseClass = `text-lg text-gray-500 after:content-[''] after:block after:mt-1 after:bg-primary after:h-0.5 after:w-0 hover:after:w-full hover:after:transition-all hover:after:duration-400`;
 
-const activeClass = `text-primary after:w-full`;
+const activeClass = `text-primary font-bold after:w-full`;
 
 const RaNavlink = ({ path, name, activeLink, setActiveLink }: ILinkProps) => {
   const isHash = path.includes("#");

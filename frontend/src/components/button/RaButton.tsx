@@ -25,9 +25,9 @@ const variantStlyes = {
 };
 
 const buttonStyles = {
-  sm: "px-4 py-2 text-xs",
-  md: "px-6 py-3 text-sm",
-  large: "px-6 py-4 md:text-base",
+  sm: "px-2 py-1 lg:px-4 lg:py-2 text-sm",
+  md: "px-3 py-2 lg:px-5 lg:py-3 lg:text-base",
+  large: "px-4 py-3 lg:px-6 lg:py-4 md:text-lg",
 };
 
 const RaButton = ({
@@ -48,7 +48,7 @@ const RaButton = ({
       type={type}
       onClick={clickFunc}
       disabled={disabled}
-      className={`${buttonStyles[size]} rounded-full font-semibold ${variantStlyes[variant]} ${!widthFill ? "" : "w-full px-auto"} flex items-center justify-center gap-2 hover:shadow-lg transition group cursor-pointer disabled:opacity-50 
+      className={`${buttonStyles[size]} rounded-full font-bold ${variantStlyes[variant]} ${!widthFill ? "" : "w-full px-auto"} flex items-center justify-center gap-2 hover:shadow-lg transition group cursor-pointer disabled:opacity-50 
         disabled:cursor-not-allowed 
         disabled:pointer-events-none 
         disabled:shadow-none
