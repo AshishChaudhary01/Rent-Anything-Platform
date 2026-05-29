@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @theme {
-   --font-sans: "Plus Jakarta Sans", sans-serif;
+   --font-sans: "Nunito Sans", sans-serif;
    --color-primary: #0960AC;
    --color-muted:#5B5F67;
    --color-accent: #D8E3F8;
@@ -22,5 +22,5 @@ html {
 }
 
 body {
-   font-family: "Plus Sans Jakarta", sans-serif;
+   font-family: "Nunito Sans", sans-serif;
 }
