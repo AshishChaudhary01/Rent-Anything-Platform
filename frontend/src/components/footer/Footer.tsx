@@ -1,23 +1,20 @@
 import { Link } from "react-router-dom"
 import RaContainer from "../container/RaContainer"
-import RaContainerPadding from "../container/RaContainerPadding"
 
 function Footer() {
   return (
     <RaContainer>
-      <RaContainerPadding>
-        <div className="py-16 text-muted flex justify-between">
-          <div>
-            &copy;
-            2026 Rent Anything Platform
-          </div>
-          <div className="flex gap-6">
-            <Link to={""}>Contact</Link>
-            <Link to={""}>Terms</Link>
-            <Link to={""}>Privacy</Link>
-          </div>
+      <div className="pt-4 pb-2 md:pt-8 md:pb-4 text-muted flex gap-6 justify-between text-sm lg:text-base">
+        <div>
+          &copy;
+          2026 Rent Anything Platform
         </div>
-      </RaContainerPadding>
+        <div className="flex flex-wrap gap-x-6">
+          <Link to={""}>Contact</Link>
+          <Link to={""}>Terms</Link>
+          <Link to={""}>Privacy</Link>
+        </div>
+      </div>
     </RaContainer>
   )
 }

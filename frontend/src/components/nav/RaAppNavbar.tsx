@@ -10,6 +10,7 @@ import RaMobileNavLink from "./RaMobileNavlink";
 export interface INavbarProps {
   isOpen: boolean;
   isMenuOpen: boolean;
+  variant?: "landingPage" | "auth" | "user" | "flow" | "admin"
 }
 
 const navLinks = [
@@ -95,7 +96,7 @@ function RaAppNavbar() {
           <div
             className={`fixed min-h-screen inset-0 z-40 backdrop-blur-xs transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
           >
-            <div className="fixed top-0 z-50 right-0 h-full w-[78vw] max-w-xs bg-light shadow-2xl flex flex-col transition-transform duration-300 ease-in-out lg:hidden">
+            <div className="fixed top-0 z-50 right-0 h-full w-[78vw] max-w-xs bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out lg:hidden">
               <div className="flex items-center justify-between px-6 py-5">
                 <div className="h-7 lg:h-8 cursor-pointer">
                   <img src={logoHorizontal} alt="Logo" className="w-full h-full" />
@@ -119,7 +120,9 @@ function RaAppNavbar() {
                 ))}
               </div>
               <div className="px-6 py-6 flex flex-col gap-3">
-                <RaButton btnText="Log in" variant="outline" widthFill={false} />
+                <Link to={"/auth/login"}>
+                  <RaButton btnText="Log in" variant="outline" />
+                </Link>
                 <RaButton btnText="Get Started" widthFill={false} />
               </div>
             </div>

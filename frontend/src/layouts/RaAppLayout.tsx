@@ -11,7 +11,7 @@ const RaAppLayout = ({ children }: IContainerProp) => {
         <Hero />
       </header>
       <main>{children}</main>
-      <footer>
+      <footer className='inset-shadow-xs'>
         <Footer />
       </footer>
     </div>
