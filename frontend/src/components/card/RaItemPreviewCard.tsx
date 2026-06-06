@@ -1,55 +1,48 @@
 import { Link } from "react-router-dom";
 import { ladder01, profile01 } from "../../utils/images";
-import { IoLocationOutline, IoStar, IoStarHalf } from "react-icons/io5";
+import { IoCashOutline, IoLocationOutline, IoStar, IoStarHalf } from "react-icons/io5";
 // import RaBadge from "../badge/RaBadge";
 // import { IoShieldCheckmarkOutline } from "react-icons/io5";
 
 export interface ICardProps {
-  item?: { id: number, image: string, title: string, description: string, lister: string, rate: number, unit: string, rating:number, listerProfile: string };
+  item?: {
+    id: number,
+    title: string,
+    rate: number,
+    unit: string,
+    location: string,
+    image: string,
+    // description: string,
+    // lister: string,
+    // rating: number,
+    // listerProfile: string 
+  };
   styleClass?: string;
 }
 
 
 const RaItemPreviewCard = ({
   item = {
-    id: 1,
+    id: 0,
     image: ladder01,
     title: "Demo Title",
-    description: "Demo description. This is a great item for xyz. It is well maintained and in good condition.",
-    lister: "Shyam Rai",
     rate: 0,
     unit: "N/A",
-    rating: 0,
-    listerProfile: profile01,
+    location: "",
   },
   styleClass,
 }: ICardProps) => {
   return (
     <div
-      className={`bg-white rounded-2xl w-full p-0 hover:shadow-sm ${styleClass}`}
+      className={`bg-white rounded-2xl w-40 md:w-55 p-0 hover:drop-shadow-lg ${styleClass}`}
     >
       <Link to={""}>
         <div style={{ backgroundImage: `url(${item.image})` }}
-          className="w-full h-70 md:h-70 bg-cover bg-center bg-no-repeat rounded-2xl"></div>
-        <div className="flex flex-col p-4 gap-2">
-          <div className="text-lg font-bold line-clamp-1">{item.title}</div>
-          {/* <div className="text-sm font-muted font-light line-clamp-2">{item.description}</div> */}
-          <div className="flex justify-between text-primary font-bold">
-            <div>Rs.{item.rate}/{item.unit}</div>
-            <div className="flex gap-1 items-center"><IoLocationOutline className="size-4" />KTM</div>
-          </div>
-          <div className="flex justify-between">
-            <div className="gap-2 inline-flex items-center">
-              <span>{item.rating}</span>
-              <div className="inline-flex items-center text-yellow-500 gap-0.5"><IoStar /><IoStar /><IoStar /><IoStar /><IoStarHalf /></div>
-            </div>
-            <div className="flex gap-2">
-              <div className="text-sm inline-flex items-center">{item.lister}</div>
-              <div style={{ backgroundImage: `url(${item.listerProfile})` }}
-                className="size-7 bg-cover bg-center bg-no-repeat rounded-full" >
-              </div>
-            </div>
-            {/* <RaBadge badgeText="VERIFIED" icon={<IoShieldCheckmarkOutline />} iconPosition="left" /> */}
+          className="size-40 md:size-55 bg-cover bg-center bg-no-repeat rounded-t-2xl"></div>
+        <div className="flex flex-col p-2 gap-1">
+          <div className="text-base md:text-lg font-bold line-clamp-1">{item.title}</div>
+          <div className="flex flex-col gap-y-0 md:gap-y-0.5 justify-between gap-x-2 text-sm md:text-base font-semibold">
+            <div className="flex gap-2 items-center font-bold text-primary"><IoCashOutline className="size-5" /> Rs.{item.rate}/{item.unit}</div>
           </div>
         </div>
       </Link>

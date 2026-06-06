@@ -10,7 +10,6 @@ import RaMobileNavLink from "./RaMobileNavlink";
 export interface INavbarProps {
   isOpen: boolean;
   isMenuOpen: boolean;
-  variant?: "landingPage" | "auth" | "user" | "flow" | "admin"
 }
 
 const navLinks = [
