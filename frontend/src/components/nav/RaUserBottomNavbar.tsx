@@ -1,5 +1,5 @@
 import RaUserNavlink from "./RaUserNavLink";
-import { IoAddCircleOutline, IoBagHandle, IoChatbubbleOutline, IoGridOutline, IoHome } from "react-icons/io5";
+import { IoAddCircle, IoBagHandle, IoChatbubble, IoGrid, IoHome } from "react-icons/io5";
 import RaContainerMD from "../container/RaContainerMD";
 import RaContainerPadding from "../container/RaContainerPadding";
 import { useLocation } from "react-router-dom";
@@ -7,9 +7,9 @@ import { useLocation } from "react-router-dom";
 const navLinks = [
   { id: 1, path: "/user", name: "Home", icon: <IoHome className="size-5" /> },
   { id: 2, path: "/user/my-rentals", name: "My Rentals", icon: <IoBagHandle className="size-5" /> },
-  { id: 2, path: "/user/add-listing", name: "Add Listing", icon: <IoAddCircleOutline className="size-5" /> },
-  { id: 2, path: "/user/my-listings", name: "My Listings", icon: <IoGridOutline className="size-5" /> },
-  { id: 2, path: "/user/chat", name: "chat", icon: <IoChatbubbleOutline className="size-5" /> },
+  { id: 2, path: "/user/add-listing", name: "Add Listing", icon: <IoAddCircle className="size-5" /> },
+  { id: 2, path: "/user/my-listings", name: "My Listings", icon: <IoGrid className="size-5" /> },
+  { id: 2, path: "/user/chat", name: "Chat", icon: <IoChatbubble className="size-5" /> },
 ];
 function RaUserBottomNavbar() {
   const location = useLocation();

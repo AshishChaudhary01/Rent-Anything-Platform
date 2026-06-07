@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import RaUserTopNavbar from "../../../components/nav/RaUserTopNavbar";
+import RaUserBottomNavbar from "../../../components/nav/RaUserBottomNavbar";
 
 const UserStandardLayout = () => {
   return (
@@ -10,6 +11,7 @@ const UserStandardLayout = () => {
       <main className="pb-18 pt-6">
         <Outlet />
       </main>
+      <RaUserBottomNavbar />
     </div>
   )
 }

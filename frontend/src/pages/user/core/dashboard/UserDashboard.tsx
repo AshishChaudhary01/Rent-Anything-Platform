@@ -2,7 +2,6 @@ import RaCategoryBar from "../../../../components/categoryBar/CategoryBar"
 import RaContainer from "../../../../components/container/RaContainer"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import ListingsSection from "../../../../components/listingsSection/ListingsSection"
-import RaUserBottomNavbar from "../../../../components/nav/RaUserBottomNavbar"
 import RaSearchBar from "../../../../components/searchbar/RaSearchbar"
 import { backpack01, ladder01, pressureWasher01, tent01, tools01 } from "../../../../utils/images"
 
@@ -92,24 +91,21 @@ const listItems = [
 
 const UserDashboard = () => {
   return (
-    <div>
-      <div className="bg-bg">
-        <RaContainer>
-          <RaContainerPadding>
-            <div>
-              <div className="flex flex-col gap-y-2">
-                <RaSearchBar placeholder="Search for tools, gears, or appliances..." />
-                <RaCategoryBar />
-              </div>
-              <ListingsSection sectionTitle="Featured" listItems={listItems} />
-              <ListingsSection sectionTitle="Adventure gear" listItems={listItems} />
-              <ListingsSection sectionTitle="Essential tools" listItems={listItems} />
-              <ListingsSection sectionTitle="Home living" listItems={listItems}/>
+    <div className="bg-bg">
+      <RaContainer>
+        <RaContainerPadding>
+          <div>
+            <div className="flex flex-col gap-y-2">
+              <RaSearchBar placeholder="Search for tools, gears, or appliances..." />
+              <RaCategoryBar />
             </div>
-          </RaContainerPadding>
-        </RaContainer>
-      </div>
-      <RaUserBottomNavbar />
+            <ListingsSection sectionTitle="Featured" listItems={listItems} />
+            <ListingsSection sectionTitle="Adventure gear" listItems={listItems} />
+            <ListingsSection sectionTitle="Essential tools" listItems={listItems} />
+            <ListingsSection sectionTitle="Home living" listItems={listItems} />
+          </div>
+        </RaContainerPadding>
+      </RaContainer>
     </div>
   )
 }

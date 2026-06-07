@@ -50,6 +50,7 @@ const router = createBrowserRouter([
           { path: "", element: <UserDashboard /> },
           { path: "my-rentals", element: <MyRentals /> },
           { path: "my-listings", element: <MyListings /> },
+          { path: "chat", element: <Chat /> },
         ]
       },
       {
@@ -70,12 +71,12 @@ const router = createBrowserRouter([
           { path: "confirmation", element: <Confirmation /> },
         ]
       },
-      {
-        element: <UserChatLayout />,
-        children: [
-          { path: "chat", element: <Chat /> },
-        ]
-      },
+      // {
+      //   element: <UserChatLayout />,
+      //   children: [
+      //     { path: "chat", element: <Chat /> },
+      //   ]
+      // },
     ]
   }
 ]);
