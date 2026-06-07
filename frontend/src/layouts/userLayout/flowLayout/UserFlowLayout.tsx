@@ -14,14 +14,15 @@ const UserFlowLayout = () => {
                 <img src={logoHorizontal} alt="Logo" className="size-full" />
               </div>
               <div className="flex gap-x-4">
-                <Link to={"/user"} className="size-10 text-muted">
+                <Link to={"/user"} className="size-6 text-muted">
                   <IoHelpCircleOutline className="size-full" />
                 </Link>
               </div>
             </div>
           </RaContainer>
-        </nav>      </header>
-      <main>
+        </nav>
+      </header>
+      <main className="pt-6 mb-30 md:pb-18">
         <Outlet />
       </main>
     </div>

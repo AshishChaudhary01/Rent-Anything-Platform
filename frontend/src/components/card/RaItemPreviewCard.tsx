@@ -26,9 +26,9 @@ const RaItemPreviewCard = ({
 }: ICardProps) => {
   return (
     <div
-      className={`bg-white rounded-2xl w-40 md:w-55 p-0 hover:drop-shadow-lg ${styleClass}`}
+      className={`bg-white rounded-2xl w-40 md:w-55 p-0 hover:drop-shadow-sm ${styleClass}`}
     >
-      <Link to={""}>
+      <Link to={"/user/listing"}>
         <div style={{ backgroundImage: `url(${item.image})` }}
           className="size-40 md:size-55 bg-cover bg-center bg-no-repeat rounded-t-2xl"></div>
         <div className="flex flex-col p-2 gap-1">

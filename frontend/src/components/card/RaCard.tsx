@@ -2,7 +2,7 @@ import type React from "react";
 
 export interface ICardProps {
   children: React.ReactNode;
-  shadow?: "xs" | "sm" | "md" | "lg";
+  shadow?: "xs" | "sm" | "md" | "lg" | "none";
   bg?: "white" | "accent" | "accentSecondary" | "surface";
   color?: "muted" | "muted-secondary";
   round?: "none" | "round" | "rounder" | "full";
@@ -24,7 +24,7 @@ const roundedStyles = {
 };
 
 const RaCard = ({
-  shadow,
+  shadow = "sm",
   bg="white",
   color,
   round = "rounder",
@@ -33,7 +33,7 @@ const RaCard = ({
 }: ICardProps) => {
   return (
     <div
-      className={`${shadow} ${backgroundStyles[bg]} ${color} ${roundedStyles[round]} w-full py-6 px-4 hover:shadow-sm ${styleClass}`}
+      className={`${shadow} ${backgroundStyles[bg]} ${color} ${roundedStyles[round]} w-full p-2 md:p-6 ${styleClass}`}
     >
       {children}
     </div>
