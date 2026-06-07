@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
-import { ladder01, profile01 } from "../../utils/images";
-import { IoCashOutline, IoLocationOutline, IoStar, IoStarHalf } from "react-icons/io5";
-// import RaBadge from "../badge/RaBadge";
-// import { IoShieldCheckmarkOutline } from "react-icons/io5";
+import { ladder01 } from "../../utils/images";
+import { IoCashOutline } from "react-icons/io5";
 
 export interface ICardProps {
   item?: {
@@ -10,12 +8,7 @@ export interface ICardProps {
     title: string,
     rate: number,
     unit: string,
-    location: string,
     image: string,
-    // description: string,
-    // lister: string,
-    // rating: number,
-    // listerProfile: string 
   };
   styleClass?: string;
 }
@@ -28,7 +21,6 @@ const RaItemPreviewCard = ({
     title: "Demo Title",
     rate: 0,
     unit: "N/A",
-    location: "",
   },
   styleClass,
 }: ICardProps) => {

@@ -2,66 +2,90 @@ import { Link } from "react-router-dom";
 import RaContainer from "../../../components/container/RaContainer";
 import RaContainerPadding from "../../../components/container/RaContainerPadding";
 import { IoArrowForward } from "react-icons/io5";
-import RaContainerXS from "../../../components/container/RaContainerXS";
-import { ladder01, pressureWasher01, profile01, tent01 } from "../../../utils/images";
 import RaItemPreviewContainer from "../../../components/container/RaItemPreviewContainer";
 import RaItemPreviewCard from "../../../components/card/RaItemPreviewCard";
+import { backpack01, ladder01, pressureWasher01, tent01, tools01 } from "../../../utils/images";
 
 const listItems = [
   {
     id: 1,
     image: ladder01,
-    title: "A Title that is very very very very very very long",
-    description: "Demo description. This is a great item for xyz. It is well maintained and in good condition.",
-    lister: "Shyam Rai",
+    title: "Demo title",
     rate: 1000,
     unit: "day",
-    rating: 4.6,
-    listerProfile: profile01
+    location: "KTM"
   },
   {
     id: 2,
     image: tent01,
-    title: "Demo Title",
-    description: "Demo description. This is a great item for xyz. It is well maintained and in good condition.",
-    lister: "Shyam Rai",
+    title: "Demo title",
     rate: 1000,
     unit: "day",
-    rating: 4.6,
-    listerProfile: profile01
+    location: "KTM"
   },
   {
     id: 3,
-    image: pressureWasher01,
-    title: "Demo Title",
-    description: "Demo description. This is a great item for xyz. It is well maintained and in good condition.",
-    lister: "Shyam Rai",
+    image: backpack01,
+    title: "A Title that is very looooooooooooooooooooooong",
     rate: 1000,
     unit: "day",
-    rating: 4.6,
-    listerProfile: profile01
+    location: "KTM"
   },
   {
     id: 4,
-    image: ladder01,
-    title: "Demo Title",
-    description: "Demo description. This is a great item for xyz. It is well maintained and in good condition.",
-    lister: "Shyam Rai",
+    image: tools01,
+    title: "Demo title",
     rate: 1000,
     unit: "day",
-    rating: 4.6,
-    listerProfile: profile01
+    location: "KTM"
   },
   {
     id: 5,
-    image: tent01,
-    title: "Demo Title",
-    description: "Demo description. This is a great item for xyz. It is well maintained and in good condition.",
-    lister: "Shyam Rai",
+    image: pressureWasher01,
+    title: "Demo title",
     rate: 1000,
     unit: "day",
-    rating: 4.1,
-    listerProfile: profile01
+    location: "KTM"
+  },
+  {
+    id: 6,
+    image: ladder01,
+    title: "Demo title",
+    rate: 1000,
+    unit: "day",
+    location: "KTM"
+  },
+  {
+    id: 7,
+    image: tent01,
+    title: "Demo title",
+    rate: 1000,
+    unit: "day",
+    location: "KTM"
+  },
+  {
+    id: 8,
+    image: backpack01,
+    title: "A Title that is very looooooooooooooooooooooong",
+    rate: 1000,
+    unit: "day",
+    location: "KTM"
+  },
+  {
+    id: 9,
+    image: tools01,
+    title: "Demo title",
+    rate: 1000,
+    unit: "day",
+    location: "KTM"
+  },
+  {
+    id: 10,
+    image: pressureWasher01,
+    title: "Demo title",
+    rate: 1000,
+    unit: "day",
+    location: "KTM"
   },
 ]
 
@@ -78,9 +102,7 @@ const FeaturedItems = () => {
           </div>
           <RaItemPreviewContainer>
             {listItems.map((item) => (
-              <RaContainerXS>
-                <RaItemPreviewCard item={item} />
-              </RaContainerXS>
+              <RaItemPreviewCard item={item} />
             ))}
           </RaItemPreviewContainer>
         </RaContainerPadding>
