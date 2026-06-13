@@ -1,19 +1,19 @@
 import { IoSearchOutline } from "react-icons/io5";
 
 interface RaSearchBarProps {
-  placeholder?: string;
+  placeholderText?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit?: () => void;
-  className?: string;
+  styleClass?: string;
 }
 
 const RaSearchBar = ({
-  placeholder = "Search...",
+  placeholderText = "Search...",
   value,
   onChange,
   onSubmit,
-  className = "",
+  styleClass = "",
 }: RaSearchBarProps) => {
   return (
     <div
@@ -25,7 +25,7 @@ const RaSearchBar = ({
         px-4 py-2
         focus-within:border-muted
         transition
-        ${className}
+        ${styleClass}
       `}
     >
       {/* Icon */}
@@ -36,7 +36,7 @@ const RaSearchBar = ({
         type="text"
         value={value}
         onChange={onChange}
-        placeholder={placeholder}
+        placeholder={placeholderText}
         className="
           w-full
           bg-transparent

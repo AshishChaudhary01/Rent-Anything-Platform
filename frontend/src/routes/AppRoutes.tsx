@@ -16,7 +16,6 @@ import AddListing from "../pages/user/core/addListing/AddListing";
 import Chat from "../pages/user/core/chat/Chat";
 import UserStandardLayout from "../layouts/userLayout/standardLayout/UserStandardLayout";
 import UserFlowLayout from "../layouts/userLayout/flowLayout/UserFlowLayout";
-import UserChatLayout from "../layouts/userLayout/chatLayout/UserChatLayout";
 
 const router = createBrowserRouter([
   {
@@ -64,19 +63,13 @@ const router = createBrowserRouter([
         path: "rent",
         element: <UserFlowLayout />,
         children: [
-          { path: "request-to rent", element: <RequestToRent /> },
-          { path: "collborate", element: <Collaborate /> },
+          { path: "request-to-rent", element: <RequestToRent /> },
+          { path: "collaborate", element: <Collaborate /> },
           { path: "meetup", element: <Meetup /> },
           { path: "checkout", element: <Checkout /> },
           { path: "confirmation", element: <Confirmation /> },
         ]
-      },
-      // {
-      //   element: <UserChatLayout />,
-      //   children: [
-      //     { path: "chat", element: <Chat /> },
-      //   ]
-      // },
+      }
     ]
   }
 ]);

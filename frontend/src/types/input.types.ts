@@ -1,11 +1,12 @@
 import type { UseFormRegisterReturn } from "react-hook-form";
 
 export interface IInput {
-  type?: "text" | "password" | "email";
+  type?: "text" | "password" | "email" | "date" | "time" | "datetime-local";
   label?: string;
   name: string;
   Icon?: React.ElementType;
   placeholderText?: string;
+  value?: string;
   registration?: UseFormRegisterReturn;
   error?: string;
 }

@@ -6,7 +6,7 @@ import SummaryCard from "./summaryCard/SummaryCard";
 import { useMediaQuery } from "react-responsive";
 
 function Listing() {
-  const isMobile = useMediaQuery({ maxWidth: 1024 });
+  const isMobile = useMediaQuery({ maxWidth: 768 });
   return (
     <RaContainer>
       <RaContainerPadding>

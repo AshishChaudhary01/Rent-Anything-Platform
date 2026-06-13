@@ -96,7 +96,7 @@ const UserDashboard = () => {
         <RaContainerPadding>
           <div>
             <div className="flex flex-col gap-y-2">
-              <RaSearchBar placeholder="Search for tools, gears, or appliances..." />
+              <RaSearchBar placeholderText="Search for tools, gears, or appliances..." />
               <RaCategoryBar />
             </div>
             <ListingsSection sectionTitle="Featured" listItems={listItems} />
