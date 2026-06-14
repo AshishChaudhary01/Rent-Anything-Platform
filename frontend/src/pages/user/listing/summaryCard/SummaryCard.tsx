@@ -4,7 +4,6 @@ import Divider from "../../../../components/divider/Divider"
 import RaButton from "../../../../components/button/RaButton"
 import RaInput from "../../../../components/input/RaInput"
 import RequestToRentButton from "./RequestToRentButton"
-import { Link } from "react-router-dom"
 
 function SummaryCard() {
   return (
@@ -19,7 +18,7 @@ function SummaryCard() {
 
         {/* Request Button for Small Screen ONLY */}
         <div className="lg:hidden flex justify-end">
-          <RequestToRentButton/>
+          <RequestToRentButton />
         </div>
       </div>
       {/* <div className="font-medium flex justify-between items-end text-base md:text-lg">
