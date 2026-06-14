@@ -4,31 +4,53 @@ import RaCard from "../../../../components/card/RaCard";
 import Divider from "../../../../components/divider/Divider";
 import RaButton from "../../../../components/button/RaButton";
 import { FaRegEdit } from "react-icons/fa";
+import { tent01 } from "../../../../utils/images";
+import { IoArrowForward, IoArrowForwardOutline } from "react-icons/io5";
 
 function CollaborateSummaryCard() {
   return (
     <RaCard styleClass="flex flex-col gap-y-4">
 
-      <div className="flex items-center justify-between">
-        <h2 className="font-bold text-base md:text-xl">
-          Current Request
-        </h2>
+      <div className="">
 
-        {/* Edit Request Button for Small Screen ONLY */}
-        <div className="lg:hidden">
-          <Link to="/user/rent/request-to-rent">
-            <RaButton
-              btnText="Edit"
-              size="md"
-              icon={<FaRegEdit />}
-            />
-          </Link>
+        {/* Small Screen ONLY */}
+        <div className="lg:hidden flex justify-between gap-x-4 items-center">
+
+          <div className="flex gap-x-2">
+            <div><img src={tent01} alt="Listing Image" className="size-10 rounded-lg" /></div>
+            <div className="text-base md:text-xl font-bold flex items-center truncate">Hiking Tent</div>
+          </div>
+
+          <div className="flex gap-x-2">
+            <Link to="/user/rent/request-to-rent">
+              <RaButton
+                btnText="Edit"
+                size="md"
+                variant="outline"
+                icon={<FaRegEdit />}
+              />
+            </Link>
+            <Link to="/user/rent/checkout">
+              <RaButton
+                btnText="Continue"
+                size="md"
+                icon={<IoArrowForwardOutline />}
+              // disabled={true}
+              />
+            </Link>
+          </div>
         </div>
       </div>
 
-      <Divider />
-
       <div className="flex flex-col gap-y-3">
+        <div className="hidden lg:block">
+          <div className="flex gap-x-4">
+            <div><img src={tent01} alt="Listing Image" className="size-14 rounded-lg" /></div>
+            <div className="text-lg md:text-xl font-bold flex items-center truncate">Hiking Tent</div>
+          </div>
+        </div>
+
+        <Divider />
 
         <div>
           <p className="text-sm text-muted">
@@ -74,12 +96,21 @@ function CollaborateSummaryCard() {
 
       <Divider />
 
-      <div className="hidden lg:block">
+      <div className="hidden lg:flex flex-col gap-y-2">
         <Link to="/user/rent/request-to-rent">
           <RaButton
             btnText="Edit Request"
             size="md"
+            variant="outline"
             icon={<FaRegEdit />}
+          />
+        </Link>
+        <Link to="/user/rent/checkout">
+          <RaButton
+            btnText="Continue"
+            size="md"
+            icon={<IoArrowForwardOutline />}
+          // disabled={true}
           />
         </Link>
       </div>
