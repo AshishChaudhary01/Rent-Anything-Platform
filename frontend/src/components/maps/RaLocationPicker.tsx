@@ -7,7 +7,6 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
-import { IoLocation } from "react-icons/io5";
 
 export interface SelectedLocation {
   address: string;
@@ -17,7 +16,9 @@ export interface SelectedLocation {
 
 interface LocationPickerProps {
   value?: SelectedLocation | null;
-  onChange?: (location: SelectedLocation) => void;
+  onChange?: (
+    location: SelectedLocation
+  ) => void;
 }
 
 /* ---------------- KATHMANDU BOUNDS ---------------- */

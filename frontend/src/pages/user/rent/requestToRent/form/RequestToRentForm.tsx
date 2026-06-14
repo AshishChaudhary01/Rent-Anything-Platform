@@ -1,7 +1,29 @@
 import RaInput from "../../../../../components/input/RaInput";
 import LocationPicker from "../../../../../components/maps/RaLocationPicker";
 
-function RequestToRentForm() {
+interface RequestToRentFormProps {
+  value: {
+    startDate: string;
+    endDate: string;
+    meetupLocation: string;
+    note: string;
+  };
+  onChange: (data: any) => void;
+}
+
+function RequestToRentForm({
+  value,
+  onChange,
+}: RequestToRentFormProps) {
+  const updateField = (
+    field: string,
+    fieldValue: string
+  ) => {
+    onChange({
+      ...value,
+      [field]: fieldValue,
+    });
+  };
   return (
     <div className="flex flex-col gap-6">
 
@@ -17,14 +39,20 @@ function RequestToRentForm() {
             type="date"
             name="startDate"
             label="Start Date"
-            placeholderText="Select start date"
+            value={value.startDate}
+            onChange={(e) =>
+              updateField("startDate", e.target.value)
+            }
           />
 
           <RaInput
             type="date"
             name="endDate"
             label="End Date"
-            placeholderText="Select end date"
+            value={value.endDate}
+            onChange={(e) =>
+              updateField("endDate", e.target.value)
+            }
           />
 
         </div>
@@ -39,8 +67,39 @@ function RequestToRentForm() {
           Choose your preferred meetup Location
         </div>
 
-        <LocationPicker />
+        <LocationPicker
+          value={
+            value.meetupLocation
+              ? {
+                address: value.meetupLocation,
+                lat: 0,
+                lng: 0,
+              }
+              : null
+          }
+          onChange={(location) =>
+            updateField(
+              "meetupLocation",
+              location.address
+            )
+          }
+        />
       </div>
+      {/* <div className="flex flex-col gap-2">
+        <div className="font-semibold text-xl">
+          Additional Note
+        </div>
+
+        <RaInput
+          type="text"
+          name="note"
+          placeholderText="Any special instructions..."
+          value={value.note}
+          onChange={(e) =>
+            updateField("note", e.target.value)
+          }
+        />
+      </div> */}
     </div>
   );
 }

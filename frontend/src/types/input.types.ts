@@ -9,6 +9,7 @@ export interface IInput {
   value?: string;
   registration?: UseFormRegisterReturn;
   error?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export interface IOTPInput {

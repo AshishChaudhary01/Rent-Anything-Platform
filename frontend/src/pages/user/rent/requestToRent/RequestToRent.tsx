@@ -42,18 +42,6 @@ function RequestToRent() {
         </div>
       </RaContainerPadding>
     </RaContainer>
-
-    // <div>
-    //   <RequestToRentForm />
-
-    //   <
-    //   {/* <RaContainerMD>
-    //     <RaLocationPicker
-    //       value={location}
-    //       onChange={setLocation}
-    //     />
-    //   </RaContainerMD> */}
-    // </div>
   );
 }
 
