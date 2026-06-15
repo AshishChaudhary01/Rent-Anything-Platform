@@ -22,7 +22,7 @@ const UserFlowLayout = () => {
           </RaContainer>
         </nav>
       </header>
-      <main className="pt-6 mb-12 lg:mb-0">
+      <main className="pt-6 mb-24 lg:mb-0">
         <Outlet />
       </main>
     </div>

@@ -7,5 +7,19 @@ import ladder01 from "@/assets/images/ladder-01.png";
 import tent01 from "@/assets/images/tent-01.png";
 import pressureWasher01 from "@/assets/images/pressure-washer-01.png";
 import profile01 from "@/assets/images/profile-01.png";
+import esewa from "@/assets/images/esewa-logo.jpg";
+import khalti from "@/assets/images/khalti-logo.png";
 
-export { logoHorizontal, logoSquare, heroImage, tools01, backpack01, ladder01, tent01, pressureWasher01, profile01 };
+export {
+  logoHorizontal,
+  logoSquare,
+  heroImage,
+  tools01,
+  backpack01,
+  ladder01,
+  tent01,
+  pressureWasher01,
+  profile01,
+  esewa,
+  khalti,
+};
