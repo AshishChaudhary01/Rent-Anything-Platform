@@ -26,7 +26,7 @@ function CheckoutSummaryCard() {
           </div>
           <p className="font-bold">Nrs. 100</p>
         </div>
-        <div className="flex justify-between my-2">
+        <div className="hidden lg:flex lg:justify-between my-2">
           <div className="flex gap-x-2 items-center text-xl font-semibold">
             <p>Sub Total:</p>
           </div>
