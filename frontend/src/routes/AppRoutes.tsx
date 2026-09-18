@@ -10,10 +10,14 @@ import Collaborate from "../pages/user/rent/collaborate/Collaborate";
 import Checkout from "../pages/user/rent/checkout/Checkout";
 import Meetup from "../pages/user/rent/meetup/Meetup";
 import Confirmation from "../pages/user/rent/confirmation/Confirmation";
+import ConditionProof from "../pages/user/rent/conditionProof/ConditionProof";
+import ReturnSchedule from "../pages/user/rent/returnSchedule/ReturnSchedule";
+import ReturnMeetup from "../pages/user/rent/returnMeetup/ReturnMeetup";
 import MyRentals from "../pages/user/core/myRentals/MyRentals";
 import MyListings from "../pages/user/core/myListings/MyListings";
 import AddListing from "../pages/user/core/addListing/AddListing";
 import Chat from "../pages/user/core/chat/Chat";
+import RentalDetails from "../pages/user/rent/rentalDetails/RentalDetails";
 import UserStandardLayout from "../layouts/userLayout/standardLayout/UserStandardLayout";
 import UserFlowLayout from "../layouts/userLayout/flowLayout/UserFlowLayout";
 
@@ -57,6 +61,7 @@ const router = createBrowserRouter([
         children: [
           { path: "add-listing", element: <AddListing /> },
           { path: "listing", element: <Listing /> },
+          { path: "rental-details", element: <RentalDetails /> },
         ]
       },
       {
@@ -68,6 +73,9 @@ const router = createBrowserRouter([
           { path: "meetup", element: <Meetup /> },
           { path: "checkout", element: <Checkout /> },
           { path: "confirmation", element: <Confirmation /> },
+          { path: "return-schedule", element: <ReturnSchedule /> },
+          { path: "condition-proof", element: <ConditionProof /> },
+          { path: "return-meetup", element: <ReturnMeetup /> },
         ]
       }
     ]

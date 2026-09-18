@@ -8,6 +8,8 @@ const RaInput = ({
   name,
   Icon,
   placeholderText,
+  value,
+  onChange,
   registration,
   error,
 }: IInput) => {
@@ -28,6 +30,8 @@ const RaInput = ({
           id={name}
           name={name}
           placeholder={placeholderText}
+          value={value}
+          onChange={onChange}
           {...registration}
         />
         {isPassword && (

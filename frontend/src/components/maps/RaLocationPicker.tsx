@@ -19,6 +19,7 @@ interface LocationPickerProps {
   onChange?: (
     location: SelectedLocation
   ) => void;
+  mapClass?: string;
 }
 
 /* ---------------- KATHMANDU BOUNDS ---------------- */
@@ -88,6 +89,7 @@ function MapClickHandler({
 function LocationPicker({
   value,
   onChange,
+  mapClass = "h-80",
 }: LocationPickerProps) {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<any[]>([]);
@@ -238,7 +240,7 @@ function LocationPicker({
       <MapContainer
         center={position}
         zoom={14}
-        className="h-80 rounded-lg z-0 cursor-grab active:cursor-grabbing"
+        className={`${mapClass} rounded-lg z-0 cursor-grab active:cursor-grabbing`}
         maxBounds={ktmBounds}
         maxBoundsViscosity={1.0}
       >
