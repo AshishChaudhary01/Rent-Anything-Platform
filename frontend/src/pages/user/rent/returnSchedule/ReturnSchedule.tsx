@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { IoCalendarOutline, IoChatbubbleOutline } from "react-icons/io5"
 import RaContainerLG from "../../../../components/container/RaContainerLG"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
@@ -10,6 +10,8 @@ import LocationPicker from "../../../../components/maps/RaLocationPicker"
 import ReturnFlowHeader from "../ReturnFlowHeader"
 import OwnerReturnNav from "../OwnerReturnNav"
 import { OWNER_RETURN_STEPS } from "../returnSteps"
+import ChatLink from "../../core/chat/ChatLink"
+import { chatWithOwner, chatWithRenter } from "../../core/chat/chatData"
 
 function ReturnSchedule() {
   const navigate = useNavigate()
@@ -57,15 +59,10 @@ function ReturnSchedule() {
               <IoChatbubbleOutline className="size-5 text-primary" />
               Need to coordinate?
             </div>
-            <Link to="/user/chat">
-              <RaButton
-                type="button"
-                btnText={isOwner ? "Chat with Renter" : "Chat with Owner"}
-                variant="outline"
-                icon={<IoChatbubbleOutline />}
-                iconPosition="left"
-              />
-            </Link>
+            <ChatLink
+              context={isOwner ? chatWithRenter : chatWithOwner}
+              btnText={isOwner ? "Chat with Renter" : "Chat with Owner"}
+            />
           </RaCard>
 
           {isOwner ? (

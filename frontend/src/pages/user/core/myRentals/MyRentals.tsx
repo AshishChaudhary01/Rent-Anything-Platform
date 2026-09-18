@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom"
-import { IoCalendarOutline, IoChatbubbleOutline, IoClose, IoTimeOutline } from "react-icons/io5"
+import { IoCalendarOutline, IoClose, IoTimeOutline } from "react-icons/io5"
 import RaContainer from "../../../../components/container/RaContainer"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
-import RaItemPreviewContainer from "../../../../components/container/RaItemPreviewContainer"
+import ChatLink from "../chat/ChatLink"
+import { chatWithOwner } from "../chat/chatData"
 import { backpack01, ladder01, pressureWasher01, tent01, tools01 } from "../../../../utils/images"
 
 const detailsPath = "/user/rental-details"
@@ -50,9 +51,13 @@ function MyRentals() {
                       <div className="text-sm text-muted">{item.status}</div>
                     </Link>
                     <div className="flex gap-2 mt-3">
-                      <Link to="/user/chat" className="flex-1">
-                        <RaButton type="button" btnText="Chat" size="sm" variant="outline" icon={<IoChatbubbleOutline />} iconPosition="left" />
-                      </Link>
+                      <div className="flex-1">
+                        <ChatLink
+                          context={{ ...chatWithOwner, threadId: `pending-${item.id}`, listingTitle: item.title, listingImage: item.image }}
+                          btnText="Chat"
+                          size="sm"
+                        />
+                      </div>
                       <div className="flex-1">
                         <RaButton type="button" btnText="Cancel" size="sm" variant="outline" icon={<IoClose />} iconPosition="left" />
                       </div>
@@ -84,9 +89,13 @@ function MyRentals() {
                       <Link to="/user/rent/return-schedule" className="flex-1">
                         <RaButton type="button" btnText="Return Item" size="sm" />
                       </Link>
-                      <Link to="/user/chat" className="flex-1">
-                        <RaButton type="button" btnText="Open Chat" size="sm" variant="outline" />
-                      </Link>
+                      <div className="flex-1">
+                        <ChatLink
+                          context={{ ...chatWithOwner, threadId: `active-${item.id}`, listingTitle: item.title, listingImage: item.image }}
+                          btnText="Open Chat"
+                          size="sm"
+                        />
+                      </div>
                     </div>
                   </div>
                 </RaCard>

@@ -29,13 +29,13 @@ const ListingsSection = ({
     <div className={`rounded-4xl py-4 md:py-8 ${styleClass}`} >
       <div className="flex justify-between items-end">
         <h3 className="text-lg md:text-xl lg:text-3xl font-bold">{sectionTitle}</h3>
-        <Link to={`${redirectUrl}`} className="flex gap-2 text-xs md:text-base text-primary hover:underline">
+        <Link to={redirectUrl || "/user/category/all"} className="flex gap-2 text-xs md:text-base text-primary hover:underline">
           View All<IoArrowForward />
         </Link>
       </div>
       <RaItemPreviewContainer>
         {listItems.map((item) => (
-          <RaItemPreviewCard item={item} />
+          <RaItemPreviewCard key={item.id} item={item} />
         ))}
       </RaItemPreviewContainer>
     </div >

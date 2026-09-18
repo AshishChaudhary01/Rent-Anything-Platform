@@ -1,33 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { IoCheckmarkOutline, IoChevronForwardOutline, IoNotificationsOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
-
-interface Notification {
-  id: number;
-  message: string;
-  read: boolean;
-}
+import { initialNotifications } from "../../data/notifications";
+import NotificationItem from "./NotificationItem";
 
 const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      message: "Your booking request was approved.",
-      read: true,
-    },
-    {
-      id: 2,
-      message: "New message from John.",
-      read: false,
-    },
-    {
-      id: 3,
-      message: "Rental period ends tomorrow.",
-      read: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState(initialNotifications);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -103,25 +83,24 @@ const NotificationDropdown = () => {
                 No notifications
               </div>
             ) : (
-              notifications.map((notification) => (
-                <div
+              notifications.slice(0, 4).map((notification) => (
+                <NotificationItem
                   key={notification.id}
-                  className={`border-t border-white p-4 ${!notification.read
-                    ? "bg-accent/50"
-                    : ""
-                    }`}
-                >
-
-                  <p className="text-sm">
-                    {notification.message}
-                  </p>
-                </div>
+                  item={notification}
+                  compact
+                  onClick={() => setIsOpen(false)}
+                  onMarkRead={(id) =>
+                    setNotifications((prev) =>
+                      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+                    )
+                  }
+                />
               ))
             )}
           </div>
 
           {/* View all */}
-          <Link to={"/user"} className="m-2 p-3 rounded-sm bg-gray-100 text-xs text-muted font-semibold flex justify-center gap-x-2">View all notifications <IoChevronForwardOutline /></Link>
+          <Link to="/user/notifications" onClick={() => setIsOpen(false)} className="m-2 p-3 rounded-sm bg-gray-100 text-xs text-muted font-semibold flex justify-center gap-x-2">View all notifications <IoChevronForwardOutline /></Link>
         </div>
       )}
     </div>

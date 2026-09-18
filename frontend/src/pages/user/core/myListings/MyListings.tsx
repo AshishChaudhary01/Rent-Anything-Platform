@@ -68,7 +68,7 @@ function MyListings() {
 
           <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1">
-              <RaSearchBar placeholderText="Search listings..." value={query} onChange={(e) => setQuery(e.target.value)} />
+              <RaSearchBar placeholderText="Search listings..." value={query} onChange={(e) => setQuery(e.target.value)} suggestions={false} />
             </div>
             <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="All">All</option>

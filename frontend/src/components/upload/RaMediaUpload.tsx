@@ -75,7 +75,7 @@ function RaMediaUpload({
       </button>
 
       {items.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
           {items.map((item) => (
             <div key={item.id} className="relative aspect-square rounded-xl overflow-hidden bg-black">
               {item.file.type.startsWith("video/") ? (

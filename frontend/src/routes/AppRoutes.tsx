@@ -6,7 +6,6 @@ import Register from "../pages/auth/register/Register";
 import UserDashboard from "../pages/user/core/dashboard/UserDashboard";
 import Listing from "../pages/user/listing/Listing";
 import RequestToRent from "../pages/user/rent/requestToRent/RequestToRent";
-import Collaborate from "../pages/user/rent/collaborate/Collaborate";
 import Checkout from "../pages/user/rent/checkout/Checkout";
 import Meetup from "../pages/user/rent/meetup/Meetup";
 import Confirmation from "../pages/user/rent/confirmation/Confirmation";
@@ -17,6 +16,9 @@ import MyRentals from "../pages/user/core/myRentals/MyRentals";
 import MyListings from "../pages/user/core/myListings/MyListings";
 import AddListing from "../pages/user/core/addListing/AddListing";
 import Chat from "../pages/user/core/chat/Chat";
+import CategoryListings from "../pages/user/core/category/CategoryListings";
+import SearchResults from "../pages/user/core/search/SearchResults";
+import Notifications from "../pages/user/core/notifications/Notifications";
 import RentalDetails from "../pages/user/rent/rentalDetails/RentalDetails";
 import MyListingDetails from "../pages/user/core/myListingDetails/MyListingDetails";
 import ListingRequests from "../pages/user/core/listingRequests/ListingRequests";
@@ -59,6 +61,9 @@ const router = createBrowserRouter([
           { path: "my-rentals", element: <MyRentals /> },
           { path: "my-listings", element: <MyListings /> },
           { path: "chat", element: <Chat /> },
+          { path: "category/:slug", element: <CategoryListings /> },
+          { path: "search", element: <SearchResults /> },
+          { path: "notifications", element: <Notifications /> },
         ]
       },
       {
@@ -76,7 +81,6 @@ const router = createBrowserRouter([
         element: <UserFlowLayout />,
         children: [
           { path: "request-to-rent", element: <RequestToRent /> },
-          { path: "collaborate", element: <Collaborate /> },
           { path: "meetup", element: <Meetup /> },
           { path: "checkout", element: <Checkout /> },
           { path: "confirmation", element: <Confirmation /> },

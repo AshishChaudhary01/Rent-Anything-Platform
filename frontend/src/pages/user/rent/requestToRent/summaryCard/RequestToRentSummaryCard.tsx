@@ -1,7 +1,7 @@
+import { Link } from "react-router-dom"
 import RaCard from "../../../../../components/card/RaCard"
 import Divider from "../../../../../components/divider/Divider"
-import RequestToCollaborateButton from "./CollaborateButton"
-import CollaborateButton from "./CollaborateButton"
+import RaButton from "../../../../../components/button/RaButton"
 
 function RequestToRentSummaryCard({
   formData,
@@ -42,7 +42,9 @@ function RequestToRentSummaryCard({
           <div className="flex items-center">
             <p>Total: <span className="font-bold text-primary">400</span></p>
           </div>
-          <CollaborateButton />
+          <Link to="/user/rent/checkout">
+            <RaButton type="submit" btnText="Continue" size="large" />
+          </Link>
         </div>
       </div>
       <Divider />
@@ -90,7 +92,9 @@ function RequestToRentSummaryCard({
       {/* Request To Collaborate Button Full view Only */}
       <div className="hidden lg:block">
 
-        <RequestToCollaborateButton />
+        <Link to="/user/rent/checkout">
+          <RaButton type="submit" btnText="Continue" size="large" />
+        </Link>
       </div>
       <div className="text-center text-muted font-light text-sm"> For now, you will only be charged a small commitment fee that will later be deducted from total fee.</div>
     </RaCard>

@@ -1,9 +1,10 @@
-import { Link, useNavigate } from "react-router-dom"
-import { IoCalendarOutline, IoChatbubbleOutline, IoCubeOutline, IoImagesOutline, IoLocationOutline, IoPersonOutline, IoShieldCheckmarkOutline, IoTimeOutline } from "react-icons/io5"
+import { useNavigate } from "react-router-dom"
+import { IoCalendarOutline, IoCubeOutline, IoImagesOutline, IoLocationOutline, IoPersonOutline, IoShieldCheckmarkOutline, IoTimeOutline } from "react-icons/io5"
+import ChatLink from "../../core/chat/ChatLink"
+import { chatWithRenter } from "../../core/chat/chatData"
 import RaContainerLG from "../../../../components/container/RaContainerLG"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import RaCard from "../../../../components/card/RaCard"
-import RaButton from "../../../../components/button/RaButton"
 import ReturnFlowHeader from "../ReturnFlowHeader"
 import OwnerReturnNav from "../OwnerReturnNav"
 import { OWNER_RETURN_STEPS } from "../returnSteps"
@@ -52,9 +53,7 @@ function OwnerReturnReview() {
                 <div className="font-semibold">Anish Sharma</div>
                 <div className="text-sm text-muted">Active renter</div>
               </div>
-              <Link to="/user/chat">
-                <RaButton type="button" btnText="Chat" size="sm" variant="outline" widthFill={false} icon={<IoChatbubbleOutline />} iconPosition="left" />
-              </Link>
+              <ChatLink context={chatWithRenter} size="sm" widthFill={false} />
             </div>
           </RaCard>
 

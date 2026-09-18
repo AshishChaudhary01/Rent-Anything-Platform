@@ -5,7 +5,9 @@ import RaContainerPadding from "../../../../components/container/RaContainerPadd
 import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import RaBadge from "../../../../components/badge/RaBadge"
-import { profile01 } from "../../../../utils/images"
+import ChatLink from "../chat/ChatLink"
+import { chatWithRenter } from "../chat/chatData"
+import { profile01, tools01 } from "../../../../utils/images"
 
 const requests = [
   { id: 1, name: "Anish Sharma", dates: "Oct 24 - Oct 27", status: "Pending" },
@@ -43,6 +45,17 @@ function ListingRequests() {
               <div className="flex gap-2">
                 <RaButton type="button" btnText="Accept" size="sm" />
                 <RaButton type="button" btnText="Decline" size="sm" variant="outline" />
+                <ChatLink
+                  context={{
+                    ...chatWithRenter,
+                    threadId: `request-${req.id}`,
+                    peerName: req.name,
+                    listingTitle: listing,
+                    listingImage: tools01,
+                  }}
+                  size="sm"
+                  widthFill={false}
+                />
               </div>
             </RaCard>
           ))}

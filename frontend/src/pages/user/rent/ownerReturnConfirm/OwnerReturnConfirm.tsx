@@ -1,6 +1,8 @@
 import { useEffect } from "react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { IoCalendarOutline, IoChatbubbleOutline, IoCheckmarkCircle, IoCubeOutline, IoLocationOutline, IoPersonOutline, IoTimeOutline } from "react-icons/io5"
+import { useLocation, useNavigate } from "react-router-dom"
+import { IoCalendarOutline, IoCheckmarkCircle, IoCubeOutline, IoLocationOutline, IoPersonOutline, IoTimeOutline } from "react-icons/io5"
+import ChatLink from "../../core/chat/ChatLink"
+import { chatWithRenter } from "../../core/chat/chatData"
 import RaContainerLG from "../../../../components/container/RaContainerLG"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import RaCard from "../../../../components/card/RaCard"
@@ -59,9 +61,7 @@ function OwnerReturnConfirm() {
                 <div className="font-semibold">Anish Sharma</div>
                 <div className="text-sm text-muted">Return complete</div>
               </div>
-              <Link to="/user/chat">
-                <RaButton type="button" btnText="Chat" size="sm" variant="outline" widthFill={false} icon={<IoChatbubbleOutline />} iconPosition="left" />
-              </Link>
+              <ChatLink context={chatWithRenter} size="sm" widthFill={false} />
             </div>
           </RaCard>
 

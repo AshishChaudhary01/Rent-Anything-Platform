@@ -7,6 +7,7 @@ import {
   IoBicycleOutline,
   IoHomeOutline,
   IoGameControllerOutline,
+  IoEllipsisHorizontalCircleOutline,
 } from "react-icons/io5";
 import { Link } from "react-router-dom";
 
@@ -58,6 +59,12 @@ export const categories = [
     name: "Gaming",
     path: "/user/category/gaming",
     icon: IoGameControllerOutline,
+  },
+  {
+    id: 9,
+    name: "Other",
+    path: "/user/category/other",
+    icon: IoEllipsisHorizontalCircleOutline,
   },
 ];
 

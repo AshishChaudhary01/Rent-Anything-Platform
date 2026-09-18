@@ -3,91 +3,12 @@ import RaContainer from "../../../../components/container/RaContainer"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import ListingsSection from "../../../../components/listingsSection/ListingsSection"
 import RaSearchBar from "../../../../components/searchbar/RaSearchbar"
-import { backpack01, ladder01, pressureWasher01, tent01, tools01 } from "../../../../utils/images"
+import { catalog } from "../../../../data/catalog"
 
-
-const listItems = [
-  {
-    id: 1,
-    image: ladder01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 2,
-    image: tent01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 3,
-    image: backpack01,
-    title: "A Title that is very looooooooooooooooooooooong",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 4,
-    image: tools01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 5,
-    image: pressureWasher01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 6,
-    image: ladder01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 7,
-    image: tent01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 8,
-    image: backpack01,
-    title: "A Title that is very looooooooooooooooooooooong",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 9,
-    image: tools01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 10,
-    image: pressureWasher01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-]
+const featured = catalog.slice(0, 10)
+const adventure = catalog.filter((i) => i.category === "outdoor" || i.category === "adventure-tools").slice(0, 10)
+const tools = catalog.filter((i) => i.category === "adventure-tools").slice(0, 10)
+const home = catalog.filter((i) => i.category === "home").slice(0, 10)
 
 const UserDashboard = () => {
   return (
@@ -99,10 +20,10 @@ const UserDashboard = () => {
               <RaSearchBar placeholderText="Search for tools, gears, or appliances..." />
               <RaCategoryBar />
             </div>
-            <ListingsSection sectionTitle="Featured" listItems={listItems} />
-            <ListingsSection sectionTitle="Adventure gear" listItems={listItems} />
-            <ListingsSection sectionTitle="Essential tools" listItems={listItems} />
-            <ListingsSection sectionTitle="Home living" listItems={listItems} />
+            <ListingsSection sectionTitle="Featured" redirectUrl="/user/category/all" listItems={featured} />
+            <ListingsSection sectionTitle="Adventure gear" redirectUrl="/user/category/outdoor" listItems={adventure} />
+            <ListingsSection sectionTitle="Essential tools" redirectUrl="/user/category/adventure-tools" listItems={tools} />
+            <ListingsSection sectionTitle="Home living" redirectUrl="/user/category/home" listItems={home} />
           </div>
         </RaContainerPadding>
       </RaContainer>

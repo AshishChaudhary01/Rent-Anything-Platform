@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { IoCardOutline, IoLockClosedOutline, IoPersonOutline, IoShieldCheckmarkOutline } from "react-icons/io5";
+import { IoCardOutline, IoExitOutline, IoLockClosedOutline, IoPersonOutline, IoShieldCheckmarkOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 
 interface IProfileDropdownProps {
@@ -57,6 +57,11 @@ const ProfileDropdown = ({
       label: "Security",
       icon: <IoLockClosedOutline className="size-5" />,
       path: "/security",
+    },
+    {
+      label: "Logout",
+      icon: <IoExitOutline className="size-5" />,
+      path: "/auth/login",
     },
   ];
 

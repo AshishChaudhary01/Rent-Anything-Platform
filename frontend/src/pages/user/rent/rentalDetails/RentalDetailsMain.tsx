@@ -1,9 +1,11 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
 import { IoArrowBackOutline, IoStar } from "react-icons/io5"
 import RaBadge from "../../../../components/badge/RaBadge"
-import RaButton from "../../../../components/button/RaButton"
 import RaCard from "../../../../components/card/RaCard"
 import MediaGallery, { type MediaItem } from "../../../../components/mediaGallery/MediaGallery"
+import ChatLink from "../../core/chat/ChatLink"
+import { chatWithArpan } from "../../core/chat/chatData"
 import { backpack01, ladder01, profile01, tent01, tools01 } from "../../../../utils/images"
 
 const rentalMedia: MediaItem[] = [
@@ -15,6 +17,8 @@ const rentalMedia: MediaItem[] = [
 ]
 
 function RentalDetailsMain() {
+  const [note, setNote] = useState("")
+
   return (
     <div className="flex flex-col gap-y-4">
       <Link to="/user/my-rentals" className="flex items-center gap-x-1 text-muted text-sm">
@@ -48,10 +52,20 @@ function RentalDetailsMain() {
           </div>
         </div>
         <div className="flex gap-2 items-end">
-          <input className="flex-1 bg-surface border border-muted/20 p-3 rounded-full outline-0" placeholder="Ask about the item..." />
-          <Link to="/user/chat">
-            <RaButton type="button" btnText="Send" size="sm" widthFill={false} />
-          </Link>
+          <input
+            className="flex-1 bg-surface border border-muted/20 p-3 rounded-full outline-0"
+            placeholder="Ask about the item..."
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+          <ChatLink
+            context={{ ...chatWithArpan, draft: note || "Ask about the item..." }}
+            btnText="Send"
+            size="sm"
+            widthFill={false}
+            variant="primary"
+            icon={undefined}
+          />
         </div>
       </RaCard>
     </div>
