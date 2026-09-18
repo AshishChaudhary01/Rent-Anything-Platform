@@ -5,43 +5,36 @@ const ROLE_HOME: Record<string, string> = {
   admin: "/admin",
 };
 
-function RaBreadcrumb() {
+function RaBreadcrumb({
+  items,
+}: {
+  items?: { label: string; path?: string }[]
+}) {
   const location = useLocation();
 
-  const segments = location.pathname.split("/").filter(Boolean);
-
-  const role = segments[0]; // user | admin
-  const homePath = ROLE_HOME[role] || "/";
-
-  // remove role segment
-  const cleanSegments = segments.slice(1);
-
-  const crumbs = cleanSegments.map((seg, i) => ({
-    label: seg.replace(/-/g, " "),
-    path: "/" + segments.slice(0, i + 2).join("/"),
-  }));
+  const trail = items
+    ? [{ label: "Home", path: "/user" }, ...items]
+    : (() => {
+      const segments = location.pathname.split("/").filter(Boolean);
+      const role = segments[0];
+      return [
+        { label: "Home", path: ROLE_HOME[role] || "/" },
+        ...segments.slice(1).map((seg, i, arr) => ({
+          label: seg.replace(/-/g, " "),
+          path: i === arr.length - 1 ? undefined : "/" + segments.slice(0, i + 2).join("/"),
+        })),
+      ];
+    })();
 
   return (
     <div className="flex items-center gap-2 text-sm text-gray-500">
-
-      {/* Home */}
-      <Link to={homePath} className="hover:text-primary">
-        Home
-      </Link>
-
-      {/* Dynamic crumbs */}
-      {crumbs.map((c, i) => (
-        <div key={c.path} className="flex items-center gap-2">
-          <span>/</span>
-
-          {i === crumbs.length - 1 ? (
-            <span className="text-text-dark font-medium capitalize">
-              {c.label}
-            </span>
+      {trail.map((c, i) => (
+        <div key={`${c.label}-${i}`} className="flex items-center gap-2">
+          {i > 0 && <span>/</span>}
+          {i === trail.length - 1 || !c.path ? (
+            <span className="text-text-dark font-medium capitalize">{c.label}</span>
           ) : (
-            <Link to={c.path} className="hover:text-primary capitalize">
-              {c.label}
-            </Link>
+            <Link to={c.path} className="hover:text-primary capitalize">{c.label}</Link>
           )}
         </div>
       ))}

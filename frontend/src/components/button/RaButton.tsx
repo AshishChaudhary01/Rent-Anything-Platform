@@ -20,7 +20,7 @@ const variantStlyes = {
   primary: "bg-[image:var(--gradient-primary)] text-white hover:opacity-90",
   lean: "bg-transparent border-transparent border-1 text-primary hover:border-1 hover:border-primary hover:opacity-90",
   outline: "bg-light text-primary hover:bg-[image:var(--gradient-primary)] hover:text-white border border-primary",
-  danger: "bg-danger text-light border-danger hover:bg-soft-danger",
+  danger: "bg-danger text-white hover:bg-soft-danger hover:text-danger border border-danger",
   inverted: "bg-white text-primary hover:bg-light",
 };
 

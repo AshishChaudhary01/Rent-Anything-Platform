@@ -10,11 +10,15 @@ export type MediaFile = {
 interface RaMediaUploadProps {
   accept?: string
   onChange?: (items: MediaFile[]) => void
+  onAdd?: (items: MediaFile[]) => void
+  heading?: string
 }
 
 function RaMediaUpload({
   accept = "image/*,video/mp4,video/quicktime",
   onChange,
+  onAdd,
+  heading = "Upload Proof",
 }: RaMediaUploadProps) {
   const [items, setItems] = useState<MediaFile[]>([])
   const itemsRef = useRef<MediaFile[]>([])
@@ -34,6 +38,7 @@ function RaMediaUpload({
       url: URL.createObjectURL(file),
     }))
     update([...items, ...added])
+    onAdd?.(added)
   }
 
   const remove = (id: string) => {
@@ -65,7 +70,7 @@ function RaMediaUpload({
         className="w-full border-2 border-dashed border-muted/30 rounded-2xl p-8 bg-surface hover:border-primary cursor-pointer"
       >
         <IoAdd className="size-8 mx-auto text-primary" />
-        <div className="font-semibold mt-2">Upload Proof</div>
+        <div className="font-semibold mt-2">{heading}</div>
         <div className="text-sm text-muted">Supports JPG, PNG, MOV, MP4</div>
       </button>
 

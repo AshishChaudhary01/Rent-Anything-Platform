@@ -3,10 +3,14 @@ import { Sheet } from "react-modal-sheet";
 
 interface RaBottomSheetProps {
   children: React.ReactNode;
+  snapPoints?: number[];
+  initialSnap?: number;
 }
 
 function RaBottomSheet({
-  children
+  children,
+  snapPoints = [0.65, 220],
+  initialSnap = 1,
 }: RaBottomSheetProps) {
   return (
     <Sheet
@@ -14,13 +18,15 @@ function RaBottomSheet({
       isOpen={true}
       onClose={() => { }}
       disableDismiss
-      snapPoints={[0.6, 80]}
-      initialSnap={2}
+      snapPoints={snapPoints}
+      initialSnap={initialSnap}
     >
       <Sheet.Container>
         <Sheet.Header />
         <Sheet.Content>
-          {children}
+          <div className="px-4 pb-6">
+            {children}
+          </div>
         </Sheet.Content>
       </Sheet.Container>
     </Sheet>

@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { IoChatbubbleOutline } from "react-icons/io5"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { IoCalendarOutline, IoChatbubbleOutline } from "react-icons/io5"
 import RaContainerLG from "../../../../components/container/RaContainerLG"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import RaCard from "../../../../components/card/RaCard"
@@ -8,9 +8,13 @@ import RaInput from "../../../../components/input/RaInput"
 import RaButton from "../../../../components/button/RaButton"
 import LocationPicker from "../../../../components/maps/RaLocationPicker"
 import ReturnFlowHeader from "../ReturnFlowHeader"
+import OwnerReturnNav from "../OwnerReturnNav"
+import { OWNER_RETURN_STEPS } from "../returnSteps"
 
 function ReturnSchedule() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const isOwner = params.get("role") === "owner"
   const [form, setForm] = useState({ date: "", time: "", location: "" })
   const ready = Boolean(form.date && form.time && form.location)
 
@@ -18,7 +22,11 @@ function ReturnSchedule() {
     <RaContainerLG>
       <RaContainerPadding>
         <div className="max-w-xl mx-auto flex flex-col gap-y-6 pb-10">
-          <ReturnFlowHeader current={0} />
+          <ReturnFlowHeader
+            current={0}
+            title={isOwner ? "End Rental" : "Return Item"}
+            steps={isOwner ? OWNER_RETURN_STEPS : undefined}
+          />
 
           <div>
             <div className="text-xl font-bold">Schedule Return</div>
@@ -33,7 +41,10 @@ function ReturnSchedule() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="font-semibold">Meetup Location</div>
+            <div className="flex items-center gap-2 font-semibold">
+              <IoCalendarOutline className="size-5 text-primary" />
+              Meetup Location
+            </div>
             <LocationPicker
               mapClass="h-48"
               value={form.location ? { address: form.location, lat: 0, lng: 0 } : null}
@@ -42,18 +53,35 @@ function ReturnSchedule() {
           </div>
 
           <RaCard round="round" styleClass="flex flex-col gap-3">
-            <div className="font-semibold">Need to coordinate?</div>
+            <div className="flex items-center gap-2 font-semibold">
+              <IoChatbubbleOutline className="size-5 text-primary" />
+              Need to coordinate?
+            </div>
             <Link to="/user/chat">
-              <RaButton type="button" btnText="Chat with Owner" variant="outline" icon={<IoChatbubbleOutline />} iconPosition="left" />
+              <RaButton
+                type="button"
+                btnText={isOwner ? "Chat with Renter" : "Chat with Owner"}
+                variant="outline"
+                icon={<IoChatbubbleOutline />}
+                iconPosition="left"
+              />
             </Link>
           </RaCard>
 
-          <RaButton
-            type="button"
-            btnText="Continue"
-            disabled={!ready}
-            clickFunc={() => navigate("/user/rent/condition-proof")}
-          />
+          {isOwner ? (
+            <OwnerReturnNav
+              onPrev={() => navigate("/user/my-listing-details")}
+              onNext={() => navigate("/user/rent/owner-return-review")}
+              nextDisabled={!ready}
+            />
+          ) : (
+            <RaButton
+              type="button"
+              btnText="Continue"
+              disabled={!ready}
+              clickFunc={() => navigate("/user/rent/condition-proof")}
+            />
+          )}
         </div>
       </RaContainerPadding>
     </RaContainerLG>

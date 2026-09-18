@@ -4,6 +4,7 @@ import RaContainerLG from "../../../../components/container/RaContainerLG"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
+import RaQrBox from "../../../../components/qr/RaQrBox"
 import ReturnFlowHeader from "../ReturnFlowHeader"
 
 function ReturnMeetup() {
@@ -23,8 +24,8 @@ function ReturnMeetup() {
           </div>
 
           <RaCard round="round" styleClass="flex flex-col items-center gap-y-3 text-center">
-            <div className="font-semibold text-lg">Scan to complete return</div>
-            <div className="size-52 border border-gray-300 rounded-2xl bg-surface flex items-center justify-center text-muted">QR</div>
+            <div className="font-semibold text-lg">Show this QR to the owner</div>
+            <RaQrBox />
           </RaCard>
 
           <RaCard round="round" styleClass="flex flex-col gap-y-3">

@@ -11,7 +11,8 @@
    --color-muted-secondary: #4B416A;
    --color-light: #F9FAFB;
    --color-bg: #f8f9ff;
-   --color-surface: #F2F3FA;
+   --color-danger: #DC2626;
+   --color-soft-danger: #FEE2E2;
    --gradient-primary: linear-gradient(135deg, #0960AC 0%, #5d9cec 100%);
    --transition: 0.3s ease;
 }
