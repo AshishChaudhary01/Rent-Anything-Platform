@@ -22,6 +22,10 @@ import Notifications from "../pages/user/core/notifications/Notifications";
 import RentalDetails from "../pages/user/rent/rentalDetails/RentalDetails";
 import MyListingDetails from "../pages/user/core/myListingDetails/MyListingDetails";
 import ListingRequests from "../pages/user/core/listingRequests/ListingRequests";
+import RequestDetails from "../pages/user/core/listingRequests/RequestDetails";
+import RentalHistory from "../pages/user/core/rentalHistory/RentalHistory";
+import PendingRequests from "../pages/user/core/pendingRequests/PendingRequests";
+import ActiveRentals from "../pages/user/core/activeRentals/ActiveRentals";
 import OwnerReturnConfirm from "../pages/user/rent/ownerReturnConfirm/OwnerReturnConfirm";
 import OwnerReturnReview from "../pages/user/rent/ownerReturnReview/OwnerReturnReview";
 import OwnerReturnPickup from "../pages/user/rent/ownerReturnPickup/OwnerReturnPickup";
@@ -59,6 +63,9 @@ const router = createBrowserRouter([
         children: [
           { path: "", element: <UserDashboard /> },
           { path: "my-rentals", element: <MyRentals /> },
+          { path: "rental-history", element: <RentalHistory /> },
+          { path: "pending-requests", element: <PendingRequests /> },
+          { path: "active-rentals", element: <ActiveRentals /> },
           { path: "my-listings", element: <MyListings /> },
           { path: "chat", element: <Chat /> },
           { path: "category/:slug", element: <CategoryListings /> },
@@ -74,6 +81,7 @@ const router = createBrowserRouter([
           { path: "rental-details", element: <RentalDetails /> },
           { path: "my-listing-details", element: <MyListingDetails /> },
           { path: "listing-requests", element: <ListingRequests /> },
+          { path: "request-details/:id", element: <RequestDetails /> },
         ]
       },
       {

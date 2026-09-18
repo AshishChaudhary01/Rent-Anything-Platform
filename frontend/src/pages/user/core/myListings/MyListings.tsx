@@ -46,9 +46,14 @@ function MyListings() {
               <div className="text-xl md:text-2xl font-bold">My Listings</div>
               <div className="text-sm md:text-base font-light text-muted">Manage your shared inventory and track your earnings.</div>
             </div>
-            <Link to="/user/add-listing" className="shrink-0">
-              <RaButton type="button" btnText="Add Listing" size="sm" widthFill={false} />
-            </Link>
+            <div className="flex shrink-0 gap-2">
+              <Link to="/user/listing-requests">
+                <RaButton type="button" btnText="View All Requests" size="sm" variant="outline" widthFill={false} />
+              </Link>
+              <Link to="/user/add-listing">
+                <RaButton type="button" btnText="Add Listing" size="sm" widthFill={false} />
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
