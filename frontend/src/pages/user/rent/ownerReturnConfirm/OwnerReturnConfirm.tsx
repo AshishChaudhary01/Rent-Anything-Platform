@@ -10,6 +10,7 @@ import RaButton from "../../../../components/button/RaButton"
 import ReturnFlowHeader from "../ReturnFlowHeader"
 import { OWNER_RETURN_STEPS } from "../returnSteps"
 import { profile01, tools01 } from "../../../../utils/images"
+import { raToast } from "../../../../lib/raToast"
 
 function OwnerReturnConfirm() {
   const navigate = useNavigate()
@@ -89,7 +90,10 @@ function OwnerReturnConfirm() {
             btnText="Done"
             icon={<IoCheckmarkCircle />}
             iconPosition="left"
-            clickFunc={() => navigate("/user/my-listings")}
+            clickFunc={() => {
+              raToast.success("Return completed")
+              navigate("/user/rent/rate?role=owner")
+            }}
           />
         </div>
       </RaContainerPadding>

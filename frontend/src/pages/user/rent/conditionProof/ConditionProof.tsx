@@ -6,6 +6,7 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import RaMediaUpload, { type MediaFile } from "../../../../components/upload/RaMediaUpload"
 import ReturnFlowHeader from "../ReturnFlowHeader"
+import { raToast } from "../../../../lib/raToast"
 
 function ConditionProof() {
   const [files, setFiles] = useState<MediaFile[]>([])
@@ -39,7 +40,10 @@ function ConditionProof() {
             type="button"
             btnText="Submit Proof"
             disabled={files.length === 0}
-            clickFunc={() => navigate("/user/rent/return-meetup")}
+            clickFunc={() => {
+              raToast.success("Condition proof submitted")
+              navigate("/user/rent/return-meetup")
+            }}
           />
         </div>
       </RaContainerPadding>

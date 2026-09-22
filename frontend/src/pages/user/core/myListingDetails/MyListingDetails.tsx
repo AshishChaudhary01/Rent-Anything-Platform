@@ -7,6 +7,7 @@ import MyListingDetailsMain from "./MyListingDetailsMain"
 import MyListingDetailsSummary from "./MyListingDetailsSummary"
 import { backpack01, ladder01, tent01, tools01 } from "../../../../utils/images"
 import type { MediaItem } from "../../../../components/mediaGallery/MediaGallery"
+import { raToast } from "../../../../lib/raToast"
 
 export type ListingDraft = {
   title: string
@@ -50,6 +51,7 @@ function MyListingDetails() {
               onSave={() => {
                 setSaved(listing)
                 setEditing(false)
+                raToast.success("Listing updated")
               }}
               onCancel={() => {
                 setListing(saved)

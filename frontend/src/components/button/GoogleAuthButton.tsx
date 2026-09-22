@@ -1,6 +1,5 @@
 import { useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
-import { toast } from "sonner";
+import { raToast } from "../../lib/raToast";
 import { useGoogleAuth } from "../../hooks/mutations/useAuth";
 
 interface IGoogleAuthButtonProp {
@@ -14,20 +13,12 @@ const GoogleAuthButton = ({ label }: IGoogleAuthButtonProp) => {
     onSuccess: (tokenResponse) => {
       googleAuthMutate(tokenResponse.access_token, {
         onError: (error) => {
-          if (axios.isAxiosError(error)) {
-            const message =
-              error.response?.data?.details ??
-              error.response?.data?.message ??
-              "Something went wrong.";
-            toast.error(message);
-          } else {
-            toast.error("Something went wrong.");
-          }
+          raToast.fromError(error);
         },
       });
     },
     onError: () => {
-      toast.error("Google login failed, Please try again.");
+      raToast.error("Google login failed. Please try again.");
     },
   });
   return (

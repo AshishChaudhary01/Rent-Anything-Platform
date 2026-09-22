@@ -7,6 +7,7 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import NotificationItem from "../../../../components/notificationDropdown/NotificationItem"
 import { NOTIFICATION_PAGE_SIZE, initialNotifications } from "../../../../data/notifications"
+import { raToast } from "../../../../lib/raToast"
 
 function Notifications() {
   const [items, setItems] = useState(initialNotifications)
@@ -36,7 +37,10 @@ function Notifications() {
               widthFill={false}
               icon={<IoCheckmarkOutline />}
               iconPosition="left"
-              clickFunc={() => setItems((prev) => prev.map((n) => ({ ...n, read: true })))}
+              clickFunc={() => {
+                setItems((prev) => prev.map((n) => ({ ...n, read: true })))
+                raToast.success("All notifications marked as read")
+              }}
             />
           </div>
 

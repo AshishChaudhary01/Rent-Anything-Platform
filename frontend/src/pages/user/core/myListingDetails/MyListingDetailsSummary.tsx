@@ -5,6 +5,7 @@ import RaButton from "../../../../components/button/RaButton"
 import RaInput from "../../../../components/input/RaInput"
 import Divider from "../../../../components/divider/Divider"
 import type { ListingDraft } from "./MyListingDetails"
+import { raToast } from "../../../../lib/raToast"
 
 function MyListingDetailsSummary({
   listing,
@@ -25,7 +26,7 @@ function MyListingDetailsSummary({
           <Link to="/user/rent/return-schedule?role=owner">
             <RaButton type="button" btnText="Cancel Active Rental" variant="danger" size="sm" />
           </Link>
-          <RaButton type="button" btnText="Pause Listing" variant="outline" size="sm" />
+          <RaButton type="button" btnText="Pause Listing" variant="outline" size="sm" clickFunc={() => raToast.success("Listing paused")} />
         </div>
       )}
 
@@ -80,7 +81,7 @@ function MyListingDetailsSummary({
           <Link to="/user/rent/return-schedule?role=owner">
             <RaButton type="button" btnText="Cancel Active Rental" variant="danger" />
           </Link>
-          <RaButton type="button" btnText="Pause Listing" variant="outline" />
+          <RaButton type="button" btnText="Pause Listing" variant="outline" clickFunc={() => raToast.success("Listing paused")} />
         </div>
       )}
       </RaCard>

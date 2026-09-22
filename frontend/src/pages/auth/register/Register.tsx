@@ -2,8 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import RaContainerXS from "../../../components/container/RaContainerXS"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import axios from "axios";
+import { raToast } from "../../../lib/raToast";
 import RaInput from "../../../components/input/RaInput";
 import { IoLockClosedOutline, IoMailOutline, IoPersonOutline } from "react-icons/io5";
 import RaButton from "../../../components/button/RaButton";
@@ -30,18 +29,10 @@ function Register() {
     registerUser(data, {
       onSuccess: () => {
         navigate("/auth/login");
-        toast.success("Account created. Please check your email.");
+        raToast.success("Account created. Please check your email.");
       },
       onError: (error) => {
-        if (axios.isAxiosError(error)) {
-          const message =
-            error.response?.data?.details ??
-            error.response?.data?.message ??
-            "Something went wrong.";
-          toast.error(message);
-        } else {
-          toast.error("Something went wrong.");
-        }
+        raToast.fromError(error);
       },
     });
   };
@@ -139,6 +130,9 @@ function Register() {
           <span className="text-primary">
             <Link to={"/auth/login"} className="font-semibold"> Login</Link>
           </span>
+          <div className="mt-2">
+            <Link to="/auth/forgot-password" className="text-primary font-semibold">Forgot password?</Link>
+          </div>
         </div>
       </div>
     </RaContainerXS>

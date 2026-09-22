@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import RaCard from "../../../../../components/card/RaCard"
 import Divider from "../../../../../components/divider/Divider"
 import RaButton from "../../../../../components/button/RaButton"
+import { raToast } from "../../../../../lib/raToast"
 
 function RequestToRentSummaryCard({
   formData,
@@ -42,7 +43,7 @@ function RequestToRentSummaryCard({
           <div className="flex items-center">
             <p>Total: <span className="font-bold text-primary">400</span></p>
           </div>
-          <Link to="/user/rent/checkout">
+          <Link to="/user/rent/checkout" onClick={() => raToast.success("Request saved. Continue to payment.")}>
             <RaButton type="submit" btnText="Continue" size="large" />
           </Link>
         </div>
@@ -92,7 +93,7 @@ function RequestToRentSummaryCard({
       {/* Request To Collaborate Button Full view Only */}
       <div className="hidden lg:block">
 
-        <Link to="/user/rent/checkout">
+        <Link to="/user/rent/checkout" onClick={() => raToast.success("Request saved. Continue to payment.")}>
           <RaButton type="submit" btnText="Continue" size="large" />
         </Link>
       </div>

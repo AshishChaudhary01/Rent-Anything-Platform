@@ -41,22 +41,22 @@ const ProfileDropdown = ({
     {
       label: "Profile",
       icon: <IoPersonOutline className="size-5" />,
-      path: "/profile",
+      path: "/user/profile",
     },
     {
       label: "Payment Methods",
       icon: <IoCardOutline className="size-5" />,
-      path: "/payment-methods",
+      path: "/user/payment-methods",
     },
     {
       label: "KYC Verification",
       icon: <IoShieldCheckmarkOutline className="size-5" />,
-      path: "/kyc",
+      path: "/user/kyc",
     },
     {
       label: "Security",
       icon: <IoLockClosedOutline className="size-5" />,
-      path: "/security",
+      path: "/user/security",
     },
     {
       label: "Logout",
@@ -113,6 +113,7 @@ const ProfileDropdown = ({
               <Link
                 key={item.label}
                 to={item.path}
+                onClick={() => setIsOpen(false)}
                 className="
                   flex items-center gap-3
                   px-4 py-3

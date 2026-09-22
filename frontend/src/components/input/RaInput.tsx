@@ -9,6 +9,8 @@ const RaInput = ({
   Icon,
   placeholderText,
   value,
+  min,
+  max,
   onChange,
   registration,
   error,
@@ -31,6 +33,8 @@ const RaInput = ({
           name={name}
           placeholder={placeholderText}
           value={value}
+          min={min}
+          max={max}
           onChange={onChange}
           {...registration}
         />

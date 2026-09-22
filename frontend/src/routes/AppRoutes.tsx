@@ -3,6 +3,7 @@ import Home from "../pages/home/Home";
 import Auth from "../pages/auth/Auth";
 import Login from "../pages/auth/login/Login";
 import Register from "../pages/auth/register/Register";
+import ForgotPassword from "../pages/auth/forgotPassword/ForgotPassword";
 import UserDashboard from "../pages/user/core/dashboard/UserDashboard";
 import Listing from "../pages/user/listing/Listing";
 import RequestToRent from "../pages/user/rent/requestToRent/RequestToRent";
@@ -29,6 +30,11 @@ import ActiveRentals from "../pages/user/core/activeRentals/ActiveRentals";
 import OwnerReturnConfirm from "../pages/user/rent/ownerReturnConfirm/OwnerReturnConfirm";
 import OwnerReturnReview from "../pages/user/rent/ownerReturnReview/OwnerReturnReview";
 import OwnerReturnPickup from "../pages/user/rent/ownerReturnPickup/OwnerReturnPickup";
+import RateRental from "../pages/user/rent/rateRental/RateRental";
+import Profile from "../pages/user/core/account/Profile";
+import PaymentMethods from "../pages/user/core/account/PaymentMethods";
+import Kyc from "../pages/user/core/account/Kyc";
+import Security from "../pages/user/core/account/Security";
 import UserStandardLayout from "../layouts/userLayout/standardLayout/UserStandardLayout";
 import UserFlowLayout from "../layouts/userLayout/flowLayout/UserFlowLayout";
 
@@ -53,6 +59,10 @@ const router = createBrowserRouter([
         path: "register",
         element: <Register />,
       },
+      {
+        path: "forgot-password",
+        element: <ForgotPassword />,
+      },
     ],
   },
   {
@@ -71,6 +81,10 @@ const router = createBrowserRouter([
           { path: "category/:slug", element: <CategoryListings /> },
           { path: "search", element: <SearchResults /> },
           { path: "notifications", element: <Notifications /> },
+          { path: "profile", element: <Profile /> },
+          { path: "payment-methods", element: <PaymentMethods /> },
+          { path: "kyc", element: <Kyc /> },
+          { path: "security", element: <Security /> },
         ]
       },
       {
@@ -98,6 +112,7 @@ const router = createBrowserRouter([
           { path: "owner-return-review", element: <OwnerReturnReview /> },
           { path: "owner-return-pickup", element: <OwnerReturnPickup /> },
           { path: "owner-return-confirm", element: <OwnerReturnConfirm /> },
+          { path: "rate", element: <RateRental /> },
         ]
       }
     ]

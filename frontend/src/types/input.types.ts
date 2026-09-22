@@ -7,6 +7,8 @@ export interface IInput {
   Icon?: React.ElementType;
   placeholderText?: string;
   value?: string;
+  min?: string;
+  max?: string;
   registration?: UseFormRegisterReturn;
   error?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;

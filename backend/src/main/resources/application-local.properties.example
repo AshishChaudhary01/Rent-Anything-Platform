@@ -1,0 +1,5 @@
+# Copy this file to application-local.properties and fill in your values.
+# application-local.properties is gitignored.
+
+spring.security.oauth2.client.registration.google.client-id=
+spring.security.oauth2.client.registration.google.client-secret=

@@ -4,6 +4,7 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import Divider from "../../../../components/divider/Divider"
 import type { ListingForm } from "./AddListing"
+import { raToast } from "../../../../lib/raToast"
 
 function AddListingSummary({ form }: { form: ListingForm }) {
   const navigate = useNavigate()
@@ -20,7 +21,10 @@ function AddListingSummary({ form }: { form: ListingForm }) {
           disabled={!ready}
           icon={<IoAddCircleOutline />}
           iconPosition="left"
-          clickFunc={() => navigate("/user/my-listings")}
+          clickFunc={() => {
+            raToast.success("Listing published")
+            navigate("/user/my-listings")
+          }}
         />
       </div>
 
@@ -74,7 +78,10 @@ function AddListingSummary({ form }: { form: ListingForm }) {
             disabled={!ready}
             icon={<IoAddCircleOutline />}
             iconPosition="left"
-            clickFunc={() => navigate("/user/my-listings")}
+            clickFunc={() => {
+            raToast.success("Listing published")
+            navigate("/user/my-listings")
+          }}
           />
           <RaButton
             type="button"

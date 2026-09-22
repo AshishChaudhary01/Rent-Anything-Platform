@@ -4,6 +4,7 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import ChatLink from "../chat/ChatLink"
 import { chatWithOwner } from "../chat/chatData"
+import { raToast } from "../../../../lib/raToast"
 
 const detailsPath = "/user/rental-details"
 
@@ -34,7 +35,7 @@ function PendingRentalCard({ item }: { item: PendingRental }) {
             />
           </div>
           <div className="flex-1">
-            <RaButton type="button" btnText="Cancel" size="sm" variant="outline" icon={<IoClose />} iconPosition="left" />
+            <RaButton type="button" btnText="Cancel" size="sm" variant="outline" icon={<IoClose />} iconPosition="left" clickFunc={() => raToast.success("Request cancelled")} />
           </div>
         </div>
       </div>

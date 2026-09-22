@@ -1,10 +1,10 @@
 import './App.css'
-import { Toaster } from 'sonner'
+import RaToaster from './components/toast/RaToaster'
 import AppRoutes from './routes/AppRoutes'
 function App() {
   return (
     <div>
-      <Toaster position="top-right" richColors />
+      <RaToaster />
       <AppRoutes />
     </div>
   )

@@ -6,6 +6,7 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import RaQrBox from "../../../../components/qr/RaQrBox"
 import ReturnFlowHeader from "../ReturnFlowHeader"
+import { raToast } from "../../../../lib/raToast"
 
 function ReturnMeetup() {
   const navigate = useNavigate()
@@ -52,7 +53,10 @@ function ReturnMeetup() {
             </ul>
           </RaCard>
 
-          <RaButton type="button" btnText="Confirm Return" clickFunc={() => navigate("/user/my-rentals")} />
+          <RaButton type="button" btnText="Confirm Return" clickFunc={() => {
+            raToast.success("Return confirmed")
+            navigate("/user/rent/rate?role=renter")
+          }} />
         </div>
       </RaContainerPadding>
     </RaContainerLG>

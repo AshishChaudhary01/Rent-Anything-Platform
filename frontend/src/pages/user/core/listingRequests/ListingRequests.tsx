@@ -11,6 +11,7 @@ import RaSearchBar from "../../../../components/searchbar/RaSearchbar"
 import { listingRequests } from "../../../../data/listingRequests"
 import { PAGE_SIZE } from "../../../../data/catalog"
 import { profile01 } from "../../../../utils/images"
+import { raToast } from "../../../../lib/raToast"
 
 const selectClass = "bg-surface border border-gray-300 rounded-full px-4 py-2 text-sm outline-none"
 const gridClass = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -141,9 +142,9 @@ function ListingRequests() {
                     {req.status === "Pending" && (
                       <div className="flex items-center gap-2">
                         <div className="flex-1 min-w-0">
-                          <RaButton type="button" btnText="Accept" size="sm" />
+                          <RaButton type="button" btnText="Accept" size="sm" clickFunc={() => raToast.success(`Accepted request from ${req.name}`)} />
                         </div>
-                        <RaButton type="button" btnText="Reject" size="sm" variant="danger" widthFill={false} />
+                        <RaButton type="button" btnText="Reject" size="sm" variant="danger" widthFill={false} clickFunc={() => raToast.warning(`Rejected request from ${req.name}`)} />
                       </div>
                     )}
                     {req.status === "Accepted" && (

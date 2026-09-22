@@ -11,6 +11,7 @@ import OwnerReturnNav from "../OwnerReturnNav"
 import { RENT_STEPS } from "../returnSteps"
 import ChatLink from "../../core/chat/ChatLink"
 import { chatWithOwner } from "../../core/chat/chatData"
+import { raToast } from "../../../../lib/raToast"
 
 function Meetup() {
   const navigate = useNavigate()
@@ -148,7 +149,10 @@ function Meetup() {
 
           <OwnerReturnNav
             onPrev={() => navigate("/user/rent/confirmation", { state: { paid: true } })}
-            onNext={() => navigate("/user/my-rentals")}
+            onNext={() => {
+              raToast.success("Rental started")
+              navigate("/user/my-rentals")
+            }}
             nextDisabled={!scanned}
             nextText="Start rental"
           />

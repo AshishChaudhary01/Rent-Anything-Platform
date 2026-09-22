@@ -5,12 +5,14 @@ interface RaBottomSheetProps {
   children: React.ReactNode;
   snapPoints?: number[];
   initialSnap?: number;
+  contentClassName?: string;
 }
 
 function RaBottomSheet({
   children,
-  snapPoints = [0.65, 220],
-  initialSnap = 1,
+  snapPoints = [0.6, 80],
+  initialSnap = 2,
+  contentClassName = "px-4 pb-6",
 }: RaBottomSheetProps) {
   return (
     <Sheet
@@ -24,7 +26,7 @@ function RaBottomSheet({
       <Sheet.Container>
         <Sheet.Header />
         <Sheet.Content>
-          <div className="px-4 pb-6">
+          <div className={contentClassName}>
             {children}
           </div>
         </Sheet.Content>

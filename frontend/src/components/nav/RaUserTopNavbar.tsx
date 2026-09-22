@@ -1,9 +1,12 @@
-import { logoHorizontal, profile01 } from "../../utils/images"
+import { logoHorizontal } from "../../utils/images"
 import RaContainer from "../container/RaContainer"
 import NotificationDropdown from "../notificationDropdown/NotificationDropdown"
 import ProfileDropdown from "../profileDropdown/ProfileDropdown"
+import { useAccountStore } from "../../store/accountStore"
 
 function RaUserTopNavbar() {
+  const { fullName, email, avatarUrl } = useAccountStore()
+
   return (
     <nav className=" bg-white shadow py-2 px-6 md:px-7 lg:px-8 xxl:px-0 fixed z-50 top-0 w-full">
       <RaContainer>
@@ -13,7 +16,7 @@ function RaUserTopNavbar() {
           </div>
           <div className="flex gap-x-4">
             <NotificationDropdown />
-            <ProfileDropdown username="Ram Rai" email="ramrai@gmail.com" avatarUrl={profile01} />
+            <ProfileDropdown username={fullName} email={email} avatarUrl={avatarUrl} />
           </div>
         </div>
       </RaContainer>

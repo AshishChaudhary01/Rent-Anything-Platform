@@ -11,7 +11,7 @@ const Auth = () => {
         <nav className="bg-white drop-shadow-xs py-2 px-6 md:px-7 lg:px-8 xxl:px-0 fixed z-50 top-0 w-full">
           <RaContainer>
             <div className="h-12 flex">
-              <Link to={""} className="cursor-pointer">
+              <Link to={"/"} className="cursor-pointer">
                 <img src={logoHorizontal} className="w-auto h-full"></img>
               </Link>
             </div>

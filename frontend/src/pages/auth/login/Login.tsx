@@ -6,8 +6,7 @@ import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLogin } from "../../../hooks/mutations/useAuth";
-import { toast } from "sonner";
-import axios from "axios";
+import { raToast } from "../../../lib/raToast";
 import RaInput from "../../../components/input/RaInput";
 import { IoLockClosedOutline, IoMailOutline } from "react-icons/io5";
 
@@ -33,19 +32,10 @@ const Login = () => {
   const handleLogin = async (data: LoginFormData) => {
     loginUser(data, {
       onSuccess: () => {
-        toast.success("User authenticated!");
+        raToast.success("User authenticated!");
       },
       onError(error) {
-        if (axios.isAxiosError(error)) {
-          const message =
-            error.response?.data?.details ??
-            error.response?.data?.message ??
-            "something went wrong";
-          toast.error(message);
-        } else {
-          toast.error("Something went wrong");
-          console.error(error);
-        }
+        raToast.fromError(error);
       },
     });
   };
@@ -92,7 +82,7 @@ const Login = () => {
             <span className="text-sm text-gray-500">Keep me signed in</span>
           </label>
 
-          <Link to={""} className="text-primary text-end">Forgot password?</Link>
+          <Link to="/auth/forgot-password" className="text-primary text-end">Forgot password?</Link>
 
           {/* Login */}
           <RaButton type="submit" btnText="Login" variant="primary" />

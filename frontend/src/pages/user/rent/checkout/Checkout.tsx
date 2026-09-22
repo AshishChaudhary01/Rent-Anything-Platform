@@ -8,11 +8,15 @@ import Divider from "../../../../components/divider/Divider"
 import ReturnFlowHeader from "../ReturnFlowHeader"
 import OwnerReturnNav from "../OwnerReturnNav"
 import { RENT_STEPS } from "../returnSteps"
-import { esewa, khalti, tools01 } from "../../../../utils/images"
+import { Link } from "react-router-dom"
+import { tools01 } from "../../../../utils/images"
+import { raToast } from "../../../../lib/raToast"
 
 function Checkout() {
   const navigate = useNavigate()
-  const [method, setMethod] = useState("")
+  const [method, setMethod] = useState(
+    initialLinkedWallets.find((w) => w.isDefault)?.id ?? initialLinkedWallets[0]?.id ?? ""
+  )
 
   return (
     <RaContainerLG>
@@ -62,31 +66,37 @@ function Checkout() {
           </RaCard>
 
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2 font-semibold">
-              <IoCardOutline className="size-5 text-primary" />
-              Payment method
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 font-semibold">
+                <IoCardOutline className="size-5 text-primary" />
+                Payment method
+              </div>
+              <Link to="/user/payment-methods" className="text-sm text-primary">
+                Manage
+              </Link>
             </div>
-            <button
-              type="button"
-              onClick={() => setMethod("esewa")}
-              className={`flex items-center gap-3 rounded-2xl p-4 bg-white border cursor-pointer ${method === "esewa" ? "border-primary" : "border-gray-200"}`}
-            >
-              <img src={esewa} alt="eSewa" className="size-10 rounded-full object-cover" />
-              <span className="font-semibold">eSewa</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMethod("khalti")}
-              className={`flex items-center gap-3 rounded-2xl p-4 bg-white border cursor-pointer ${method === "khalti" ? "border-primary" : "border-gray-200"}`}
-            >
-              <img src={khalti} alt="Khalti" className="size-10 rounded-full object-cover" />
-              <span className="font-semibold">Khalti</span>
-            </button>
+            {initialLinkedWallets.map((wallet) => (
+              <button
+                key={wallet.id}
+                type="button"
+                onClick={() => setMethod(wallet.id)}
+                className={`flex items-center gap-3 rounded-2xl p-4 bg-white border cursor-pointer ${method === wallet.id ? "border-primary" : "border-gray-200"}`}
+              >
+                <img src={wallet.logo} alt="" className="size-10 rounded-full object-cover" />
+                <div className="text-left min-w-0">
+                  <div className="font-semibold">{wallet.label}</div>
+                  <div className="text-sm text-muted">{wallet.accountHint}</div>
+                </div>
+              </button>
+            ))}
           </div>
 
           <OwnerReturnNav
             onPrev={() => navigate("/user/rent/request-to-rent")}
-            onNext={() => navigate("/user/rent/confirmation", { state: { paid: true } })}
+            onNext={() => {
+              raToast.success("Payment successful")
+              navigate("/user/rent/confirmation", { state: { paid: true } })
+            }}
             nextDisabled={!method}
             nextText="Pay"
           />
