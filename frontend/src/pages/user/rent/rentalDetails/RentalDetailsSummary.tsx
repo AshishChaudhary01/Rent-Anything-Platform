@@ -4,6 +4,7 @@ import RaButton from "../../../../components/button/RaButton"
 import RaCard from "../../../../components/card/RaCard"
 import Divider from "../../../../components/divider/Divider"
 import RaMapView from "../../../../components/maps/RaMapView"
+import ReportLink from "../../../../components/report/ReportLink"
 
 const meetup = { lat: 28.2096, lng: 83.9556, label: "Lakeside, Sector 6, Pokhara" }
 
@@ -64,6 +65,17 @@ function RentalDetailsSummary() {
         <Link to="/user/rent/return-schedule">
           <RaButton type="button" btnText="Return Item" size="large" />
         </Link>
+        <ReportLink
+          draft={{
+            context: "rental",
+            listingTitle: "Sony A7R IV 61.0MP Full-frame Camera",
+            accusedName: "Arpan Sharma",
+            accusedId: "u-arpan",
+            rentalId: "RA-88421",
+          }}
+          btnText="Report an issue"
+          widthFill
+        />
 
         <div className="flex gap-x-2 text-sm text-muted">
           <IoShieldCheckmarkOutline className="size-4 text-primary shrink-0 mt-0.5" />

@@ -9,6 +9,7 @@ import StarRating from "../../../../components/rating/StarRating"
 import { chatWithOwner, chatWithRenter } from "../../core/chat/chatData"
 import { profile01, tools01 } from "../../../../utils/images"
 import { raToast } from "../../../../lib/raToast"
+import ReportLink from "../../../../components/report/ReportLink"
 
 function RateRental() {
   const navigate = useNavigate()
@@ -93,6 +94,17 @@ function RateRental() {
           <Link to={donePath} className="text-center text-sm text-muted">
             Skip for now
           </Link>
+          <ReportLink
+            draft={{
+              context: "rental",
+              listingTitle: peer.listingTitle,
+              accusedName: peer.peerName,
+              rentalId: "RA-88421",
+            }}
+            btnText="Report an issue instead"
+            variant="lean"
+            widthFill
+          />
         </div>
       </RaContainerPadding>
     </RaContainerLG>

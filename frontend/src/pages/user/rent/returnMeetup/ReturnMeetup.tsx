@@ -7,6 +7,7 @@ import RaButton from "../../../../components/button/RaButton"
 import RaQrBox from "../../../../components/qr/RaQrBox"
 import ReturnFlowHeader from "../ReturnFlowHeader"
 import { raToast } from "../../../../lib/raToast"
+import ReportLink from "../../../../components/report/ReportLink"
 
 function ReturnMeetup() {
   const navigate = useNavigate()
@@ -57,6 +58,19 @@ function ReturnMeetup() {
             raToast.success("Return confirmed")
             navigate("/user/rent/rate?role=renter")
           }} />
+          <ReportLink
+            draft={{
+              context: "return",
+              listingTitle: "Sony A7R IV 61.0MP Full-frame Camera",
+              accusedName: "Arpan Sharma",
+              accusedId: "u-arpan",
+              rentalId: "RA-88421",
+              reason: "Damage dispute",
+            }}
+            btnText="Report a return issue"
+            variant="lean"
+            widthFill
+          />
         </div>
       </RaContainerPadding>
     </RaContainerLG>

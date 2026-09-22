@@ -4,6 +4,7 @@ import { IoArrowBackOutline, IoSend } from "react-icons/io5"
 import RaCard from "../../../../components/card/RaCard"
 import type { ChatMessage, ChatThread } from "./chatTypes"
 import { peerImage } from "./chatData"
+import ReportLink from "../../../../components/report/ReportLink"
 
 function ChatConversation({
   thread,
@@ -40,6 +41,16 @@ function ChatConversation({
           <div className="font-semibold truncate">{thread.peerName}</div>
           <div className="text-xs text-muted">{thread.peerRole}</div>
         </div>
+        <ReportLink
+          iconOnly
+          btnText={`Report ${thread.peerName}`}
+          draft={{
+            context: "chat",
+            listingTitle: thread.listingTitle,
+            accusedName: thread.peerName,
+            reason: "Harassment",
+          }}
+        />
       </div>
 
       <Link to="/user/listing" className="px-4 py-3 border-b border-gray-200 flex items-center gap-3 bg-surface">

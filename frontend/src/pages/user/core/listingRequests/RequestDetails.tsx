@@ -27,6 +27,7 @@ import { getListingRequest, type ListingRequest } from "../../../../data/listing
 import { profile01 } from "../../../../utils/images"
 import type { ChatContext } from "../chat/chatTypes"
 import { raToast } from "../../../../lib/raToast"
+import ReportLink from "../../../../components/report/ReportLink"
 
 function RequesterActions({
   req,
@@ -97,6 +98,15 @@ function RequesterActions({
             />
           </Link>
         )}
+        <ReportLink
+          iconOnly
+          btnText={`Report ${req.name}`}
+          draft={{
+            context: "request",
+            listingTitle: req.listing,
+            accusedName: req.name,
+          }}
+        />
       </div>
     )
   }
@@ -115,6 +125,16 @@ function RequesterActions({
           <RaButton type="button" btnText="Manage Booking" size="md" variant="outline" icon={<IoCalendarOutline className="size-5" />} iconPosition="left" />
         </Link>
       )}
+      <ReportLink
+        draft={{
+          context: "request",
+          listingTitle: req.listing,
+          accusedName: req.name,
+        }}
+        btnText="Report this renter"
+        variant="lean"
+        widthFill
+      />
     </div>
   )
 }

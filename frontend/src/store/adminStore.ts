@@ -15,6 +15,7 @@ import {
   type KycCaseStatus,
   type ListingStatus,
   type PlatformSettings,
+  type ReportProof,
   type ReportResolution,
   type UserStatus,
 } from "../data/admin"
@@ -29,6 +30,18 @@ interface AdminState {
   setUserStatus: (id: string, status: UserStatus) => void
   setListingStatus: (id: number, status: ListingStatus) => void
   resolveReport: (id: string, resolution: ReportResolution) => void
+  submitReport: (input: {
+    listingId: number
+    listingTitle: string
+    reporterId: string
+    reporterName: string
+    accusedId: string
+    accusedName: string
+    rentalId: string | null
+    reason: string
+    detail: string
+    proofs: ReportProof[]
+  }) => string
   reviewKyc: (id: string, status: Exclude<KycCaseStatus, "Pending">, reviewer: string, notes: string) => void
   saveSettings: (settings: PlatformSettings) => void
   createAdmin: (input: { fullName: string; email: string; phone: string }) => void
@@ -53,6 +66,24 @@ export const useAdminStore = create<AdminState>((set) => ({
     set((s) => ({
       reports: s.reports.map((r) => (r.id === id ? { ...r, status: "Resolved", resolution } : r)),
     })),
+  submitReport: (input) => {
+    const id = `RP-${Date.now().toString().slice(-5)}`
+    const openedAt = new Date().toISOString().slice(0, 10)
+    set((s) => ({
+      reports: [
+        {
+          ...input,
+          id,
+          status: "Pending",
+          opened: "Just now",
+          openedAt,
+          resolution: null,
+        },
+        ...s.reports,
+      ],
+    }))
+    return id
+  },
   reviewKyc: (id, status, reviewer, notes) =>
     set((s) => {
       const kycCases = s.kycCases.map((item) =>

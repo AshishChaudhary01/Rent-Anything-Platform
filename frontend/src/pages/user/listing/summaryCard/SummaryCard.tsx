@@ -7,6 +7,7 @@ import RequestToRentButton from "./RequestToRentButton"
 import ChatLink from "../../core/chat/ChatLink"
 import { chatWithOwner } from "../../core/chat/chatData"
 import { tools01 } from "../../../../utils/images"
+import ReportLink from "../../../../components/report/ReportLink"
 
 function SummaryCard() {
   const [message, setMessage] = useState("")
@@ -76,6 +77,18 @@ function SummaryCard() {
       </div>
 
       <div className="text-center text-muted font-light text-sm"> You won't be charged yet</div>
+      <ReportLink
+        draft={{
+          context: "listing",
+          listingTitle: "Sony A7R IV Professional Kit",
+          accusedName: "Anish Sharma",
+          accusedId: "u-anish",
+          reason: "Listing policy violation",
+        }}
+        btnText="Report this listing"
+        variant="lean"
+        widthFill
+      />
     </RaCard>
   )
 }

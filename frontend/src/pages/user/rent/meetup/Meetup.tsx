@@ -12,6 +12,7 @@ import { RENT_STEPS } from "../returnSteps"
 import ChatLink from "../../core/chat/ChatLink"
 import { chatWithOwner } from "../../core/chat/chatData"
 import { raToast } from "../../../../lib/raToast"
+import ReportLink from "../../../../components/report/ReportLink"
 
 function Meetup() {
   const navigate = useNavigate()
@@ -155,6 +156,18 @@ function Meetup() {
             }}
             nextDisabled={!scanned}
             nextText="Start rental"
+          />
+          <ReportLink
+            draft={{
+              context: "meetup",
+              listingTitle: chatWithOwner.listingTitle,
+              accusedName: chatWithOwner.peerName,
+              accusedId: "u-anish",
+              reason: "No-show at meetup",
+            }}
+            btnText="Owner didn't show"
+            variant="lean"
+            widthFill
           />
         </div>
       </RaContainerPadding>

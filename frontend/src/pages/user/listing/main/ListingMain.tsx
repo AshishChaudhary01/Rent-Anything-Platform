@@ -3,6 +3,7 @@ import MediaGallery, { type MediaItem } from "../../../../components/mediaGaller
 import { backpack01, ladder01, pressureWasher01, tent01, tools01 } from "../../../../utils/images";
 import ListingDescription from "./ListingDescription";
 import ListingReview from "./ListingReview";
+import ReportLink from "../../../../components/report/ReportLink";
 
 const listingMedia: MediaItem[] = [
   { type: "image", url: tools01 },
@@ -24,7 +25,18 @@ function ListingMain() {
       {/* Listing Info */}
       <div className="flex flex-col gap-y-6">
         {/* Title */}
-        <div className="text-2xl md:text-3xl font-bold">Sony A7R IV Professional Kit</div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="text-2xl md:text-3xl font-bold">Sony A7R IV Professional Kit</div>
+          <ReportLink
+            draft={{
+              context: "listing",
+              listingTitle: "Sony A7R IV Professional Kit",
+              accusedName: "Anish Sharma",
+              accusedId: "u-anish",
+            }}
+            btnText="Report listing"
+          />
+        </div>
         <div className="flex flex-col gap-6">
           <MediaGallery media={listingMedia} />
           {/* Description */}

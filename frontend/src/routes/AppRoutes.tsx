@@ -52,6 +52,9 @@ import AdminUserActivity from "../pages/admin/users/AdminUserActivity"
 import AdminKyc from "../pages/admin/kyc/AdminKyc"
 import AdminKycDetails from "../pages/admin/kyc/AdminKycDetails"
 import AdminProfile from "../pages/admin/profile/AdminProfile";
+import ReportIssue from "../pages/user/core/reports/ReportIssue";
+import MyReports from "../pages/user/core/reports/MyReports";
+import MyReportDetails from "../pages/user/core/reports/MyReportDetails";
 
 const router = createBrowserRouter([
   {
@@ -100,6 +103,8 @@ const router = createBrowserRouter([
           { path: "payment-methods", element: <PaymentMethods /> },
           { path: "kyc", element: <Kyc /> },
           { path: "security", element: <Security /> },
+          { path: "reports", element: <MyReports /> },
+          { path: "reports/:id", element: <MyReportDetails /> },
         ]
       },
       {
@@ -111,6 +116,7 @@ const router = createBrowserRouter([
           { path: "my-listing-details", element: <MyListingDetails /> },
           { path: "listing-requests", element: <ListingRequests /> },
           { path: "request-details/:id", element: <RequestDetails /> },
+          { path: "report", element: <ReportIssue /> },
         ]
       },
       {

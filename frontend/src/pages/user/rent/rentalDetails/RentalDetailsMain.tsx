@@ -6,6 +6,7 @@ import RaCard from "../../../../components/card/RaCard"
 import MediaGallery, { type MediaItem } from "../../../../components/mediaGallery/MediaGallery"
 import ChatLink from "../../core/chat/ChatLink"
 import { chatWithArpan } from "../../core/chat/chatData"
+import ReportLink from "../../../../components/report/ReportLink"
 import { backpack01, ladder01, profile01, tent01, tools01 } from "../../../../utils/images"
 
 const rentalMedia: MediaItem[] = [
@@ -33,7 +34,19 @@ function RentalDetailsMain() {
 
       <MediaGallery media={rentalMedia} />
 
-      <div className="text-xl md:text-2xl font-bold">Sony A7R IV 61.0MP Full-frame Camera</div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="text-xl md:text-2xl font-bold">Sony A7R IV 61.0MP Full-frame Camera</div>
+        <ReportLink
+          draft={{
+            context: "rental",
+            listingTitle: "Sony A7R IV 61.0MP Full-frame Camera",
+            accusedName: "Arpan Sharma",
+            accusedId: "u-arpan",
+            rentalId: "RA-88421",
+          }}
+          btnText="Report issue"
+        />
+      </div>
       <p className="font-light text-muted">
         High-resolution mirrorless camera paired with a 24-70mm f/2.8 GM lens. Perfect for commercial shoots, landscapes, and professional portraiture. Includes 2 batteries and a 128GB UHS-II card.
       </p>

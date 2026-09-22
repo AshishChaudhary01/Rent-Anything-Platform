@@ -11,6 +11,7 @@ import ReturnFlowHeader from "../ReturnFlowHeader"
 import { OWNER_RETURN_STEPS } from "../returnSteps"
 import { profile01, tools01 } from "../../../../utils/images"
 import { raToast } from "../../../../lib/raToast"
+import ReportLink from "../../../../components/report/ReportLink"
 
 function OwnerReturnConfirm() {
   const navigate = useNavigate()
@@ -94,6 +95,19 @@ function OwnerReturnConfirm() {
               raToast.success("Return completed")
               navigate("/user/rent/rate?role=owner")
             }}
+          />
+          <ReportLink
+            draft={{
+              context: "return",
+              listingTitle: chatWithRenter.listingTitle,
+              accusedName: chatWithRenter.peerName,
+              accusedId: "u-anish",
+              rentalId: "RA-88421",
+              reason: "Damage dispute",
+            }}
+            btnText="Report this renter"
+            variant="lean"
+            widthFill
           />
         </div>
       </RaContainerPadding>
