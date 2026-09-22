@@ -26,7 +26,7 @@ function Register() {
   });
 
   const handleRegister = (data: UserRegisterType) => {
-    registerUser(data, {
+    registerUser({ ...data, role: "USER" }, {
       onSuccess: () => {
         navigate("/auth/login");
         raToast.success("Account created. Please check your email.");

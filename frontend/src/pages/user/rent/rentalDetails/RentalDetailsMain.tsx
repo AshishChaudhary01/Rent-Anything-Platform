@@ -31,9 +31,7 @@ function RentalDetailsMain() {
         <div className="text-sm text-muted">Rental ID: #RA-88421</div>
       </div>
 
-      <div className="flex-1 max-h-300">
-        <MediaGallery media={rentalMedia} />
-      </div>
+      <MediaGallery media={rentalMedia} />
 
       <div className="text-xl md:text-2xl font-bold">Sony A7R IV 61.0MP Full-frame Camera</div>
       <p className="font-light text-muted">

@@ -5,8 +5,8 @@ import {
 } from "../schemas/zod.schema";
 import { z } from "zod";
 
-export const RoleEnumSchema = z.enum(["USER", "ADMIN"], {
-  error: "Value of USER / ADMIN only",
+export const RoleEnumSchema = z.enum(["USER", "ADMIN", "SUPER_ADMIN"], {
+  error: "Value of USER / ADMIN / SUPER_ADMIN only",
 });
 
 export const userRegisterBody = z.object({

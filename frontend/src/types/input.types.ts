@@ -12,6 +12,7 @@ export interface IInput {
   registration?: UseFormRegisterReturn;
   error?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
 export interface IOTPInput {

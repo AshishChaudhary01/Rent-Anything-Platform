@@ -37,6 +37,21 @@ import Kyc from "../pages/user/core/account/Kyc";
 import Security from "../pages/user/core/account/Security";
 import UserStandardLayout from "../layouts/userLayout/standardLayout/UserStandardLayout";
 import UserFlowLayout from "../layouts/userLayout/flowLayout/UserFlowLayout";
+import AdminLayout from "../layouts/adminLayout/AdminLayout";
+import AdminDashboard from "../pages/admin/dashboard/AdminDashboard";
+import AdminListings from "../pages/admin/listings/AdminListings";
+import AdminListingDetails from "../pages/admin/listings/AdminListingDetails";
+import AdminUsers from "../pages/admin/users/AdminUsers";
+import AdminUserDetails from "../pages/admin/users/AdminUserDetails";
+import AdminReports from "../pages/admin/reports/AdminReports";
+import AdminReportDetails from "../pages/admin/reports/AdminReportDetails";
+import AdminRentals from "../pages/admin/rentals/AdminRentals";
+import AdminRentalDetails from "../pages/admin/rentals/AdminRentalDetails";
+import AdminSettings from "../pages/admin/settings/AdminSettings"
+import AdminUserActivity from "../pages/admin/users/AdminUserActivity"
+import AdminKyc from "../pages/admin/kyc/AdminKyc"
+import AdminKycDetails from "../pages/admin/kyc/AdminKycDetails"
+import AdminProfile from "../pages/admin/profile/AdminProfile";
 
 const router = createBrowserRouter([
   {
@@ -116,6 +131,27 @@ const router = createBrowserRouter([
         ]
       }
     ]
+  },
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      { path: "", element: <AdminDashboard /> },
+      { path: "listings", element: <AdminListings /> },
+      { path: "listings/:id", element: <AdminListingDetails /> },
+      { path: "users", element: <AdminUsers /> },
+      { path: "users/:id", element: <AdminUserDetails /> },
+      { path: "users/:id/listings", element: <AdminUserActivity kind="listings" /> },
+      { path: "users/:id/rentals", element: <AdminUserActivity kind="rentals" /> },
+      { path: "kyc", element: <AdminKyc /> },
+      { path: "kyc/:id", element: <AdminKycDetails /> },
+      { path: "reports", element: <AdminReports /> },
+      { path: "reports/:id", element: <AdminReportDetails /> },
+      { path: "rentals", element: <AdminRentals /> },
+      { path: "rentals/:id", element: <AdminRentalDetails /> },
+      { path: "settings", element: <AdminSettings /> },
+      { path: "profile", element: <AdminProfile /> },
+    ],
   }
 ]);
 

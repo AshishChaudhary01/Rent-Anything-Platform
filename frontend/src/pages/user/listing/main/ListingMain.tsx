@@ -19,17 +19,14 @@ const listingMedia: MediaItem[] = [
 function ListingMain() {
   return (
     <div className="flex flex-col gap-y-4">
-      <RaBreadcrumb />
+      <RaBreadcrumb items={[{ label: "Sony A7R IV Professional Kit" }]} />
 
       {/* Listing Info */}
       <div className="flex flex-col gap-y-6">
         {/* Title */}
-        <div className="text-xl md:text-2xl font-bold">Sony A7R IV Professional Kit</div>
+        <div className="text-2xl md:text-3xl font-bold">Sony A7R IV Professional Kit</div>
         <div className="flex flex-col gap-6">
-          {/* Gallery */}
-          <div className="flex-1 max-h-300">
-            <MediaGallery media={listingMedia} />
-          </div>
+          <MediaGallery media={listingMedia} />
           {/* Description */}
           <div className="flex-1">
             <ListingDescription />

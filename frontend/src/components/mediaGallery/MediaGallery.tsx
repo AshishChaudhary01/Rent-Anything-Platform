@@ -1,86 +1,82 @@
-import { useState } from "react";
+import { useState } from "react"
+import { IoChevronBack, IoChevronForward, IoPlay } from "react-icons/io5"
 
 export type MediaItem = {
-  type: "image" | "video";
-  url: string;
-};
-
-interface MediaGalleryProps {
-  media: MediaItem[];
+  type: "image" | "video"
+  url: string
 }
 
-function MediaGallery({ media }: MediaGalleryProps) {
-  const [active, setActive] = useState(0);
+function MediaGallery({ media, compact = false }: { media: MediaItem[]; compact?: boolean }) {
+  const [active, setActive] = useState(0)
+  const total = media.length
+  const activeItem = media[active] ?? media[0]
+  if (!activeItem) return null
 
-  const activeItem = media[active];
-
-  const visibleThumbs = media.slice(0, 4);
-  const extraCount = media.length - 4;
+  const go = (next: number) => {
+    if (total === 0) return
+    setActive((next + total) % total)
+  }
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 justify-center bg-surface rounded-2xl shadow-sm">
-
-      {/* ACTIVE MEDIA */}
-      <div className="flex-1 flex justify-center">
-        <div className="w-md aspect-4/3 rounded-lg overflow-hidden bg-black">
-
-          {activeItem.type === "image" ? (
-            <img
-              src={activeItem.url}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <video
-              src={activeItem.url}
-              controls
-              className="w-full h-full object-cover"
-            />
-          )}
-
-        </div>
-      </div>
-
-      {/* THUMBNAILS */}
-      <div className="flex md:flex-col items-center justify-center gap-0">
-
-        {visibleThumbs.map((item, i) => {
-          const isLastVisible = i === 3 && extraCount > 0;
-
-          return (
+    <div className="flex flex-col gap-3">
+      <div className={`relative w-full overflow-hidden rounded-2xl bg-black ${compact ? "aspect-4/3 max-h-80" : "aspect-4/3 md:aspect-16/10 max-h-[28rem]"}`}>
+        {activeItem.type === "video" ? (
+          <video src={activeItem.url} controls className="size-full object-cover" />
+        ) : (
+          <img src={activeItem.url} alt="" className="size-full object-cover" />
+        )}
+        {total > 1 && (
+          <>
             <button
-              key={i}
-              onClick={() => !isLastVisible && setActive(i)}
-              className={`flex-1 relative w-20 h-20 rounded-md overflow-hidden border-4 ${active === i ? "border-blue-700 shadow-lg" : "border-gray-200"
-                }`}
+              type="button"
+              aria-label="Previous media"
+              onClick={() => go(active - 1)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 size-10 rounded-full bg-black/45 text-white flex items-center justify-center cursor-pointer hover:bg-black/60"
             >
-              {item.type === "image" ? (
-                <img
-                  src={item.url}
-                  className="w-full h-full object-cover"
-                />
+              <IoChevronBack className="size-5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next media"
+              onClick={() => go(active + 1)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 size-10 rounded-full bg-black/45 text-white flex items-center justify-center cursor-pointer hover:bg-black/60"
+            >
+              <IoChevronForward className="size-5" />
+            </button>
+            <span className="absolute bottom-3 right-3 text-xs font-medium text-white bg-black/50 rounded-full px-2.5 py-1">
+              {active + 1} / {total}
+            </span>
+          </>
+        )}
+      </div>
+      {total > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {media.map((item, i) => (
+            <button
+              key={`${item.url}-${i}`}
+              type="button"
+              onClick={() => setActive(i)}
+              className={`relative shrink-0 overflow-hidden rounded-xl border-2 cursor-pointer ${
+                compact ? "size-16" : "size-16 md:size-20"
+              } ${active === i ? "border-primary" : "border-transparent opacity-80 hover:opacity-100"}`}
+              aria-label={`Media ${i + 1}`}
+            >
+              {item.type === "video" ? (
+                <video src={item.url} className="size-full object-cover" muted />
               ) : (
-                <video
-                  src={item.url}
-                  className="w-full h-full object-cover"
-                />
+                <img src={item.url} alt="" className="size-full object-cover" />
               )}
-
-              {/* +N overlay */}
-              {isLastVisible && (
-                <div
-                  onClick={() => setActive(i)}
-                  className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-sm font-medium cursor-pointer"
-                >
-                  +{extraCount}
-                </div>
+              {item.type === "video" && (
+                <span className="absolute inset-0 flex items-center justify-center bg-black/35">
+                  <IoPlay className="size-4 text-white" />
+                </span>
               )}
             </button>
-          );
-        })}
-
-      </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  )
 }
 
-export default MediaGallery;
+export default MediaGallery

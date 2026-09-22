@@ -8,8 +8,8 @@
 function ListingDescription() {
   return (
     <div className="flex flex-col gap-y-4">
-      <p className="text-lg md:text-xl font-bold">Description</p>
-      <p className="font-light text-muted">
+      <p className="text-xl md:text-2xl font-bold">Description</p>
+      <p className="text-base md:text-lg font-light text-muted">
         Capture stunning detail with the Sony A7R IV. This professional-grade mirrorless camera
         features a 61MP full-frame sensor, perfect for high-resolution photography and 4K video.
         Whether you're shooting weddings, commercial projects, or breathtaking landscapes, this kit

@@ -108,7 +108,7 @@ function MyListingDetailsMain({
           <RaMediaUpload heading="Add photos or videos" onAdd={addMedia} />
         </div>
       ) : (
-        <div className="flex-1 max-h-300">
+        <div className="flex-1">
           <MediaGallery media={listing.media} />
         </div>
       )}

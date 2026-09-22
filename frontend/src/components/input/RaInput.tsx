@@ -14,6 +14,7 @@ const RaInput = ({
   onChange,
   registration,
   error,
+  disabled,
 }: IInput) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -36,6 +37,8 @@ const RaInput = ({
           min={min}
           max={max}
           onChange={onChange}
+          disabled={disabled}
+          readOnly={disabled}
           {...registration}
         />
         {isPassword && (

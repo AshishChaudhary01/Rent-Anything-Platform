@@ -1,11 +1,12 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import RaButton from "../../../components/button/RaButton"
 import RaContainerXS from "../../../components/container/RaContainerXS"
 import GoogleAuthButton from "../../../components/button/GoogleAuthButton"
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLogin } from "../../../hooks/mutations/useAuth";
+import { useLogin, tryLocalAdminLogin } from "../../../hooks/mutations/useAuth";
+import { useAuthStore } from "../../../store/authStore";
 import { raToast } from "../../../lib/raToast";
 import RaInput from "../../../components/input/RaInput";
 import { IoLockClosedOutline, IoMailOutline } from "react-icons/io5";
@@ -19,6 +20,8 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
+  const navigate = useNavigate();
+  const setAuth = useAuthStore((state) => state.setAuth);
   const {
     register,
     handleSubmit,
@@ -30,6 +33,14 @@ const Login = () => {
   const { mutate: loginUser, isPending } = useLogin();
 
   const handleLogin = async (data: LoginFormData) => {
+    const localAdmin = tryLocalAdminLogin(data.email, data.password);
+    if (localAdmin) {
+      setAuth("local-admin", localAdmin.role, localAdmin.userId, true);
+      raToast.success("Admin signed in");
+      navigate("/admin");
+      return;
+    }
+
     loginUser(data, {
       onSuccess: () => {
         raToast.success("User authenticated!");
