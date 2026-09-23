@@ -16,10 +16,11 @@ export interface IInput {
 }
 
 export interface IOTPInput {
-  length?: number;
-  onComplete: (top: string) => void;
-  isError?: boolean;
-  isLoading?: boolean;
-  email?: string;
-  onResend?: () => void;
+  length?: number
+  onComplete: (top: string) => void
+  isError?: boolean
+  error?: string
+  isLoading?: boolean
+  email?: string
+  onResend?: () => void
 }

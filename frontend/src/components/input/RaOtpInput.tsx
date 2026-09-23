@@ -5,6 +5,7 @@ function RaOtpInput({
   length = 6,
   onComplete,
   isError,
+  error,
   isLoading,
   email,
   onResend,
@@ -74,6 +75,9 @@ function RaOtpInput({
         <button type="button" onClick={onResend} className="text-sm text-primary text-left cursor-pointer">
           Resend code
         </button>
+      )}
+      {(error || isError) && (
+        <span className="text-danger text-xs">{error || "Incorrect code"}</span>
       )}
     </div>
   )

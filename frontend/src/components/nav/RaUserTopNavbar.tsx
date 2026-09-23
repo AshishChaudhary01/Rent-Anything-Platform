@@ -5,7 +5,7 @@ import ProfileDropdown from "../profileDropdown/ProfileDropdown"
 import { useAccountStore } from "../../store/accountStore"
 
 function RaUserTopNavbar() {
-  const { fullName, email, avatarUrl } = useAccountStore()
+  const { fullName, email, avatarUrl, hasAvatar } = useAccountStore()
 
   return (
     <nav className=" bg-white shadow py-2 px-6 md:px-7 lg:px-8 xxl:px-0 fixed z-50 top-0 w-full">
@@ -16,7 +16,7 @@ function RaUserTopNavbar() {
           </div>
           <div className="flex gap-x-4">
             <NotificationDropdown />
-            <ProfileDropdown username={fullName} email={email} avatarUrl={avatarUrl} />
+            <ProfileDropdown username={fullName} email={email} avatarUrl={hasAvatar ? avatarUrl : ""} />
           </div>
         </div>
       </RaContainer>

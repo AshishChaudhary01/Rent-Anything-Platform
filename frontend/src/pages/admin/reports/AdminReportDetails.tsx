@@ -21,6 +21,7 @@ function AdminReportDetails() {
   const me = users.find((u) => u.id === authUserId)
   const [action, setAction] = useState("Warning issued")
   const [notes, setNotes] = useState("")
+  const [notesError, setNotesError] = useState("")
 
   if (!report) {
     return <div className="text-muted">Report not found. <Link to="/admin/reports" className="text-primary">Back</Link></div>
@@ -28,9 +29,10 @@ function AdminReportDetails() {
 
   const closeCase = () => {
     if (!notes.trim()) {
-      raToast.error("Add resolution notes before closing")
+      setNotesError("Add resolution notes before closing")
       return
     }
+    setNotesError("")
     resolveReport(report.id, {
       resolverId: me?.id || authUserId || "admin",
       resolverName: me?.fullName || "Admin",
@@ -109,7 +111,7 @@ function AdminReportDetails() {
               <option>Listing removed</option>
             </select>
           </label>
-          <RaInput name="notes" label="Resolution notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholderText="What was decided and why" />
+          <RaInput name="notes" label="Resolution notes" value={notes} error={notesError} onChange={(e) => { setNotes(e.target.value); setNotesError("") }} placeholderText="What was decided and why" />
           <div className="flex flex-col sm:flex-row gap-2">
             <RaButton type="button" btnText="Close case" clickFunc={closeCase} />
             <RaButton

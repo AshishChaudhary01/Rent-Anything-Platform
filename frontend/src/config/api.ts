@@ -21,7 +21,9 @@ api.interceptors.response.use(
 
     const isAuthRoute =
       originalConfig.url === "/auth/register" ||
-      originalConfig.url === "/auth/login";
+      originalConfig.url === "/auth/login" ||
+      originalConfig.url === "/auth/refresh" ||
+      originalConfig.url === "/auth/logout";
 
     if (
       error.response?.status === 401 &&
@@ -32,19 +34,14 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          "/auth/refresh",
+          `${import.meta.env.VITE_BACKEND_URL}/auth/refresh`,
           {},
           { withCredentials: true },
         );
 
-        const { setAuth, role, userId, isActive } = useAuthStore.getState();
-        setAuth(
-          data.data.access_token,
-          role ?? data.data.role,
-          userId ?? data.data.userId,
-          isActive ?? data.data.isActive,
-        );
-        originalConfig.headers["Authorization"] = `Bearer ${data.accessToken}`;
+        const { setAuth } = useAuthStore.getState();
+        setAuth(data.accessKey, data.role, data.userId, data.isActive);
+        originalConfig.headers["Authorization"] = `Bearer ${data.accessKey}`;
 
         return api(originalConfig);
       } catch (refreshError) {

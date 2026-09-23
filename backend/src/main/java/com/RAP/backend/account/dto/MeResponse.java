@@ -1,5 +1,7 @@
 package com.RAP.backend.account.dto;
 
+import com.RAP.backend.account.AccountReadiness;
+import com.RAP.backend.user.KycStatus;
 import com.RAP.backend.user.Role;
 import com.RAP.backend.user.User;
 import java.time.Instant;
@@ -15,6 +17,10 @@ public record MeResponse(
 		String district,
 		String avatarUrl,
 		Role role,
+		KycStatus kycStatus,
+		boolean hasAvatar,
+		boolean profileComplete,
+		boolean canTransact,
 		Instant createdAt,
 		boolean isActive,
 		boolean accountLocked,
@@ -32,6 +38,10 @@ public record MeResponse(
 				user.getDistrict(),
 				user.getAvatarUrl(),
 				user.getRole(),
+				user.getKycStatus(),
+				AccountReadiness.hasAvatar(user),
+				AccountReadiness.profileComplete(user),
+				AccountReadiness.canTransact(user),
 				user.getCreatedAt(),
 				user.isActive(),
 				user.isAccountLocked(),

@@ -1,65 +1,65 @@
 import { useState } from "react"
 import { raToast } from "../../lib/raToast"
+import { apiFieldErrors } from "../../lib/formErrors"
 import RaInput from "../input/RaInput"
 import RaOtpInput from "../input/RaOtpInput"
 import RaButton from "../button/RaButton"
 import RaCard from "../card/RaCard"
-import { sendOtp, verifyOtp, type OtpChannel } from "../../services/otp.service"
+import { sendOtp, verifyOtp } from "../../services/otp.service"
+import { IoMailOutline } from "react-icons/io5"
 
 function ContactOtpChange({
-  channel,
   current,
-  icon,
   onVerified,
 }: {
-  channel: OtpChannel
   current: string
-  icon: React.ElementType
-  onVerified: (value: string) => void
+  onVerified: (value: string) => Promise<void> | void
 }) {
-  const isEmail = channel === "email"
   const [nextValue, setNextValue] = useState("")
   const [awaitingOtp, setAwaitingOtp] = useState(false)
-  const [otpError, setOtpError] = useState(false)
+  const [otpError, setOtpError] = useState("")
+  const [emailError, setEmailError] = useState("")
   const [otpKey, setOtpKey] = useState(0)
   const [demoCode, setDemoCode] = useState("")
 
   const destination = nextValue.trim()
 
   const requestCode = () => {
-    if (isEmail && !destination.includes("@")) {
-      raToast.error("Enter a valid email")
+    if (!destination.includes("@")) {
+      setEmailError("Enter a valid email")
       return
     }
-    if (!isEmail && destination.replace(/\D/g, "").length < 10) {
-      raToast.error("Enter a valid phone number")
+    if (destination.toLowerCase() === current.toLowerCase()) {
+      setEmailError("That is already your email")
       return
     }
-    if (destination === current) {
-      raToast.error(`That is already your ${isEmail ? "email" : "phone number"}`)
-      return
-    }
-    const code = sendOtp(channel, destination)
+    setEmailError("")
+    const code = sendOtp(destination)
     setDemoCode(code)
     setAwaitingOtp(true)
-    setOtpError(false)
+    setOtpError("")
     setOtpKey((n) => n + 1)
     raToast.success(`Code sent to ${destination}`)
   }
 
-  const checkCode = (otp: string) => {
-    const result = verifyOtp(channel, destination, otp)
+  const checkCode = async (otp: string) => {
+    const result = verifyOtp(destination, otp)
     if (!result.ok) {
-      setOtpError(true)
-      raToast.error(result.message)
+      setOtpError(result.message)
       return
     }
-    onVerified(destination)
-    setNextValue("")
-    setAwaitingOtp(false)
-    setDemoCode("")
-    setOtpError(false)
-    raToast.success(`${isEmail ? "Email" : "Phone number"} updated`)
+    try {
+      await onVerified(destination)
+      setNextValue("")
+      setAwaitingOtp(false)
+      setDemoCode("")
+      setOtpError("")
+      raToast.success("Email updated")
+    } catch (error) {
+      const fields = apiFieldErrors(error)
+      setEmailError(fields.email || "Could not update email")
+      setAwaitingOtp(false)
+    }
   }
 
   return (
@@ -72,18 +72,20 @@ function ContactOtpChange({
     >
       <RaCard round="round" styleClass="flex flex-col gap-y-4">
         <div>
-          <div className="font-semibold">{isEmail ? "Email" : "Phone"}</div>
+          <div className="font-semibold">Email</div>
           <div className="text-sm text-muted">{current}</div>
         </div>
         <RaInput
-          type={isEmail ? "email" : "text"}
-          name={isEmail ? "newEmail" : "newPhone"}
-          label={isEmail ? "New email" : "New phone number"}
-          placeholderText={isEmail ? "you@example.com" : "9801234567"}
-          Icon={icon}
+          type="email"
+          name="newEmail"
+          label="New email"
+          placeholderText="you@example.com"
+          Icon={IoMailOutline}
           value={nextValue}
+          error={emailError}
           onChange={(e) => {
             setNextValue(e.target.value)
+            setEmailError("")
             setAwaitingOtp(false)
             setDemoCode("")
           }}
@@ -93,18 +95,19 @@ function ContactOtpChange({
             <RaOtpInput
               key={otpKey}
               email={destination}
-              isError={otpError}
+              isError={Boolean(otpError)}
+              error={otpError}
               onComplete={checkCode}
               onResend={requestCode}
             />
             <div className="text-xs text-muted">
-              Prototype code: {demoCode}. This will be delivered by {isEmail ? "email" : "SMS"} when the gateway is connected.
+              Prototype code: {demoCode}. This will be delivered by email when SMTP is connected.
             </div>
           </>
         )}
       </RaCard>
       {!awaitingOtp && (
-        <RaButton type="submit" btnText={isEmail ? "Send email code" : "Send SMS code"} />
+        <RaButton type="submit" btnText="Send email code" />
       )}
     </form>
   )

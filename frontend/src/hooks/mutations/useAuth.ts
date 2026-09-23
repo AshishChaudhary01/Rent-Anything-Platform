@@ -3,7 +3,6 @@ import { googleAuth, loginUser, registerUser } from "../../services/auth.service
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { demoAdminAccounts } from "../../data/admin";
 
 function homeForRole(role: string) {
   return role === "USER" ? "/user" : "/admin";
@@ -32,7 +31,7 @@ export const useLogin = () => {
     mutationFn: loginUser,
     onSuccess: (data) => {
       setAuth(data.accessKey, data.role, data.userId, data.isActive);
-      queryClient.setQueryData(authKeys.currentUser(), data);
+      queryClient.invalidateQueries({ queryKey: authKeys.currentUser() });
       navigate(homeForRole(data.role));
     },
     onError: (error) => {
@@ -41,30 +40,17 @@ export const useLogin = () => {
   });
 };
 
-export function tryLocalAdminLogin(email: string, password: string) {
-  const match = demoAdminAccounts.find(
-    (account) => account.email.toLowerCase() === email.trim().toLowerCase() && account.password === password,
-  )
-  return match ?? null
-}
-
 export const useGoogleAuth = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
 
   return useMutation({
-    mutationFn: (idToken: string) => googleAuth(idToken),
+    mutationFn: (accessToken: string) => googleAuth(accessToken),
     onSuccess: (data) => {
-      const role = data.data.role;
-      setAuth(
-        data.data.access_token,
-        role,
-        data.data.userId,
-        data.data.isActive,
-      );
-      queryClient.setQueryData(authKeys.currentUser(), data);
-      navigate(homeForRole(role));
+      setAuth(data.accessKey, data.role, data.userId, data.isActive);
+      queryClient.invalidateQueries({ queryKey: authKeys.currentUser() });
+      navigate(homeForRole(data.role));
     },
     onError: (error) => {
       console.error("Google OAuth failed: ", error);

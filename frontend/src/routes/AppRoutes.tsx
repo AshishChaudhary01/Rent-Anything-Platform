@@ -35,6 +35,7 @@ import Profile from "../pages/user/core/account/Profile";
 import PaymentMethods from "../pages/user/core/account/PaymentMethods";
 import Kyc from "../pages/user/core/account/Kyc";
 import Security from "../pages/user/core/account/Security";
+import RequireTransactReady from "../components/auth/RequireTransactReady";
 import UserStandardLayout from "../layouts/userLayout/standardLayout/UserStandardLayout";
 import UserFlowLayout from "../layouts/userLayout/flowLayout/UserFlowLayout";
 import AdminLayout from "../layouts/adminLayout/AdminLayout";
@@ -110,7 +111,7 @@ const router = createBrowserRouter([
       {
         element: <UserFlowLayout />,
         children: [
-          { path: "add-listing", element: <AddListing /> },
+          { path: "add-listing", element: <RequireTransactReady><AddListing /></RequireTransactReady> },
           { path: "listing", element: <Listing /> },
           { path: "rental-details", element: <RentalDetails /> },
           { path: "my-listing-details", element: <MyListingDetails /> },
@@ -123,9 +124,9 @@ const router = createBrowserRouter([
         path: "rent",
         element: <UserFlowLayout />,
         children: [
-          { path: "request-to-rent", element: <RequestToRent /> },
+          { path: "request-to-rent", element: <RequireTransactReady><RequestToRent /></RequireTransactReady> },
           { path: "meetup", element: <Meetup /> },
-          { path: "checkout", element: <Checkout /> },
+          { path: "checkout", element: <RequireTransactReady><Checkout /></RequireTransactReady> },
           { path: "confirmation", element: <Confirmation /> },
           { path: "return-schedule", element: <ReturnSchedule /> },
           { path: "condition-proof", element: <ConditionProof /> },

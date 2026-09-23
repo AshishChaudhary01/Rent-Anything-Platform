@@ -8,10 +8,14 @@ interface IGoogleAuthButtonProp {
 
 const GoogleAuthButton = ({ label }: IGoogleAuthButtonProp) => {
   const { mutate: googleAuthMutate, isPending } = useGoogleAuth();
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const handleGoogleAuth = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       googleAuthMutate(tokenResponse.access_token, {
+        onSuccess: () => {
+          raToast.success("Signed in with Google");
+        },
         onError: (error) => {
           raToast.fromError(error);
         },
@@ -21,10 +25,17 @@ const GoogleAuthButton = ({ label }: IGoogleAuthButtonProp) => {
       raToast.error("Google login failed. Please try again.");
     },
   });
+
   return (
     <button
       type="button"
-      onClick={() => handleGoogleAuth()}
+      onClick={() => {
+        if (!clientId) {
+          raToast.error("Google sign-in is not configured.");
+          return;
+        }
+        handleGoogleAuth();
+      }}
       disabled={isPending}
       className="w-full flex items-center justify-center gap-2 rounded-full px-5 py-3 lg:text-base text-sm font-semibold bg-white drop-shadow-sm hover:drop-shadow-lg transition duration-300 cursor-pointer disabled:opacity-50"
     >

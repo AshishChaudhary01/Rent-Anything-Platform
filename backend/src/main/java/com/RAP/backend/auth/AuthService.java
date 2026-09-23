@@ -1,6 +1,7 @@
 package com.RAP.backend.auth;
 
 import com.RAP.backend.auth.dto.AuthResponse;
+import com.RAP.backend.auth.dto.GoogleAuthRequest;
 import com.RAP.backend.auth.dto.LoginRequest;
 import com.RAP.backend.auth.dto.RegisterRequest;
 import com.RAP.backend.auth.dto.UserResponse;
@@ -30,19 +31,22 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
 	private final JwtProperties jwtProperties;
+	private final GoogleTokenService googleTokenService;
 
 	public AuthService(
 			UserRepository userRepository,
 			RefreshTokenRepository refreshTokenRepository,
 			PasswordEncoder passwordEncoder,
 			JwtService jwtService,
-			JwtProperties jwtProperties
+			JwtProperties jwtProperties,
+			GoogleTokenService googleTokenService
 	) {
 		this.userRepository = userRepository;
 		this.refreshTokenRepository = refreshTokenRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
 		this.jwtProperties = jwtProperties;
+		this.googleTokenService = googleTokenService;
 	}
 
 	@Transactional
@@ -73,7 +77,8 @@ public class AuthService {
 		User user = userRepository.findByEmailIgnoreCase(email)
 				.orElseThrow(AuthService::invalidLogin);
 
-		if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+		if (user.getPasswordHash() == null || user.getPasswordHash().isBlank()
+				|| !passwordEncoder.matches(request.password(), user.getPasswordHash())) {
 			throw invalidLogin();
 		}
 		assertCanAuthenticate(user);
@@ -83,6 +88,35 @@ public class AuthService {
 				? Duration.ofDays(30)
 				: Duration.ofDays(jwtProperties.getRefreshTokenDays());
 		issueRefreshCookie(user, response, refreshTtl);
+		return AuthResponse.from(user, jwtService.createAccessToken(user));
+	}
+
+	@Transactional
+	public AuthResponse loginWithGoogle(GoogleAuthRequest request, HttpServletResponse response) {
+		String token = firstNonBlank(request.accessToken(), request.idToken());
+		GoogleTokenService.GoogleProfile profile = googleTokenService.fetchProfile(token);
+
+		User user = userRepository.findByGoogleId(profile.googleId())
+				.or(() -> userRepository.findByEmailIgnoreCase(profile.email()))
+				.orElseGet(User::new);
+
+		if (user.getId() == null) {
+			user.setEmail(profile.email());
+			user.setRole(Role.USER);
+			user.setActive(true);
+			user.setAccountLocked(false);
+		} else if (!profile.email().equalsIgnoreCase(user.getEmail())
+				&& userRepository.existsByEmailIgnoreCaseAndIdNot(profile.email(), user.getId())) {
+			throw new ApiException(HttpStatus.CONFLICT, "An account with this email already exists");
+		}
+
+		user.setGoogleId(profile.googleId());
+		if (user.getFullName() == null || user.getFullName().isBlank()) {
+			user.setFullName(profile.fullName().isBlank() ? profile.email() : profile.fullName());
+		}
+		user = userRepository.save(user);
+		assertCanAuthenticate(user);
+		issueRefreshCookie(user, response, Duration.ofDays(jwtProperties.getRefreshTokenDays()));
 		return AuthResponse.from(user, jwtService.createAccessToken(user));
 	}
 
@@ -123,6 +157,16 @@ public class AuthService {
 					});
 		}
 		clearRefreshCookie(response);
+	}
+
+	private static String firstNonBlank(String first, String second) {
+		if (first != null && !first.isBlank()) {
+			return first.trim();
+		}
+		if (second != null && !second.isBlank()) {
+			return second.trim();
+		}
+		throw new ApiException(HttpStatus.BAD_REQUEST, "Google access token is missing");
 	}
 
 	private static ApiException invalidLogin() {

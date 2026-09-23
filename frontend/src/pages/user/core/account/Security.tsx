@@ -1,4 +1,4 @@
-import { IoCallOutline, IoLockClosedOutline, IoMailOutline } from "react-icons/io5"
+import { IoLockClosedOutline } from "react-icons/io5"
 import { raToast } from "../../../../lib/raToast"
 import { useState } from "react"
 import RaContainer from "../../../../components/container/RaContainer"
@@ -9,12 +9,18 @@ import RaInput from "../../../../components/input/RaInput"
 import RaButton from "../../../../components/button/RaButton"
 import ContactOtpChange from "../../../../components/account/ContactOtpChange"
 import { useAccountStore } from "../../../../store/accountStore"
+import { useChangePassword, useUpdateContact } from "../../../../hooks/queries/useAccount"
+import { apiFieldErrors } from "../../../../lib/formErrors"
+import { requiredPassword } from "../../../../schemas/zod.schema"
 
 function Security() {
-  const { email, phone, setEmail, setPhone } = useAccountStore()
+  const { email } = useAccountStore()
+  const { mutateAsync: saveContact } = useUpdateContact()
+  const { mutate: savePassword, isPending } = useChangePassword()
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   return (
     <RaContainer>
@@ -24,40 +30,41 @@ function Security() {
           <div>
             <div className="text-xl md:text-2xl font-bold">Security</div>
             <div className="text-sm md:text-base font-light text-muted">
-              Email and phone changes need a one-time code. Password still uses your current password.
+              Email changes need a one-time code sent to the new address. Password updates use your current password.
             </div>
           </div>
 
           <ContactOtpChange
-            channel="email"
             current={email}
-            icon={IoMailOutline}
-            onVerified={setEmail}
-          />
-
-          <ContactOtpChange
-            channel="phone"
-            current={phone}
-            icon={IoCallOutline}
-            onVerified={setPhone}
+            onVerified={(value) => saveContact({ email: value })}
           />
 
           <form
             className="flex flex-col gap-y-4"
             onSubmit={(e) => {
               e.preventDefault()
-              if (currentPassword.length < 8 || newPassword.length < 8) {
-                raToast.error("Passwords must be at least 8 characters")
+              const next: Record<string, string> = {}
+              if (currentPassword.length < 8) next.currentPassword = "Current password is required"
+              const parsed = requiredPassword().safeParse(newPassword)
+              if (!parsed.success) next.newPassword = parsed.error.issues[0]?.message || "Enter a stronger password"
+              if (newPassword !== confirmPassword) next.confirmPassword = "New passwords do not match"
+              if (Object.keys(next).length) {
+                setErrors(next)
                 return
               }
-              if (newPassword !== confirmPassword) {
-                raToast.error("New passwords do not match")
-                return
-              }
-              setCurrentPassword("")
-              setNewPassword("")
-              setConfirmPassword("")
-              raToast.success("Password updated")
+              savePassword(
+                { currentPassword, newPassword },
+                {
+                  onSuccess: () => {
+                    setCurrentPassword("")
+                    setNewPassword("")
+                    setConfirmPassword("")
+                    setErrors({})
+                    raToast.success("Password updated")
+                  },
+                  onError: (error) => setErrors(apiFieldErrors(error)),
+                },
+              )
             }}
           >
             <RaCard round="round" styleClass="flex flex-col gap-y-4">
@@ -69,7 +76,11 @@ function Security() {
                 placeholderText="********"
                 Icon={IoLockClosedOutline}
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                error={errors.currentPassword}
+                onChange={(e) => {
+                  setCurrentPassword(e.target.value)
+                  setErrors((prev) => ({ ...prev, currentPassword: "" }))
+                }}
               />
               <RaInput
                 type="password"
@@ -78,7 +89,11 @@ function Security() {
                 placeholderText="********"
                 Icon={IoLockClosedOutline}
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                error={errors.newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value)
+                  setErrors((prev) => ({ ...prev, newPassword: "" }))
+                }}
               />
               <RaInput
                 type="password"
@@ -87,10 +102,14 @@ function Security() {
                 placeholderText="********"
                 Icon={IoLockClosedOutline}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                error={errors.confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value)
+                  setErrors((prev) => ({ ...prev, confirmPassword: "" }))
+                }}
               />
             </RaCard>
-            <RaButton type="submit" btnText="Update password" />
+            <RaButton type="submit" btnText={isPending ? "Updating" : "Update password"} disabled={isPending} />
           </form>
         </div>
       </RaContainerPadding>

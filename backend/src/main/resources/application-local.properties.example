@@ -2,9 +2,14 @@
 
 # JWT_SECRET=generate-a-long-random-string
 
-# Google OAuth (already used for the existing client)
-# GOOGLE_CLIENT_ID=
-# GOOGLE_CLIENT_SECRET=
+# Google OAuth
+# spring.security.oauth2.client.registration.google.client-id=
+# spring.security.oauth2.client.registration.google.client-secret=
+
+# Cloudinary
+# app.cloudinary.cloud-name=
+# app.cloudinary.api-key=
+# app.cloudinary.api-secret=
 
 # Gmail SMTP app password for OTP / verification mail
 # EMAIL_USERNAME=

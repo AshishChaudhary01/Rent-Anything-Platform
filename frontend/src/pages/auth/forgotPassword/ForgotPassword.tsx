@@ -1,51 +1,48 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { IoCallOutline, IoLockClosedOutline, IoMailOutline } from "react-icons/io5"
+import { IoLockClosedOutline, IoMailOutline } from "react-icons/io5"
 import RaContainerXS from "../../../components/container/RaContainerXS"
 import RaInput from "../../../components/input/RaInput"
 import RaOtpInput from "../../../components/input/RaOtpInput"
 import RaButton from "../../../components/button/RaButton"
-import { sendOtp, verifyOtp, type OtpChannel } from "../../../services/otp.service"
+import { sendOtp, verifyOtp } from "../../../services/otp.service"
 import { raToast } from "../../../lib/raToast"
+import { requiredPassword } from "../../../schemas/zod.schema"
 
 type Step = "identify" | "otp" | "reset"
 
 function ForgotPassword() {
   const navigate = useNavigate()
-  const [channel, setChannel] = useState<OtpChannel>("email")
-  const [destination, setDestination] = useState("")
+  const [email, setEmail] = useState("")
   const [step, setStep] = useState<Step>("identify")
-  const [otpError, setOtpError] = useState(false)
+  const [otpError, setOtpError] = useState("")
+  const [emailError, setEmailError] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+  const [confirmError, setConfirmError] = useState("")
   const [otpKey, setOtpKey] = useState(0)
   const [demoCode, setDemoCode] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 
-  const isEmail = channel === "email"
-
   const requestCode = () => {
-    const value = destination.trim()
-    if (isEmail && !value.includes("@")) {
-      raToast.error("Enter a valid email")
+    const value = email.trim()
+    if (!value.includes("@")) {
+      setEmailError("Enter a valid email")
       return
     }
-    if (!isEmail && value.replace(/\D/g, "").length < 10) {
-      raToast.error("Enter a valid phone number")
-      return
-    }
-    const code = sendOtp(channel, value)
+    setEmailError("")
+    const code = sendOtp(value)
     setDemoCode(code)
-    setOtpError(false)
+    setOtpError("")
     setOtpKey((n) => n + 1)
     setStep("otp")
     raToast.success(`Code sent to ${value}`)
   }
 
   const checkCode = (otp: string) => {
-    const result = verifyOtp(channel, destination.trim(), otp)
+    const result = verifyOtp(email.trim(), otp)
     if (!result.ok) {
-      setOtpError(true)
-      raToast.error(result.message)
+      setOtpError(result.message)
       return
     }
     setStep("reset")
@@ -58,8 +55,8 @@ function ForgotPassword() {
         <div className="flex flex-col gap-y-4">
           <p className="text-2xl font-bold md:text-4xl md:font-extrabold">Forgot password</p>
           <p className="font-extralight text-sm md:font-light md:text-base text-muted">
-            {step === "identify" && "Choose email or phone. We will send a one-time code to reset your password."}
-            {step === "otp" && "Enter the 6-digit code to continue."}
+            {step === "identify" && "Enter the email on your account. We will send a one-time code to reset your password."}
+            {step === "otp" && "Enter the 6-digit code sent to your email."}
             {step === "reset" && "Choose a new password for your RAP account."}
           </p>
         </div>
@@ -72,42 +69,20 @@ function ForgotPassword() {
               requestCode()
             }}
           >
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setChannel("email")
-                  setDestination("")
-                }}
-                className={`rounded-full py-2 text-sm font-semibold border cursor-pointer ${
-                  isEmail ? "border-primary bg-primary/10 text-primary" : "border-gray-200"
-                }`}
-              >
-                Email
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setChannel("phone")
-                  setDestination("")
-                }}
-                className={`rounded-full py-2 text-sm font-semibold border cursor-pointer ${
-                  !isEmail ? "border-primary bg-primary/10 text-primary" : "border-gray-200"
-                }`}
-              >
-                Phone
-              </button>
-            </div>
             <RaInput
-              type={isEmail ? "email" : "text"}
-              name="destination"
-              label={isEmail ? "Email" : "Phone number"}
-              placeholderText={isEmail ? "you@example.com" : "9801234567"}
-              Icon={isEmail ? IoMailOutline : IoCallOutline}
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
+              type="email"
+              name="email"
+              label="Email"
+              placeholderText="you@example.com"
+              Icon={IoMailOutline}
+              value={email}
+              error={emailError}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                setEmailError("")
+              }}
             />
-            <RaButton type="submit" btnText={isEmail ? "Send email code" : "Send SMS code"} />
+            <RaButton type="submit" btnText="Send email code" />
           </form>
         )}
 
@@ -115,13 +90,14 @@ function ForgotPassword() {
           <div className="flex flex-col gap-y-4">
             <RaOtpInput
               key={otpKey}
-              email={destination.trim()}
-              isError={otpError}
+              email={email.trim()}
+              isError={Boolean(otpError)}
+              error={otpError}
               onComplete={checkCode}
               onResend={requestCode}
             />
             <div className="text-xs text-muted">
-              Prototype code: {demoCode}. This will be delivered by {isEmail ? "email" : "SMS"} when the gateway is connected.
+              Prototype code: {demoCode}. This will be delivered by email when SMTP is connected.
             </div>
             <button
               type="button"
@@ -129,9 +105,10 @@ function ForgotPassword() {
               onClick={() => {
                 setStep("identify")
                 setDemoCode("")
+                setOtpError("")
               }}
             >
-              Use a different {isEmail ? "email" : "number"}
+              Use a different email
             </button>
           </div>
         )}
@@ -141,12 +118,15 @@ function ForgotPassword() {
             className="flex flex-col gap-y-4"
             onSubmit={(e) => {
               e.preventDefault()
-              if (password.length < 8) {
-                raToast.error("Password must be at least 8 characters")
+              const parsed = requiredPassword().safeParse(password)
+              if (!parsed.success) {
+                setPasswordError(parsed.error.issues[0]?.message || "Enter a stronger password")
+                setConfirmError("")
                 return
               }
               if (password !== confirmPassword) {
-                raToast.error("Passwords do not match")
+                setPasswordError("")
+                setConfirmError("Passwords do not match")
                 return
               }
               raToast.success("Password updated. You can log in now.")
@@ -160,7 +140,11 @@ function ForgotPassword() {
               placeholderText="********"
               Icon={IoLockClosedOutline}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              error={passwordError}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                setPasswordError("")
+              }}
             />
             <RaInput
               type="password"
@@ -169,7 +153,11 @@ function ForgotPassword() {
               placeholderText="********"
               Icon={IoLockClosedOutline}
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              error={confirmError}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value)
+                setConfirmError("")
+              }}
             />
             <RaButton type="submit" btnText="Update password" />
           </form>

@@ -18,6 +18,7 @@ function AdminKycDetails() {
   const item = kycCases.find((row) => row.id === id)
   const me = users.find((u) => u.id === authUserId)
   const [notes, setNotes] = useState(item?.notes ?? "")
+  const [notesError, setNotesError] = useState("")
 
   if (!item) {
     return <div className="text-muted">KYC case not found. <Link to="/admin/kyc" className="text-primary">Back</Link></div>
@@ -25,9 +26,10 @@ function AdminKycDetails() {
 
   const decide = (status: "Verified" | "Rejected") => {
     if (status === "Rejected" && !notes.trim()) {
-      raToast.error("Add a reason when rejecting")
+      setNotesError("Add a reason when rejecting")
       return
     }
+    setNotesError("")
     reviewKyc(item.id, status, me?.fullName || "Admin", notes.trim() || "Document matches profile.")
     raToast.success(status === "Verified" ? "KYC verified" : "KYC rejected")
   }
@@ -74,7 +76,7 @@ function AdminKycDetails() {
 
       {item.status === "Pending" && (
         <RaCard round="round" styleClass="flex flex-col gap-4">
-          <RaInput name="kycNotes" label="Reviewer notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholderText="Match notes or rejection reason" />
+          <RaInput name="kycNotes" label="Reviewer notes" value={notes} error={notesError} onChange={(e) => { setNotes(e.target.value); setNotesError("") }} placeholderText="Match notes or rejection reason" />
           <div className="flex gap-2">
             <RaButton type="button" btnText="Verify" clickFunc={() => decide("Verified")} />
             <RaButton type="button" btnText="Reject" variant="danger" clickFunc={() => decide("Rejected")} />

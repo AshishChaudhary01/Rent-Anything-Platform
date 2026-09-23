@@ -42,7 +42,9 @@ public class SecurityConfig {
 	UserDetailsService userDetailsService(UserRepository userRepository) {
 		return username -> userRepository.findByEmailIgnoreCase(username)
 				.map(user -> org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
-						.password(user.getPasswordHash())
+						.password(user.getPasswordHash() == null || user.getPasswordHash().isBlank()
+								? "{noop}oauth-only"
+								: user.getPasswordHash())
 						.roles(user.getRole().name())
 						.disabled(!user.isActive())
 						.accountLocked(user.isAccountLocked())

@@ -15,6 +15,7 @@ function AdminSettings() {
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
+  const [adminErrors, setAdminErrors] = useState<Record<string, string>>({})
   const isSuper = role === "SUPER_ADMIN"
 
   return (
@@ -81,19 +82,23 @@ function AdminSettings() {
             className="flex flex-col gap-3"
             onSubmit={(e) => {
               e.preventDefault()
-              if (!fullName.trim() || !email.includes("@")) {
-                raToast.error("Enter a name and valid email")
+              const next: Record<string, string> = {}
+              if (!fullName.trim()) next.adminName = "Full name is required"
+              if (!email.includes("@")) next.adminEmail = "Enter a valid email"
+              if (Object.keys(next).length) {
+                setAdminErrors(next)
                 return
               }
               createAdmin({ fullName: fullName.trim(), email: email.trim(), phone: phone.trim() || "—" })
               setFullName("")
               setEmail("")
               setPhone("")
+              setAdminErrors({})
               raToast.success("Admin account created")
             }}
           >
-            <RaInput name="adminName" label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholderText="Staff name" />
-            <RaInput type="email" name="adminEmail" label="Email" value={email} onChange={(e) => setEmail(e.target.value)} placeholderText="staff@rap.np" />
+            <RaInput name="adminName" label="Full name" value={fullName} error={adminErrors.adminName} onChange={(e) => { setFullName(e.target.value); setAdminErrors((p) => ({ ...p, adminName: "" })) }} placeholderText="Staff name" />
+            <RaInput type="email" name="adminEmail" label="Email" value={email} error={adminErrors.adminEmail} onChange={(e) => { setEmail(e.target.value); setAdminErrors((p) => ({ ...p, adminEmail: "" })) }} placeholderText="staff@rap.np" />
             <RaInput name="adminPhone" label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholderText="9800000000" />
             <RaButton type="submit" btnText="Create admin" />
           </form>

@@ -1,3 +1,4 @@
+import AccountSetupBanner from "../../../../components/account/AccountSetupBanner"
 import RaCategoryBar from "../../../../components/categoryBar/CategoryBar"
 import RaContainer from "../../../../components/container/RaContainer"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
@@ -16,7 +17,8 @@ const UserDashboard = () => {
       <RaContainer>
         <RaContainerPadding>
           <div>
-            <div className="flex flex-col gap-y-2">
+            <div className="flex flex-col gap-y-4">
+              <AccountSetupBanner />
               <RaSearchBar placeholderText="Search for tools, gears, or appliances..." />
               <RaCategoryBar />
             </div>

@@ -3,6 +3,7 @@ import RaContainerXS from "../../../components/container/RaContainerXS"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { raToast } from "../../../lib/raToast";
+import { applyApiFieldErrors } from "../../../lib/formErrors";
 import RaInput from "../../../components/input/RaInput";
 import { IoLockClosedOutline, IoMailOutline, IoPersonOutline } from "react-icons/io5";
 import RaButton from "../../../components/button/RaButton";
@@ -17,6 +18,7 @@ function Register() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting }
   } = useForm<UserRegisterType>({
     resolver: zodResolver(userRegisterBody),
@@ -29,10 +31,10 @@ function Register() {
     registerUser({ ...data, role: "USER" }, {
       onSuccess: () => {
         navigate("/auth/login");
-        raToast.success("Account created. Please check your email.");
+        raToast.success("Account created. You can sign in now.");
       },
       onError: (error) => {
-        raToast.fromError(error);
+        applyApiFieldErrors(setError, error, "email");
       },
     });
   };

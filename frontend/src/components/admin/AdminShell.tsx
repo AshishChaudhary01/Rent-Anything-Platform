@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, NavLink, useNavigate } from "react-router-dom"
+import { Link, NavLink } from "react-router-dom"
 import {
   IoAlertCircleOutline,
   IoBagHandleOutline,
@@ -11,9 +11,10 @@ import {
   IoSettingsOutline,
   IoSwapHorizontalOutline,
 } from "react-icons/io5"
-import { logoHorizontal, profile01 } from "../../utils/images"
+import { logoHorizontal } from "../../utils/images"
 import { useAuthStore } from "../../store/authStore"
-import { useAdminStore } from "../../store/adminStore"
+import { useAccountStore } from "../../store/accountStore"
+import { useLogout } from "../../hooks/queries/useAccount"
 
 const links = [
   { to: "/admin", label: "Dashboard", icon: IoGridOutline, end: true },
@@ -27,12 +28,10 @@ const links = [
 
 function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
   const role = useAuthStore((s) => s.role)
-  const userId = useAuthStore((s) => s.userId)
-  const clearAuth = useAuthStore((s) => s.clearAuth)
-  const users = useAdminStore((s) => s.users)
-  const me = users.find((u) => u.id === userId)
+  const { mutate: logout } = useLogout()
+  const { fullName, avatarUrl } = useAccountStore()
+  const avatar = avatarUrl || "https://ui-avatars.com/api/?name=Admin"
 
   const nav = (
     <nav className="flex flex-col gap-1 p-3">
@@ -63,9 +62,9 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         </Link>
         <div className="flex-1 overflow-y-auto">{nav}</div>
         <Link to="/admin/profile" className="shrink-0 p-4 text-xs text-muted border-t border-gray-100 hover:bg-surface flex items-center gap-3">
-          <img src={profile01} alt="" className="size-9 rounded-full object-cover" />
+          <img src={avatar} alt="" className="size-9 rounded-full object-cover" />
           <div className="min-w-0">
-            <div className="truncate">{me?.fullName || "Admin"}</div>
+            <div className="truncate">{fullName || "Admin"}</div>
             <div className="font-semibold text-text-dark">{role === "SUPER_ADMIN" ? "Super admin" : "Admin"}</div>
           </div>
         </Link>
@@ -82,9 +81,9 @@ function AdminShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex-1 overflow-y-auto">{nav}</div>
             <Link to="/admin/profile" onClick={() => setOpen(false)} className="shrink-0 p-4 text-xs text-muted border-t border-gray-100 flex items-center gap-3">
-              <img src={profile01} alt="" className="size-9 rounded-full object-cover" />
+              <img src={avatar} alt="" className="size-9 rounded-full object-cover" />
               <div>
-                {me?.fullName || "Admin"}
+                {fullName || "Admin"}
                 <div className="font-semibold text-text-dark">{role === "SUPER_ADMIN" ? "Super admin" : "Admin"}</div>
               </div>
             </Link>
@@ -100,15 +99,12 @@ function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="font-semibold hidden lg:block">Admin</div>
           <div className="flex items-center gap-4 ml-auto">
             <Link to="/admin/profile" className="flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary">
-              <img src={profile01} alt="" className="size-8 rounded-full object-cover ring-2 ring-primary/20" />
+              <img src={avatar} alt="" className="size-8 rounded-full object-cover ring-2 ring-primary/20" />
             </Link>
             <button
               type="button"
               className="text-sm text-primary font-semibold cursor-pointer"
-              onClick={() => {
-                clearAuth()
-                navigate("/auth/login")
-              }}
+              onClick={() => logout()}
             >
               Log out
             </button>

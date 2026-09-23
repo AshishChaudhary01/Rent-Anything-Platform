@@ -20,7 +20,8 @@ export type UserRegisterType = z.infer<typeof userRegisterBody>;
 
 export const userLoginBody = z.object({
   email: requiredEmail(),
-  password: requiredPassword(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  keepSignedIn: z.boolean().optional(),
 });
 
 export type UserLoginType = z.infer<typeof userLoginBody>;

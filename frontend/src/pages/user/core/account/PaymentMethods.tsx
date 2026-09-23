@@ -24,6 +24,7 @@ function PaymentMethods() {
   const [wallets, setWallets] = useState<LinkedWallet[]>(initialLinkedWallets)
   const [adding, setAdding] = useState<WalletId | null>(null)
   const [walletPhone, setWalletPhone] = useState("")
+  const [phoneError, setPhoneError] = useState("")
 
   const unlinked = availableWallets.filter((w) => !wallets.some((linked) => linked.id === w.id))
 
@@ -45,7 +46,7 @@ function PaymentMethods() {
 
   const linkWallet = () => {
     if (!adding || walletPhone.replace(/\D/g, "").length < 10) {
-      raToast.error("Enter a valid wallet mobile number")
+      setPhoneError("Enter a valid wallet mobile number")
       return
     }
     const meta = availableWallets.find((w) => w.id === adding)
@@ -135,6 +136,7 @@ function PaymentMethods() {
                   onClick={() => {
                     setAdding(wallet.id)
                     setWalletPhone("")
+                    setPhoneError("")
                   }}
                   className={`flex items-center gap-3 rounded-2xl p-4 bg-white border cursor-pointer ${adding === wallet.id ? "border-primary" : "border-gray-200"}`}
                 >
@@ -159,7 +161,11 @@ function PaymentMethods() {
                 label="Wallet mobile number"
                 placeholderText="9801234567"
                 value={walletPhone}
-                onChange={(e) => setWalletPhone(e.target.value)}
+                error={phoneError}
+                onChange={(e) => {
+                  setWalletPhone(e.target.value)
+                  setPhoneError("")
+                }}
               />
               <RaButton type="button" btnText="Link wallet" clickFunc={linkWallet} />
             </RaCard>

@@ -2,11 +2,13 @@ package com.RAP.backend.account;
 
 import com.RAP.backend.account.dto.ChangePasswordRequest;
 import com.RAP.backend.account.dto.MeResponse;
+import com.RAP.backend.account.dto.SubmitKycRequest;
 import com.RAP.backend.account.dto.UpdateContactRequest;
 import com.RAP.backend.account.dto.UpdateProfileRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,5 +50,14 @@ public class AccountController {
 	@PostMapping(path = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public MeResponse updateAvatar(@RequestPart("file") MultipartFile file) {
 		return accountService.updateAvatar(file);
+	}
+
+	@PostMapping(path = "/kyc", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public MeResponse submitKyc(
+			@Valid @ModelAttribute SubmitKycRequest request,
+			@RequestPart("front") MultipartFile front,
+			@RequestPart("back") MultipartFile back
+	) {
+		return accountService.submitKyc(request, front, back);
 	}
 }

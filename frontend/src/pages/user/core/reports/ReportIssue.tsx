@@ -44,6 +44,7 @@ function ReportIssue() {
   const [reason, setReason] = useState(presetReason && reasons.includes(presetReason) ? presetReason : reasons[0])
   const [detail, setDetail] = useState("")
   const [proofs, setProofs] = useState<MediaFile[]>([])
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const summary = useMemo(() => ({
     listingTitle: listing?.title || listingTitle,
@@ -77,12 +78,11 @@ function ReportIssue() {
             className="flex flex-col gap-4"
             onSubmit={(e) => {
               e.preventDefault()
-              if (!detail.trim()) {
-                raToast.error("Describe what happened")
-                return
-              }
-              if (proofs.length === 0) {
-                raToast.error("Add at least one photo or video as proof")
+              const next: Record<string, string> = {}
+              if (!detail.trim()) next.detail = "Describe what happened"
+              if (proofs.length === 0) next.proofs = "Add at least one photo or video as proof"
+              if (Object.keys(next).length) {
+                setErrors(next)
                 return
               }
               const id = submitReport({
@@ -117,13 +117,18 @@ function ReportIssue() {
               What happened
               <textarea
                 name="detail"
-                className="min-h-28 bg-surface border border-muted/20 rounded-2xl p-3 outline-none text-sm placeholder:text-muted/50"
+                className={`min-h-28 bg-surface border rounded-2xl p-3 outline-none text-sm placeholder:text-muted/50 ${errors.detail ? "border-danger" : "border-muted/20"}`}
                 placeholder="Give dates, what was missing, and what you already tried"
                 value={detail}
-                onChange={(e) => setDetail(e.target.value)}
+                onChange={(e) => {
+                  setDetail(e.target.value)
+                  setErrors((prev) => ({ ...prev, detail: "" }))
+                }}
               />
+              {errors.detail && <span className="text-danger text-xs font-normal">{errors.detail}</span>}
             </label>
-            <RaMediaUpload heading="Add photo or video proof" onChange={setProofs} />
+            <RaMediaUpload heading="Add photo or video proof" onChange={(files) => { setProofs(files); setErrors((prev) => ({ ...prev, proofs: "" })) }} />
+            {errors.proofs && <span className="text-danger text-xs">{errors.proofs}</span>}
             <RaButton type="submit" btnText="Submit report" />
           </form>
         </div>

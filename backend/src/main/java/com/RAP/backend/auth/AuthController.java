@@ -1,10 +1,10 @@
 package com.RAP.backend.auth;
 
 import com.RAP.backend.auth.dto.AuthResponse;
+import com.RAP.backend.auth.dto.GoogleAuthRequest;
 import com.RAP.backend.auth.dto.LoginRequest;
 import com.RAP.backend.auth.dto.RegisterRequest;
 import com.RAP.backend.auth.dto.UserResponse;
-import com.RAP.backend.common.ApiError;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -53,11 +53,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/google")
-	public ResponseEntity<ApiError> google() {
-		return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
-				.body(new ApiError(
-						"Google sign-in is not connected yet",
-						"Use email and password for now. Google OAuth will be wired after login/register is verified."
-				));
+	public AuthResponse google(@RequestBody GoogleAuthRequest request, HttpServletResponse response) {
+		return authService.loginWithGoogle(request, response);
 	}
 }

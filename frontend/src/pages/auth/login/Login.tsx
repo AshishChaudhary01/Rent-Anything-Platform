@@ -1,13 +1,13 @@
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import RaButton from "../../../components/button/RaButton"
 import RaContainerXS from "../../../components/container/RaContainerXS"
 import GoogleAuthButton from "../../../components/button/GoogleAuthButton"
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLogin, tryLocalAdminLogin } from "../../../hooks/mutations/useAuth";
-import { useAuthStore } from "../../../store/authStore";
+import { useLogin } from "../../../hooks/mutations/useAuth";
 import { raToast } from "../../../lib/raToast";
+import { applyApiFieldErrors } from "../../../lib/formErrors";
 import RaInput from "../../../components/input/RaInput";
 import { IoLockClosedOutline, IoMailOutline } from "react-icons/io5";
 
@@ -20,35 +20,30 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const navigate = useNavigate();
-  const setAuth = useAuthStore((state) => state.setAuth);
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: { keepSignedIn: false },
   });
 
   const { mutate: loginUser, isPending } = useLogin();
 
   const handleLogin = async (data: LoginFormData) => {
-    const localAdmin = tryLocalAdminLogin(data.email, data.password);
-    if (localAdmin) {
-      setAuth("local-admin", localAdmin.role, localAdmin.userId, true);
-      raToast.success("Admin signed in");
-      navigate("/admin");
-      return;
-    }
-
-    loginUser(data, {
-      onSuccess: () => {
-        raToast.success("User authenticated!");
+    loginUser(
+      { email: data.email, password: data.password, keepSignedIn: data.keepSignedIn },
+      {
+        onSuccess: () => {
+          raToast.success("Signed in");
+        },
+        onError(error) {
+          applyApiFieldErrors(setError, error, "password");
+        },
       },
-      onError(error) {
-        raToast.fromError(error);
-      },
-    });
+    );
   };
 
   return (
@@ -89,6 +84,7 @@ const Login = () => {
             <input
               type="checkbox"
               className="w-4 h-4 border border-muted/30 cursor-pointer"
+              {...register("keepSignedIn")}
             />
             <span className="text-sm text-gray-500">Keep me signed in</span>
           </label>
@@ -96,7 +92,7 @@ const Login = () => {
           <Link to="/auth/forgot-password" className="text-primary text-end">Forgot password?</Link>
 
           {/* Login */}
-          <RaButton type="submit" btnText="Login" variant="primary" />
+          <RaButton type="submit" btnText={isPending || isSubmitting ? "Signing in" : "Login"} variant="primary" disabled={isPending || isSubmitting} />
         </form>
 
 

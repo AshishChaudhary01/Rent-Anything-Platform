@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { IoCardOutline, IoExitOutline, IoFlagOutline, IoLockClosedOutline, IoPersonOutline, IoShieldCheckmarkOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
+import { useLogout } from "../../hooks/queries/useAccount";
 
 interface IProfileDropdownProps {
   username: string;
@@ -14,6 +15,7 @@ const ProfileDropdown = ({
   avatarUrl
 }: IProfileDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { mutate: logout } = useLogout();
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -62,11 +64,6 @@ const ProfileDropdown = ({
       label: "My reports",
       icon: <IoFlagOutline className="size-5" />,
       path: "/user/reports",
-    },
-    {
-      label: "Logout",
-      icon: <IoExitOutline className="size-5" />,
-      path: "/auth/login",
     },
   ];
 
@@ -134,6 +131,19 @@ const ProfileDropdown = ({
                 <span>{item.label}</span>
               </Link>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false)
+                logout()
+              }}
+              className="flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-surface-soft transition-colors cursor-pointer"
+            >
+              <span className="text-text-muted">
+                <IoExitOutline className="size-5" />
+              </span>
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       )}

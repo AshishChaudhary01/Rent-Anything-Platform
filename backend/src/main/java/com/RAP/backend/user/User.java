@@ -11,6 +11,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,8 +38,11 @@ public class User {
 	@Column(nullable = false, unique = true, length = 191)
 	private String email;
 
-	@Column(name = "password_hash", nullable = false, length = 255)
+	@Column(name = "password_hash", nullable = true, length = 255)
 	private String passwordHash;
+
+	@Column(name = "google_id", unique = true, length = 64)
+	private String googleId;
 
 	@Column(length = 20, unique = true)
 	private String phone;
@@ -54,6 +58,28 @@ public class User {
 
 	@Column(name = "avatar_url", length = 500)
 	private String avatarUrl;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "kyc_status", nullable = false, length = 24)
+	private KycStatus kycStatus = KycStatus.NOT_STARTED;
+
+	@Column(name = "kyc_full_name", length = 120)
+	private String kycFullName;
+
+	@Column(name = "kyc_date_of_birth")
+	private LocalDate kycDateOfBirth;
+
+	@Column(name = "kyc_document_type", length = 32)
+	private String kycDocumentType;
+
+	@Column(name = "kyc_document_number", length = 64)
+	private String kycDocumentNumber;
+
+	@Column(name = "kyc_front_url", length = 500)
+	private String kycFrontUrl;
+
+	@Column(name = "kyc_back_url", length = 500)
+	private String kycBackUrl;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 32)
@@ -79,6 +105,9 @@ public class User {
 		Instant now = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
 		createdAt = now;
 		updatedAt = now;
+		if (kycStatus == null) {
+			kycStatus = KycStatus.NOT_STARTED;
+		}
 	}
 
 	@PreUpdate

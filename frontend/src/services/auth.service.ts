@@ -22,12 +22,7 @@ export const loginUser = async (
   return data;
 };
 
-export const googleAuth = async (idToken: string) => {
-  const res = await api.post("/auth/google", {
-    idToken,
-  });
-
-  console.log(res, "Google RESPONSE");
-
-  return res.data;
+export const googleAuth = async (accessToken: string): Promise<AuthReponseType> => {
+  const { data } = await api.post("/auth/google", { accessToken });
+  return data;
 };
