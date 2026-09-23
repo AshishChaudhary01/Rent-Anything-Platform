@@ -1,5 +1,11 @@
-# Copy this file to application-local.properties and fill in your values.
-# application-local.properties is gitignored.
+# Copy to application-local.properties (gitignored) and fill values.
 
-spring.security.oauth2.client.registration.google.client-id=
-spring.security.oauth2.client.registration.google.client-secret=
+# JWT_SECRET=generate-a-long-random-string
+
+# Google OAuth (already used for the existing client)
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=
+
+# Gmail SMTP app password for OTP / verification mail
+# EMAIL_USERNAME=
+# EMAIL_PASSWORD=
