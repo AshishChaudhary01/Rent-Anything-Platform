@@ -85,17 +85,17 @@ export function searchCatalog(query: string) {
   )
 }
 
-export function sortCatalog(items: CatalogItem[], sort: string) {
+export function sortCatalog<T extends { id: number | string; title: string; rate: number; createdAt?: string }>(items: T[], sort: string) {
   const next = [...items]
-  if (sort === "newest") next.sort((a, b) => b.id - a.id)
-  if (sort === "oldest") next.sort((a, b) => a.id - b.id)
+  if (sort === "newest") next.sort((a, b) => String(b.createdAt || b.id).localeCompare(String(a.createdAt || a.id)))
+  if (sort === "oldest") next.sort((a, b) => String(a.createdAt || a.id).localeCompare(String(b.createdAt || b.id)))
   if (sort === "price-high") next.sort((a, b) => b.rate - a.rate)
   if (sort === "price-low") next.sort((a, b) => a.rate - b.rate)
   if (sort === "name") next.sort((a, b) => a.title.localeCompare(b.title))
   return next
 }
 
-export function filterByPrice(items: CatalogItem[], price: string) {
+export function filterByPrice<T extends { rate: number }>(items: T[], price: string) {
   if (price === "under-500") return items.filter((i) => i.rate < 500)
   if (price === "500-1500") return items.filter((i) => i.rate >= 500 && i.rate <= 1500)
   if (price === "over-1500") return items.filter((i) => i.rate > 1500)

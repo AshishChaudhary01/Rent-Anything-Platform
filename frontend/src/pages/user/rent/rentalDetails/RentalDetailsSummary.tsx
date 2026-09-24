@@ -1,91 +1,129 @@
 import { Link } from "react-router-dom"
-import { IoLocationOutline, IoShieldCheckmarkOutline } from "react-icons/io5"
+import { IoCashOutline, IoLocationOutline, IoShieldCheckmarkOutline, IoStarOutline, IoTimeOutline } from "react-icons/io5"
 import RaButton from "../../../../components/button/RaButton"
 import RaCard from "../../../../components/card/RaCard"
-import Divider from "../../../../components/divider/Divider"
 import RaMapView from "../../../../components/maps/RaMapView"
 import ReportLink from "../../../../components/report/ReportLink"
+import type { Rental } from "../../../../types/rental.types"
 
-const meetup = { lat: 28.2096, lng: 83.9556, label: "Lakeside, Sector 6, Pokhara" }
+function RentalDetailsSummary({ rental }: { rental: Rental }) {
+  const peerName = rental.owner ? rental.renterName : rental.ownerName
+  const peerId = rental.owner ? rental.renterId : rental.ownerId
+  const hasMap = rental.meetupLatitude != null && rental.meetupLongitude != null
 
-function RentalDetailsSummary() {
   return (
     <div className="flex flex-col gap-y-4 mb-4">
-      <RaCard styleClass="flex flex-col gap-y-4">
-        <div className="font-bold text-lg">Rental Summary</div>
+      <RaCard round="round" bg="accent" styleClass="flex flex-col gap-y-4">
+        <div className="font-bold text-lg">Rental summary</div>
 
         <div className="flex items-center justify-between text-center">
           <div>
             <div className="text-xs text-muted">PICK UP</div>
-            <div className="font-bold">Oct 24</div>
-            <div className="text-sm text-muted">Thursday</div>
+            <div className="font-bold">{rental.startDate}</div>
           </div>
-          <div className="text-xs font-bold text-primary">3 DAYS</div>
+          <div className="text-xs font-bold text-primary flex items-center gap-1">
+            <IoTimeOutline /> {rental.days} DAYS
+          </div>
           <div>
             <div className="text-xs text-muted">RETURN</div>
-            <div className="font-bold">Oct 27</div>
-            <div className="text-sm text-muted">Sunday</div>
+            <div className="font-bold">{rental.endDate}</div>
           </div>
         </div>
 
-        <Divider />
-
         <div className="flex justify-between text-muted">
-          <span>Duration</span>
-          <span className="font-semibold text-inherit">3 Days</span>
+          <span className="flex items-center gap-1"><IoCashOutline className="size-4 text-primary" /> Cost per day</span>
+          <span className="font-semibold text-inherit">Nrs. {Number(rental.dailyRate).toLocaleString()}</span>
         </div>
         <div className="flex justify-between text-muted">
-          <span>Cost per Day</span>
-          <span className="font-semibold text-inherit">NPR 4,000</span>
+          <span>Rental total</span>
+          <span className="font-semibold text-inherit">Nrs. {Number(rental.rentalTotal).toLocaleString()}</span>
         </div>
         <div className="flex justify-between text-muted">
-          <span>Rental Subtotal</span>
-          <span className="font-semibold text-inherit">NPR 12,000</span>
+          <span>Commitment held</span>
+          <span className="font-semibold text-inherit">Nrs. {Number(rental.commitmentFee).toLocaleString()}</span>
         </div>
         <div className="flex justify-between text-muted">
-          <span>Service Fee</span>
-          <span className="font-semibold text-inherit">NPR 2,500</span>
+          <span>Commitment applied to total</span>
+          <span className="font-semibold text-inherit">Nrs. {Number(rental.commitmentApplied ?? rental.commitmentFee).toLocaleString()}</span>
         </div>
+        {rental.platformCommission != null && (
+          <div className="flex justify-between text-muted">
+            <span>Platform commission</span>
+            <span className="font-semibold text-inherit">Nrs. {Number(rental.platformCommission).toLocaleString()}</span>
+          </div>
+        )}
+        {rental.ownerPayout != null && (
+          <div className="flex justify-between text-muted">
+            <span>Lister payout</span>
+            <span className="font-semibold text-inherit">Nrs. {Number(rental.ownerPayout).toLocaleString()}</span>
+          </div>
+        )}
         <div className="flex justify-between text-lg font-bold">
-          <span>Total Amount</span>
-          <span className="text-primary">NPR 14,500</span>
+          <span>Due at pickup</span>
+          <span className="text-primary">Nrs. {Number(rental.payLater).toLocaleString()}</span>
         </div>
-
-        <Divider />
 
         <div className="flex gap-x-2">
           <IoLocationOutline className="size-5 text-primary shrink-0" />
           <div>
-            <div className="font-semibold">Meetup Location</div>
-            <div className="text-sm text-muted">Lakeside, Sector 6, Pokhara</div>
-            <a href="#meetup-map" className="text-sm text-primary">View on Map</a>
+            <div className="font-semibold">Meetup location</div>
+            <div className="text-sm text-muted">{rental.meetupLocation}</div>
           </div>
         </div>
 
-        <Link to="/user/rent/return-schedule">
-          <RaButton type="button" btnText="Return Item" size="large" />
-        </Link>
+        {rental.status === "REQUESTED" && rental.renter && (
+          <Link to={`/user/rent/waiting?rentalId=${rental.id}`}>
+            <RaButton type="button" btnText="Continue request" variant="secondary" />
+          </Link>
+        )}
+        {rental.status === "REQUESTED" && rental.owner && (
+          <Link to={`/user/request-details/${rental.id}`}>
+            <RaButton type="button" btnText="Review request" variant="secondary" />
+          </Link>
+        )}
+        {rental.status === "PENDING_PAYMENT" && rental.renter && (
+          <Link to={`/user/rent/checkout?rentalId=${rental.id}`}>
+            <RaButton type="button" btnText="Pay commitment fee" />
+          </Link>
+        )}
+        {rental.status === "PAID" && (
+          <Link to={`/user/rent/meetup?rentalId=${rental.id}`}>
+            <RaButton type="button" btnText="Go to meetup / scan QR" variant="camera" />
+          </Link>
+        )}
+        {rental.status === "ACTIVE" && (
+          <Link to={rental.returnScheduled ? `/user/rent/return-meetup?rentalId=${rental.id}` : `/user/rent/return-schedule?rentalId=${rental.id}`}>
+            <RaButton type="button" btnText={rental.returnScheduled ? "Continue return meetup" : "Start return"} variant="success" />
+          </Link>
+        )}
+        {rental.canReview && (
+          <Link to={`/user/rent/rate?rentalId=${rental.id}`}>
+            <RaButton type="button" btnText={rental.myRating ? "Edit review" : "Leave a review"} variant="secondary" icon={<IoStarOutline />} iconPosition="left" />
+          </Link>
+        )}
         <ReportLink
           draft={{
             context: "rental",
-            listingTitle: "Sony A7R IV 61.0MP Full-frame Camera",
-            accusedName: "Arpan Sharma",
-            accusedId: "u-arpan",
-            rentalId: "RA-88421",
+            listingTitle: rental.listingTitle,
+            listingId: rental.listingId,
+            accusedName: peerName,
+            accusedId: peerId,
+            rentalId: rental.id,
           }}
           btnText="Report an issue"
+          variant="lean"
           widthFill
         />
 
         <div className="flex gap-x-2 text-sm text-muted">
-          <IoShieldCheckmarkOutline className="size-4 text-primary shrink-0 mt-0.5" />
-          SafeReturn protection active. We'll verify the condition upon return.
+          <IoShieldCheckmarkOutline className="size-4 text-success shrink-0 mt-0.5" />
+          {rental.escrowNote || "RAP holds the commitment fee until the rental is completed."}
         </div>
       </RaCard>
 
-      <div id="meetup-map">
-        <RaMapView center={meetup} />
-      </div>
+      {hasMap && (
+        <RaMapView center={{ lat: rental.meetupLatitude as number, lng: rental.meetupLongitude as number, label: rental.meetupLocation }} />
+      )}
     </div>
   )
 }

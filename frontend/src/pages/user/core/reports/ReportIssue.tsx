@@ -7,11 +7,9 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import RaMediaUpload, { type MediaFile } from "../../../../components/upload/RaMediaUpload"
 import { REPORT_CONTEXTS, REPORT_REASONS, type ReportContext } from "../../../../data/reports"
-import { useAdminStore } from "../../../../store/adminStore"
-import { useAccountStore } from "../../../../store/accountStore"
-import { useAuthStore } from "../../../../store/authStore"
 import { raToast } from "../../../../lib/raToast"
 import { selectClass } from "../../../../components/admin/adminUi"
+import { useSubmitReport } from "../../../../hooks/queries/useReports"
 
 function asContext(value: string | null): ReportContext {
   return REPORT_CONTEXTS.includes(value as ReportContext) ? (value as ReportContext) : "listing"
@@ -20,26 +18,15 @@ function asContext(value: string | null): ReportContext {
 function ReportIssue() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
+  const submitReport = useSubmitReport()
   const context = asContext(params.get("context"))
   const reasons = REPORT_REASONS[context]
   const listingTitle = params.get("listingTitle") || "Listing"
-  const listingIdParam = params.get("listingId")
+  const listingId = params.get("listingId") || undefined
   const accusedName = params.get("accusedName") || "User"
-  const accusedIdParam = params.get("accusedId")
-  const rentalId = params.get("rentalId")
+  const accusedId = params.get("accusedId") || undefined
+  const rentalId = params.get("rentalId") || undefined
   const presetReason = params.get("reason")
-
-  const listings = useAdminStore((s) => s.listings)
-  const users = useAdminStore((s) => s.users)
-  const submitReport = useAdminStore((s) => s.submitReport)
-  const authUserId = useAuthStore((s) => s.userId)
-  const reporterName = useAccountStore((s) => s.fullName)
-
-  const listing = listings.find((item) => String(item.id) === listingIdParam)
-    || listings.find((item) => item.title.toLowerCase() === listingTitle.toLowerCase())
-    || listings.find((item) => item.title.toLowerCase().includes(listingTitle.toLowerCase().slice(0, 12)))
-  const accused = users.find((item) => item.id === accusedIdParam)
-    || users.find((item) => item.fullName.toLowerCase() === accusedName.toLowerCase())
 
   const [reason, setReason] = useState(presetReason && reasons.includes(presetReason) ? presetReason : reasons[0])
   const [detail, setDetail] = useState("")
@@ -47,11 +34,12 @@ function ReportIssue() {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const summary = useMemo(() => ({
-    listingTitle: listing?.title || listingTitle,
-    listingId: listing?.id ?? (Number(listingIdParam) || listings[0]?.id || 1),
-    accusedName: accused?.fullName || accusedName,
-    accusedId: accused?.id || accusedIdParam || "u-unknown",
-  }), [listing, listingTitle, listingIdParam, listings, accused, accusedName, accusedIdParam])
+    listingTitle,
+    listingId,
+    accusedName,
+    accusedId,
+    rentalId,
+  }), [listingTitle, listingId, accusedName, accusedId, rentalId])
 
   return (
     <RaContainerLG>
@@ -64,14 +52,14 @@ function ReportIssue() {
           <div>
             <div className="text-xl md:text-2xl font-bold">Report an issue</div>
             <div className="text-sm md:text-base font-light text-muted">
-              Trust and safety will review this with your proof. Do not include private chat.
+              Trust and safety will review this with your proof.
             </div>
           </div>
 
           <RaCard round="round" styleClass="flex flex-col gap-2 text-sm">
-            <div className="flex justify-between gap-3"><span className="text-muted">Listing</span><span className="text-right font-medium">{summary.listingTitle} (#{summary.listingId})</span></div>
+            <div className="flex justify-between gap-3"><span className="text-muted">Listing</span><span className="text-right font-medium">{summary.listingTitle}</span></div>
             <div className="flex justify-between gap-3"><span className="text-muted">Reported user</span><span className="font-medium">{summary.accusedName}</span></div>
-            {rentalId && <div className="flex justify-between gap-3"><span className="text-muted">Booking</span><span className="font-medium">{rentalId}</span></div>}
+            {summary.rentalId && <div className="flex justify-between gap-3"><span className="text-muted">Booking</span><span className="font-medium">{summary.rentalId}</span></div>}
           </RaCard>
 
           <form
@@ -85,24 +73,24 @@ function ReportIssue() {
                 setErrors(next)
                 return
               }
-              const id = submitReport({
-                listingId: summary.listingId,
-                listingTitle: summary.listingTitle,
-                reporterId: authUserId || "u-ram",
-                reporterName: reporterName || "Ram Rai",
-                accusedId: summary.accusedId,
-                accusedName: summary.accusedName,
-                rentalId: rentalId || null,
-                reason,
-                detail: detail.trim(),
-                proofs: proofs.map((item) => ({
-                  type: item.file.type.startsWith("video/") ? "video" : "image",
-                  url: item.url,
-                  label: item.file.name,
-                })),
-              })
-              raToast.success("Report submitted")
-              navigate(`/user/reports/${id}`)
+              submitReport.mutate(
+                {
+                  context,
+                  reason,
+                  detail: detail.trim(),
+                  listingId: summary.listingId,
+                  accusedId: summary.accusedId,
+                  rentalId: summary.rentalId,
+                  files: proofs.map((item) => item.file),
+                },
+                {
+                  onSuccess: (report) => {
+                    raToast.success("Report submitted")
+                    navigate(`/user/reports/${report.id}`)
+                  },
+                  onError: (error) => raToast.fromError(error, "Could not submit report"),
+                },
+              )
             }}
           >
             <label className="flex flex-col gap-1 text-sm font-medium">
@@ -129,7 +117,7 @@ function ReportIssue() {
             </label>
             <RaMediaUpload heading="Add photo or video proof" onChange={(files) => { setProofs(files); setErrors((prev) => ({ ...prev, proofs: "" })) }} />
             {errors.proofs && <span className="text-danger text-xs">{errors.proofs}</span>}
-            <RaButton type="submit" btnText="Submit report" />
+            <RaButton type="submit" btnText={submitReport.isPending ? "Submitting…" : "Submit report"} disabled={submitReport.isPending} />
           </form>
         </div>
       </RaContainerPadding>

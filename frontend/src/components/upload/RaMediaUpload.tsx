@@ -15,7 +15,7 @@ interface RaMediaUploadProps {
 }
 
 function RaMediaUpload({
-  accept = "image/*,video/mp4,video/quicktime",
+  accept = "image/*,video/*",
   onChange,
   onAdd,
   heading = "Upload Proof",
@@ -71,7 +71,7 @@ function RaMediaUpload({
       >
         <IoAdd className="size-8 mx-auto text-primary" />
         <div className="font-semibold mt-2">{heading}</div>
-        <div className="text-sm text-muted">Supports JPG, PNG, MOV, MP4</div>
+        <div className="text-sm text-muted">Supports photos and videos up to 100 MB each</div>
       </button>
 
       {items.length > 0 && (

@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom"
+import { Outlet } from "react-router-dom"
 import AdminShell from "../../components/admin/AdminShell"
 import RequireAuth from "../../components/auth/RequireAuth"
 

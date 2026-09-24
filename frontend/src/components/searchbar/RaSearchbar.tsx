@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { IoArrowForward, IoSearchOutline } from "react-icons/io5"
-import { searchCatalog } from "../../data/catalog"
+import { useListings } from "../../hooks/queries/useListings"
+import { listingCover } from "../../types/listing.types"
 
 interface RaSearchBarProps {
   placeholderText?: string
@@ -38,9 +39,15 @@ const RaSearchBar = ({
     return () => document.removeEventListener("mousedown", close)
   }, [])
 
-  const matches = useMemo(() => searchCatalog(query), [query])
-  const preview = matches.slice(0, 6)
-  const showList = suggestions && open && query.trim().length > 0
+  const matches = useListings({
+    q: query.trim(),
+    size: 8,
+    sort: "newest",
+    enabled: suggestions && open && query.trim().length > 1,
+  })
+  const items = matches.data?.items ?? []
+  const preview = items.slice(0, 6)
+  const showList = suggestions && open && query.trim().length > 1
 
   const goSearch = () => {
     const q = query.trim()
@@ -80,25 +87,25 @@ const RaSearchBar = ({
               {preview.map((item) => (
                 <Link
                   key={item.id}
-                  to="/user/listing"
+                  to={`/user/listing/${item.id}`}
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-3 px-4 py-2 hover:bg-surface"
                 >
-                  <img src={item.image} alt="" className="size-10 rounded-lg object-cover" />
+                  <img src={listingCover(item)} alt="" className="size-10 rounded-lg object-cover" />
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-sm truncate">{item.title}</div>
                     <div className="text-xs text-muted truncate">{item.location}</div>
                   </div>
-                  <div className="text-sm font-bold text-primary shrink-0">Nrs. {item.rate}</div>
+                  <div className="text-sm font-bold text-primary shrink-0">Nrs. {item.dailyRate}</div>
                 </Link>
               ))}
-              {matches.length >= 6 && (
+              {(matches.data?.total ?? 0) >= 6 && (
                 <button
                   type="button"
                   onClick={goSearch}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-primary border-t border-gray-100 cursor-pointer hover:bg-surface"
                 >
-                  View all {matches.length} results <IoArrowForward />
+                  View all {matches.data?.total} results <IoArrowForward />
                 </button>
               )}
             </>

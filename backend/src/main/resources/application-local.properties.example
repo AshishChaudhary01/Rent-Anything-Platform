@@ -14,3 +14,10 @@
 # Gmail SMTP app password for OTP / verification mail
 # EMAIL_USERNAME=
 # EMAIL_PASSWORD=
+
+# eSewa sandbox uses public EPAYTEST credentials by default (no real money).
+# Optional override: ESEWA_SECRET= (do not commit live merchant secrets)
+
+# Khalti sandbox: create a free test merchant at https://test-admin.khalti.com
+# and paste live_secret_key here. Test logins: 9800000000, MPIN 1111, OTP 987654.
+# KHALTI_SECRET=

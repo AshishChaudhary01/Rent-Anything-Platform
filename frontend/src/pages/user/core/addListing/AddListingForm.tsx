@@ -54,12 +54,13 @@ function AddListingForm({
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => {
               const Icon = cat.icon
-              const active = value.category === cat.name
+              const slug = cat.path.split("/").pop() || ""
+              const active = value.category === slug
               return (
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => set({ category: cat.name })}
+                  onClick={() => set({ category: slug })}
                   className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm border cursor-pointer ${
                     active ? "bg-primary text-white border-primary" : "bg-white border-gray-200 text-muted"
                   }`}
@@ -112,8 +113,8 @@ function AddListingForm({
         </div>
         <LocationPicker
           mapClass="h-48"
-          value={value.location ? { address: value.location, lat: 0, lng: 0 } : null}
-          onChange={(loc) => set({ location: loc.address })}
+          value={value.location ? { address: value.location, lat: value.latitude || 0, lng: value.longitude || 0 } : null}
+          onChange={(loc) => set({ location: loc.address, latitude: loc.lat, longitude: loc.lng })}
         />
       </div>
     </div>

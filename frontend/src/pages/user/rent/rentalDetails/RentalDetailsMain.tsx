@@ -1,76 +1,89 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { IoArrowBackOutline, IoStar } from "react-icons/io5"
+import { IoArrowBackOutline, IoCalendarOutline } from "react-icons/io5"
 import RaBadge from "../../../../components/badge/RaBadge"
 import RaCard from "../../../../components/card/RaCard"
 import MediaGallery, { type MediaItem } from "../../../../components/mediaGallery/MediaGallery"
 import ChatLink from "../../core/chat/ChatLink"
-import { chatWithArpan } from "../../core/chat/chatData"
 import ReportLink from "../../../../components/report/ReportLink"
-import { backpack01, ladder01, profile01, tent01, tools01 } from "../../../../utils/images"
+import type { Rental } from "../../../../types/rental.types"
+import type { Listing } from "../../../../types/listing.types"
 
-const rentalMedia: MediaItem[] = [
-  { type: "image", url: tools01 },
-  { type: "image", url: tent01 },
-  { type: "image", url: backpack01 },
-  { type: "image", url: ladder01 },
-  { type: "image", url: tools01 },
-]
+function statusLabel(status: Rental["status"]) {
+  if (status === "ACTIVE") return "Active rental"
+  if (status === "PAID") return "Paid — meetup pending"
+  if (status === "PENDING_PAYMENT") return "Awaiting payment"
+  return status
+}
 
-function RentalDetailsMain() {
+function RentalDetailsMain({
+  rental,
+  listing,
+}: {
+  rental: Rental
+  listing?: Listing
+}) {
   const [note, setNote] = useState("")
+  const peerName = rental.owner ? rental.renterName : rental.ownerName
+  const peerId = rental.owner ? rental.renterId : rental.ownerId
+  const backTo = rental.owner ? `/user/request-details/${rental.id}` : "/user/my-rentals"
+  const media: MediaItem[] = listing?.media.map((item) => ({
+    type: item.type === "video" ? "video" : "image",
+    url: item.url,
+  })) ?? (rental.listingImage ? [{ type: "image", url: rental.listingImage }] : [])
 
   return (
     <div className="flex flex-col gap-y-4">
-      <Link to="/user/my-rentals" className="flex items-center gap-x-1 text-muted text-sm">
+      <Link to={backTo} className="flex items-center gap-x-1 text-muted text-sm">
         <IoArrowBackOutline className="size-4" />
         Back
       </Link>
 
       <div className="flex items-center gap-x-3">
-        <RaBadge badgeText="Active Rental" size="sm" />
-        <div className="text-sm text-muted">Rental ID: #RA-88421</div>
+        <RaBadge badgeText={statusLabel(rental.status)} size="sm" />
+        <div className="text-sm text-muted flex items-center gap-1">
+          <IoCalendarOutline className="size-4" />
+          {rental.startDate} – {rental.endDate}
+        </div>
       </div>
 
-      <MediaGallery media={rentalMedia} />
+      {media.length > 0 && <MediaGallery media={media} />}
 
       <div className="flex items-start justify-between gap-3">
-        <div className="text-xl md:text-2xl font-bold">Sony A7R IV 61.0MP Full-frame Camera</div>
+        <div>
+          <div className="text-xl md:text-2xl font-bold">{rental.listingTitle}</div>
+          <Link to={`/user/people/${peerId}`} className="text-sm text-primary">
+            {rental.owner ? `Renter: ${peerName}` : `Owner: ${peerName}`}
+          </Link>
+        </div>
         <ReportLink
           draft={{
             context: "rental",
-            listingTitle: "Sony A7R IV 61.0MP Full-frame Camera",
-            accusedName: "Arpan Sharma",
-            accusedId: "u-arpan",
-            rentalId: "RA-88421",
+            listingTitle: rental.listingTitle,
+            listingId: rental.listingId,
+            accusedName: peerName,
+            accusedId: peerId,
+            rentalId: rental.id,
           }}
           btnText="Report issue"
         />
       </div>
-      <p className="font-light text-muted">
-        High-resolution mirrorless camera paired with a 24-70mm f/2.8 GM lens. Perfect for commercial shoots, landscapes, and professional portraiture. Includes 2 batteries and a 128GB UHS-II card.
-      </p>
+      {listing?.description && (
+        <p className="font-light text-muted whitespace-pre-wrap">{listing.description}</p>
+      )}
 
-      <RaCard round="round" styleClass="flex flex-col gap-y-3">
-        <div className="flex items-center gap-x-3">
-          <img src={profile01} alt="Owner" className="size-10 rounded-full object-cover" />
-          <div>
-            <div className="font-semibold">Message Arpan Sharma</div>
-            <div className="flex items-center gap-x-1 text-sm text-muted">
-              <IoStar className="size-3 text-yellow-400" />
-              Typically replies in 5 mins
-            </div>
-          </div>
-        </div>
+      <RaCard round="round" bg="accent" styleClass="flex flex-col gap-y-3">
+        <div className="font-semibold">Message {peerName}</div>
         <div className="flex gap-2 items-end">
           <input
-            className="flex-1 bg-surface border border-muted/20 p-3 rounded-full outline-0"
+            className="flex-1 bg-white border border-muted/20 p-3 rounded-full outline-0"
             placeholder="Ask about the item..."
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
           <ChatLink
-            context={{ ...chatWithArpan, draft: note || "Ask about the item..." }}
+            rentalId={rental.id}
+            draft={note || "Ask about the item..."}
             btnText="Send"
             size="sm"
             widthFill={false}

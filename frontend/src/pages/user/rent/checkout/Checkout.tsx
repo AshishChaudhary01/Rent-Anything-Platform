@@ -1,22 +1,76 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { IoCalendarOutline, IoCardOutline, IoLocationOutline, IoTimeOutline } from "react-icons/io5"
+import { useEffect, useState } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { IoCalendarOutline, IoCardOutline, IoLocationOutline, IoShieldCheckmarkOutline } from "react-icons/io5"
 import RaContainerLG from "../../../../components/container/RaContainerLG"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import RaCard from "../../../../components/card/RaCard"
 import Divider from "../../../../components/divider/Divider"
 import ReturnFlowHeader from "../ReturnFlowHeader"
-import OwnerReturnNav from "../OwnerReturnNav"
+import RentHint from "../RentHint"
+import RentFlowLeave from "../RentFlowLeave"
 import { RENT_STEPS } from "../returnSteps"
-import { Link } from "react-router-dom"
-import { tools01 } from "../../../../utils/images"
 import { raToast } from "../../../../lib/raToast"
+import { useCancelRental, usePaymentConfig, useRental } from "../../../../hooks/queries/useRentals"
+import RaButton from "../../../../components/button/RaButton"
+import { initiatePayment, submitEsewaForm } from "../../../../services/rental.service"
+import { esewa } from "../../../../utils/images"
 
 function Checkout() {
   const navigate = useNavigate()
-  const [method, setMethod] = useState(
-    initialLinkedWallets.find((w) => w.isDefault)?.id ?? initialLinkedWallets[0]?.id ?? ""
-  )
+  const [params] = useSearchParams()
+  const rentalId = params.get("rentalId") || ""
+  const failed = params.get("failed")
+  const { data: rental, isPending } = useRental(rentalId)
+  const { data: config } = usePaymentConfig()
+  const cancelRental = useCancelRental()
+  const [paying, setPaying] = useState(false)
+
+  useEffect(() => {
+    if (!failed) return
+    const key = `pay-fail-toast-${rentalId}`
+    if (sessionStorage.getItem(key)) return
+    sessionStorage.setItem(key, "1")
+    raToast.error("Payment was cancelled or failed")
+  }, [failed, rentalId])
+
+  useEffect(() => {
+    if (!rental) return
+    if (rental.status === "REQUESTED") {
+      navigate(`/user/rent/waiting?rentalId=${rental.id}`, { replace: true })
+      return
+    }
+    if (rental.status === "PAID" || rental.status === "ACTIVE") {
+      navigate(`/user/rent/confirmation?rentalId=${rental.id}`, { replace: true })
+    }
+  }, [rental, navigate])
+
+  const pay = async () => {
+    if (!rental) return
+    if (!config?.esewa) {
+      raToast.error("eSewa is not available right now")
+      return
+    }
+    setPaying(true)
+    try {
+      const initiated = await initiatePayment(rental.id, { gateway: "ESEWA" })
+      if (initiated.formAction && initiated.formFields) {
+        submitEsewaForm(initiated.formAction, initiated.formFields)
+        return
+      }
+      raToast.error("Could not start eSewa payment")
+    } catch (error) {
+      raToast.fromError(error, "Could not start payment")
+    } finally {
+      setPaying(false)
+    }
+  }
+
+  if (!rentalId) {
+    return <p className="px-6 py-10 text-muted">Missing rental. Start from a listing.</p>
+  }
+  if (isPending || !rental) {
+    return <p className="px-6 py-10 text-muted">Loading checkout…</p>
+  }
 
   return (
     <RaContainerLG>
@@ -25,80 +79,86 @@ function Checkout() {
           <ReturnFlowHeader current={1} title="Rent Item" steps={RENT_STEPS} />
 
           <div>
-            <div className="text-xl font-bold">Checkout</div>
+            <div className="text-xl font-bold">Pay commitment</div>
             <div className="text-sm md:text-base font-light text-muted">
-              Pay a small commitment fee now. The rest is due at pickup.
+              Pay a small commitment fee. This builds trust between renter and owner.
             </div>
           </div>
 
+          <RentHint icon={<IoShieldCheckmarkOutline className="size-6" />} title="Held until the rental is done" tone="warning">
+            RAP holds this fee until return QR. It is then deducted from the rental total before commission. Daily rent and deposit are due at pickup.
+          </RentHint>
+
           <RaCard round="round" styleClass="flex flex-col gap-y-3">
             <div className="flex gap-x-4">
-              <img src={tools01} alt="Listing" className="size-16 rounded-lg object-cover" />
+              {rental.listingImage ? (
+                <img src={rental.listingImage} alt="" className="size-16 rounded-lg object-cover" />
+              ) : (
+                <div className="size-16 rounded-lg bg-surface" />
+              )}
               <div>
-                <div className="font-semibold">Sony A7R IV Professional Kit</div>
-                <div className="text-sm text-muted">Nrs. 999 / day</div>
+                <div className="font-semibold">{rental.listingTitle}</div>
+                <div className="text-sm text-muted">Nrs. {Number(rental.dailyRate).toLocaleString()} / day</div>
               </div>
             </div>
             <Divider />
             <div className="flex justify-between">
               <div className="flex gap-x-2 text-muted"><IoCalendarOutline className="size-4 text-primary" /> Dates</div>
-              <div className="font-medium">Oct 24 - Oct 27</div>
-            </div>
-            <div className="flex justify-between">
-              <div className="flex gap-x-2 text-muted"><IoTimeOutline className="size-4 text-primary" /> Meetup</div>
-              <div className="font-medium">10:30 AM</div>
+              <div className="font-medium">{rental.startDate} – {rental.endDate}</div>
             </div>
             <div className="flex justify-between">
               <div className="flex gap-x-2 text-muted"><IoLocationOutline className="size-4 text-primary" /> Location</div>
-              <div className="font-medium">Lazimpat, Kathmandu</div>
+              <div className="font-medium text-right max-w-[60%]">{rental.meetupLocation}</div>
             </div>
           </RaCard>
 
           <RaCard round="round" styleClass="flex flex-col gap-y-3">
             <div className="flex justify-between text-muted">
               <span>Commitment fee</span>
-              <span className="font-bold text-inherit">Nrs. 100</span>
+              <span className="font-bold text-inherit">Nrs. {Number(rental.commitmentFee).toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-lg font-semibold">
               <span>Pay now</span>
-              <span className="text-primary">Nrs. 100</span>
+              <span className="text-primary">Nrs. {Number(rental.commitmentFee).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-muted">
+              <span>Due at pickup (after commitment credit + deposit)</span>
+              <span className="font-semibold text-inherit">Nrs. {Number(rental.payLater).toLocaleString()}</span>
             </div>
           </RaCard>
 
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 font-semibold">
+          <RaCard round="round" styleClass="flex items-center gap-3">
+            <img src={esewa} alt="" className="size-10 rounded-full object-cover" />
+            <div className="min-w-0">
+              <div className="font-semibold flex items-center gap-2">
                 <IoCardOutline className="size-5 text-primary" />
-                Payment method
+                Pay with eSewa
               </div>
-              <Link to="/user/payment-methods" className="text-sm text-primary">
-                Manage
-              </Link>
+              <div className="text-sm text-muted">Opens eSewa to complete this payment.</div>
             </div>
-            {initialLinkedWallets.map((wallet) => (
-              <button
-                key={wallet.id}
-                type="button"
-                onClick={() => setMethod(wallet.id)}
-                className={`flex items-center gap-3 rounded-2xl p-4 bg-white border cursor-pointer ${method === wallet.id ? "border-primary" : "border-gray-200"}`}
-              >
-                <img src={wallet.logo} alt="" className="size-10 rounded-full object-cover" />
-                <div className="text-left min-w-0">
-                  <div className="font-semibold">{wallet.label}</div>
-                  <div className="text-sm text-muted">{wallet.accountHint}</div>
-                </div>
-              </button>
-            ))}
-          </div>
+          </RaCard>
 
-          <OwnerReturnNav
-            onPrev={() => navigate("/user/rent/request-to-rent")}
-            onNext={() => {
-              raToast.success("Payment successful")
-              navigate("/user/rent/confirmation", { state: { paid: true } })
-            }}
-            nextDisabled={!method}
-            nextText="Pay"
+          <RaButton
+            type="button"
+            btnText={paying ? "Redirecting to eSewa…" : `Pay Nrs. ${Number(rental.commitmentFee).toLocaleString()} with eSewa`}
+            disabled={!config?.esewa || paying}
+            clickFunc={() => void pay()}
+          />
+          <RentFlowLeave />
+          <RaButton
+            type="button"
+            btnText={cancelRental.isPending ? "Cancelling…" : "Cancel this request"}
+            variant="danger"
+            disabled={cancelRental.isPending}
+            clickFunc={() =>
+              cancelRental.mutate(rental.id, {
+                onSuccess: () => {
+                  raToast.success("Request cancelled")
+                  navigate("/user/my-rentals")
+                },
+                onError: (error) => raToast.fromError(error, "Could not cancel"),
+              })
+            }
           />
         </div>
       </RaContainerPadding>

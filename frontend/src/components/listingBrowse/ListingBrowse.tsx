@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react"
 import RaSearchBar from "../searchbar/RaSearchbar"
 import RaItemPreviewCard from "../card/RaItemPreviewCard"
 import RaButton from "../button/RaButton"
-import { PAGE_SIZE, filterByPrice, sortCatalog, type CatalogItem } from "../../data/catalog"
+import { PAGE_SIZE, filterByPrice, sortCatalog } from "../../data/catalog"
 import { categories } from "../categoryBar/CategoryBar"
+import type { ListingCard } from "../../types/listing.types"
 
 const selectClass = "bg-surface border border-gray-300 rounded-full px-4 py-2 text-sm outline-none"
 
@@ -16,7 +17,7 @@ function ListingBrowse({
 }: {
   title: string
   subtitle?: string
-  items: CatalogItem[]
+  items: ListingCard[]
   showCategoryFilter?: boolean
   initialQuery?: string
 }) {

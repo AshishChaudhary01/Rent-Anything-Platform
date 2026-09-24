@@ -3,40 +3,60 @@ import { IoClose } from "react-icons/io5"
 import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import ChatLink from "../chat/ChatLink"
-import { chatWithOwner } from "../chat/chatData"
 import { raToast } from "../../../../lib/raToast"
-
-const detailsPath = "/user/rental-details"
+import { useCancelRental } from "../../../../hooks/queries/useRentals"
 
 export type PendingRental = {
-  id: number
+  id: string | number
   image: string
   title: string
   status: string
+  rentalStatus?: string
 }
 
 function PendingRentalCard({ item }: { item: PendingRental }) {
+  const cancelRental = useCancelRental()
+  const code = item.rentalStatus || item.status
+  const paid = code === "PAID" || item.status.toLowerCase().includes("paid")
+  const waiting = code === "REQUESTED" || item.status.toLowerCase().includes("waiting")
+  const href = paid
+    ? `/user/rent/confirmation?rentalId=${item.id}`
+    : waiting
+      ? `/user/rent/waiting?rentalId=${item.id}`
+      : `/user/rent/checkout?rentalId=${item.id}`
+
   return (
-    <RaCard round="round" styleClass="flex gap-4 p-4!">
-      <Link to={detailsPath}>
+    <RaCard round="round" bg={waiting ? "warning" : paid ? "success" : "info"} styleClass="flex gap-4 p-4!">
+      <Link to={href}>
         <img src={item.image} alt={item.title} className="size-28 md:size-32 rounded-xl object-cover" />
       </Link>
       <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
-        <Link to={detailsPath}>
+        <Link to={href}>
           <div className="font-semibold text-base md:text-lg truncate">{item.title}</div>
           <div className="text-sm text-muted">{item.status}</div>
         </Link>
         <div className="flex gap-2 mt-3">
           <div className="flex-1">
-            <ChatLink
-              context={{ ...chatWithOwner, threadId: `pending-${item.id}`, listingTitle: item.title, listingImage: item.image }}
-              btnText="Chat"
-              size="sm"
-            />
+            <ChatLink rentalId={String(item.id)} btnText="Chat" size="sm" variant="outline" />
           </div>
-          <div className="flex-1">
-            <RaButton type="button" btnText="Cancel" size="sm" variant="outline" icon={<IoClose />} iconPosition="left" clickFunc={() => raToast.success("Request cancelled")} />
-          </div>
+          {!paid && (
+            <div className="flex-1">
+              <RaButton
+                type="button"
+                btnText="Cancel"
+                size="sm"
+                variant="danger"
+                icon={<IoClose />}
+                iconPosition="left"
+                clickFunc={() =>
+                  cancelRental.mutate(String(item.id), {
+                    onSuccess: () => raToast.success("Request cancelled"),
+                    onError: (error) => raToast.fromError(error, "Could not cancel"),
+                  })
+                }
+              />
+            </div>
+          )}
         </div>
       </div>
     </RaCard>

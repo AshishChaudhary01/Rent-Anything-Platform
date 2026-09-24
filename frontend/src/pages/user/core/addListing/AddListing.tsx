@@ -14,6 +14,8 @@ export type ListingForm = {
   rate: string
   deposit: string
   location: string
+  latitude: number | null
+  longitude: number | null
   media: MediaFile[]
 }
 
@@ -24,6 +26,8 @@ const emptyForm: ListingForm = {
   rate: "",
   deposit: "",
   location: "",
+  latitude: null,
+  longitude: null,
   media: [],
 }
 

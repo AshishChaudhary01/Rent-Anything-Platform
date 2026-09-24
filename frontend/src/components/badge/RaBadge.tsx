@@ -3,6 +3,8 @@ export interface IBadgeProps {
   variant?:
   | "primary"
   | "accent"
+  | "success"
+  | "warning"
   size?: "sm" | "md" | "lg"
   icon?: React.ReactElement;
   iconPosition?: "left" | "right";
@@ -13,6 +15,8 @@ export interface IBadgeProps {
 const variantStlyes = {
   primary: "bg-accent text-muted",
   accent: "bg-accent-secondary text-muted-secondary",
+  success: "bg-soft-success text-success",
+  warning: "bg-soft-warning text-warning",
 };
 
 const buttonSizes = {

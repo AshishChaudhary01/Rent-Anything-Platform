@@ -2,3 +2,40 @@ export const authKeys = {
   all: () => ["auth"] as const,
   currentUser: () => ["auth", "me"] as const,
 };
+
+export const listingKeys = {
+  all: () => ["listings"] as const,
+  browse: (params: object) => ["listings", "browse", params] as const,
+  mine: () => ["listings", "mine"] as const,
+  detail: (id: string) => ["listings", "detail", id] as const,
+};
+
+export const rentalKeys = {
+  all: () => ["rentals"] as const,
+  mine: () => ["rentals", "mine"] as const,
+  owned: () => ["rentals", "owned"] as const,
+  detail: (id: string) => ["rentals", "detail", id] as const,
+  config: () => ["rentals", "config"] as const,
+};
+
+export const reviewKeys = {
+  listing: (id: string) => ["reviews", "listing", id] as const,
+  user: (id: string, params?: object) => ["reviews", "user", id, params] as const,
+  profile: (id: string) => ["reviews", "profile", id] as const,
+  listings: (id: string, params?: object) => ["reviews", "listings", id, params] as const,
+};
+
+export const walletKeys = {
+  all: () => ["wallets"] as const,
+};
+
+export const chatKeys = {
+  all: () => ["chats"] as const,
+  detail: (id: string) => ["chats", "detail", id] as const,
+};
+
+export const reportKeys = {
+  all: () => ["reports"] as const,
+  mine: () => ["reports", "mine"] as const,
+  detail: (id: string) => ["reports", "detail", id] as const,
+};

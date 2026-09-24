@@ -19,11 +19,11 @@ function MediaGallery({ media, compact = false }: { media: MediaItem[]; compact?
 
   return (
     <div className="flex flex-col gap-3">
-      <div className={`relative w-full overflow-hidden rounded-2xl bg-black ${compact ? "aspect-4/3 max-h-80" : "aspect-4/3 md:aspect-16/10 max-h-[28rem]"}`}>
+      <div className={`relative w-full overflow-hidden rounded-2xl bg-gray-100 ${compact ? "h-72" : "h-[min(70vh,36rem)] min-h-80"}`}>
         {activeItem.type === "video" ? (
-          <video src={activeItem.url} controls className="size-full object-cover" />
+          <video src={activeItem.url} controls className="size-full object-contain" />
         ) : (
-          <img src={activeItem.url} alt="" className="size-full object-cover" />
+          <img src={activeItem.url} alt="" className="size-full object-contain" />
         )}
         {total > 1 && (
           <>
@@ -57,7 +57,7 @@ function MediaGallery({ media, compact = false }: { media: MediaItem[]; compact?
               type="button"
               onClick={() => setActive(i)}
               className={`relative shrink-0 overflow-hidden rounded-xl border-2 cursor-pointer ${
-                compact ? "size-16" : "size-16 md:size-20"
+                compact ? "size-16" : "size-20 md:size-24"
               } ${active === i ? "border-primary" : "border-transparent opacity-80 hover:opacity-100"}`}
               aria-label={`Media ${i + 1}`}
             >

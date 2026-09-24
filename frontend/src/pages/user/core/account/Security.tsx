@@ -36,7 +36,9 @@ function Security() {
 
           <ContactOtpChange
             current={email}
-            onVerified={(value) => saveContact({ email: value })}
+            onVerified={async (value) => {
+              await saveContact({ email: value })
+            }}
           />
 
           <form

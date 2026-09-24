@@ -40,8 +40,7 @@ function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
     return <div className="text-muted">User not found. <Link to="/admin/users" className="text-primary">Back</Link></div>
   }
 
-  const items = kind === "listings" ? listingItems : rentalItems
-  const { current } = paginate(items, page)
+  const { current } = kind === "listings" ? paginate(listingItems, page) : paginate(rentalItems, page)
   const listingSlice = paginate(listingItems, page).slice
   const rentalSlice = paginate(rentalItems, page).slice
   const title = kind === "listings" ? "Listings" : "Rentals"
@@ -110,9 +109,9 @@ function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
                   </Link>
                 </RaCard>
               ))}
-        {items.length === 0 && <div className="text-sm text-muted">Nothing matches that search.</div>}
+        {(kind === "listings" ? listingItems : rentalItems).length === 0 && <div className="text-sm text-muted">Nothing matches that search.</div>}
       </div>
-      <AdminPagination page={current} total={items.length} onPage={setPage} />
+      <AdminPagination page={current} total={(kind === "listings" ? listingItems : rentalItems).length} onPage={setPage} />
     </div>
   )
 }

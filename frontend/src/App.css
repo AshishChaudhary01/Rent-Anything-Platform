@@ -13,6 +13,12 @@
    --color-bg: #f8f9ff;
    --color-danger: #DC2626;
    --color-soft-danger: #FEE2E2;
+   --color-success: #047857;
+   --color-soft-success: #D1FAE5;
+   --color-warning: #B45309;
+   --color-soft-warning: #FEF3C7;
+   --color-info: #1D4ED8;
+   --color-soft-info: #DBEAFE;
    --gradient-primary: linear-gradient(135deg, #0960AC 0%, #5d9cec 100%);
    --transition: 0.3s ease;
 }
@@ -32,4 +38,12 @@ body {
 
 .leaflet-container {
    z-index: 0;
+}
+
+[data-sonner-toast] [data-title],
+[data-sonner-toast] [data-description] {
+   color: inherit;
+   opacity: 1;
+   font-size: 0.875rem;
+   line-height: 1.25rem;
 }

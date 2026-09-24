@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { IoCardOutline, IoExitOutline, IoFlagOutline, IoLockClosedOutline, IoPersonOutline, IoShieldCheckmarkOutline } from "react-icons/io5";
+import { IoCardOutline, IoExitOutline, IoFlagOutline, IoLockClosedOutline, IoPersonOutline, IoShieldCheckmarkOutline, IoStarOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import { useLogout } from "../../hooks/queries/useAccount";
+import { useAuthStore } from "../../store/authStore";
 
 interface IProfileDropdownProps {
   username: string;
@@ -16,6 +17,7 @@ const ProfileDropdown = ({
 }: IProfileDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { mutate: logout } = useLogout();
+  const userId = useAuthStore((s) => s.userId);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +47,13 @@ const ProfileDropdown = ({
       icon: <IoPersonOutline className="size-5" />,
       path: "/user/profile",
     },
+    ...(userId
+      ? [{
+          label: "Public profile",
+          icon: <IoStarOutline className="size-5" />,
+          path: `/user/people/${userId}`,
+        }]
+      : []),
     {
       label: "Payment Methods",
       icon: <IoCardOutline className="size-5" />,

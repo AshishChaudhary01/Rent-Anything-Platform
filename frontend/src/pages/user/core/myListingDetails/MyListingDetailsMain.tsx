@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom"
 import { IoClose, IoPencilOutline } from "react-icons/io5"
 import RaBadge from "../../../../components/badge/RaBadge"
 import RaButton from "../../../../components/button/RaButton"
@@ -7,18 +6,30 @@ import RaBreadcrumb from "../../../../components/breadcrumb/RaBreadcrumb"
 import MediaGallery from "../../../../components/mediaGallery/MediaGallery"
 import RaMediaUpload, { type MediaFile } from "../../../../components/upload/RaMediaUpload"
 import ListingReview from "../../listing/main/ListingReview"
+import ListingActivityCalendar from "../../../../components/calendar/ListingActivityCalendar"
+import type { Listing } from "../../../../types/listing.types"
 import type { ListingDraft } from "./MyListingDetails"
 
 function MyListingDetailsMain({
   listing,
+  listingId,
+  activity,
   editing,
+  saving,
+  status,
+  busy,
   onChange,
   onEdit,
   onSave,
   onCancel,
 }: {
   listing: ListingDraft
+  listingId?: string
+  activity?: Listing["activity"]
   editing: boolean
+  saving?: boolean
+  status: ListingDraft["status"]
+  busy?: boolean
   onChange: (listing: ListingDraft) => void
   onEdit: () => void
   onSave: () => void
@@ -32,6 +43,7 @@ function MyListingDetailsMain({
         ...files.map((f) => ({
           type: (f.file.type.startsWith("video/") ? "video" : "image") as "image" | "video",
           url: f.url,
+          file: f.file,
         })),
       ],
     })
@@ -46,13 +58,17 @@ function MyListingDetailsMain({
 
       {!editing && (
         <div className="flex items-center justify-between gap-3">
-          <RaBadge badgeText="Rented" size="sm" />
+          <RaBadge
+            badgeText={status === "AVAILABLE" ? "Available" : status === "RENTED" ? "Rented" : "Unavailable"}
+            size="sm"
+          />
           <RaButton
             type="button"
             btnText="Edit"
             size="sm"
             variant="outline"
             widthFill={false}
+            disabled={busy}
             icon={<IoPencilOutline />}
             iconPosition="left"
             clickFunc={onEdit}
@@ -64,8 +80,8 @@ function MyListingDetailsMain({
         <div className="flex justify-between gap-2">
           <span className="text-2xl font-bold text-muted">Edit</span>
           <div className="flex justify-end gap-2">
-            <RaButton type="button" btnText="Save" size="sm" widthFill={false} clickFunc={onSave} />
-            <RaButton type="button" btnText="Cancel" size="sm" variant="outline" widthFill={false} clickFunc={onCancel} />
+            <RaButton type="button" btnText={saving ? "Saving…" : "Save"} size="sm" widthFill={false} disabled={saving} clickFunc={onSave} />
+            <RaButton type="button" btnText="Cancel" size="sm" variant="outline" widthFill={false} disabled={saving} clickFunc={onCancel} />
           </div>
         </div>
       )}
@@ -76,12 +92,7 @@ function MyListingDetailsMain({
             <RaInput name="title" label="Title" value={listing.title} onChange={(e) => onChange({ ...listing, title: e.target.value })} />
           </div>
         ) : (
-          <>
-            <div className="text-xl md:text-2xl font-bold">{listing.title}</div>
-            <Link to={`/user/listing-requests?listing=${encodeURIComponent(listing.title)}`} className="shrink-0">
-              <RaButton type="button" btnText="View Requests" size="sm" widthFill={false} />
-            </Link>
-          </>
+          <div className="text-xl md:text-2xl font-bold">{listing.title}</div>
         )}
       </div>
 
@@ -126,7 +137,13 @@ function MyListingDetailsMain({
         <p className="font-light text-muted">{listing.description}</p>
       )}
 
-      {!editing && <ListingReview />}
+      {!editing && (
+        <div className="lg:hidden">
+          <ListingActivityCalendar windows={activity} title="Listing activity" compact />
+        </div>
+      )}
+
+      {!editing && <ListingReview listingId={listingId} />}
     </div>
   )
 }

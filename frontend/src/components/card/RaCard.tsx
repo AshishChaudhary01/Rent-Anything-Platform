@@ -3,7 +3,7 @@ import type React from "react";
 export interface ICardProps {
   children: React.ReactNode;
   shadow?: "xs" | "sm" | "md" | "lg" | "none";
-  bg?: "white" | "accent" | "accentSecondary" | "surface";
+  bg?: "white" | "accent" | "accentSecondary" | "surface" | "success" | "warning" | "info" | "danger";
   color?: "muted" | "muted-secondary";
   round?: "none" | "round" | "rounder" | "full";
   styleClass?: string;
@@ -14,6 +14,10 @@ const backgroundStyles = {
   surface: "bg-surface",
   accent: "bg-accent",
   accentSecondary: "bg-accent-secondary",
+  success: "bg-soft-success",
+  warning: "bg-soft-warning",
+  info: "bg-soft-info",
+  danger: "bg-soft-danger",
 };
 
 const roundedStyles = {

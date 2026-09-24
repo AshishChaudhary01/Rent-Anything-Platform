@@ -2,12 +2,13 @@ package com.RAP.backend;
 
 import com.RAP.backend.config.CloudinaryProperties;
 import com.RAP.backend.config.JwtProperties;
+import com.RAP.backend.config.PaymentProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
-@EnableConfigurationProperties({JwtProperties.class, CloudinaryProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, CloudinaryProperties.class, PaymentProperties.class})
 public class BackendApplication {
 
 	public static void main(String[] args) {

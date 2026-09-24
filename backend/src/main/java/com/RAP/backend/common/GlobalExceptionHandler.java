@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -47,6 +48,16 @@ public class GlobalExceptionHandler {
 				.map(entry -> entry.getKey() + ": " + entry.getValue())
 				.collect(Collectors.joining("; "));
 		return ResponseEntity.badRequest().body(new ApiError("Validation failed", details, fields));
+	}
+
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ResponseEntity<ApiError> handleUploadSize(MaxUploadSizeExceededException ex) {
+		return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE)
+				.body(new ApiError(
+						"That file is too large",
+						"Use a photo or a video under 100 MB.",
+						Map.of()
+				));
 	}
 
 	@ExceptionHandler(Exception.class)

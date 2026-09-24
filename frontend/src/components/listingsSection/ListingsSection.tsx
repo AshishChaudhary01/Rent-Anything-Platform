@@ -11,7 +11,7 @@ export interface IListingSectionProps {
 }
 
 interface ListingItem {
-  id: number;
+  id: string | number;
   title: string;
   rate: number;
   unit: string;

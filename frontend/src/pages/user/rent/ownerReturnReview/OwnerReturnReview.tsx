@@ -1,19 +1,23 @@
-import { useNavigate } from "react-router-dom"
-import { IoCalendarOutline, IoCubeOutline, IoImagesOutline, IoLocationOutline, IoPersonOutline, IoShieldCheckmarkOutline, IoTimeOutline } from "react-icons/io5"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { IoCalendarOutline, IoCubeOutline, IoLocationOutline, IoPersonOutline, IoShieldCheckmarkOutline, IoTimeOutline } from "react-icons/io5"
 import ChatLink from "../../core/chat/ChatLink"
-import { chatWithRenter } from "../../core/chat/chatData"
 import RaContainerLG from "../../../../components/container/RaContainerLG"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import RaCard from "../../../../components/card/RaCard"
 import ReturnFlowHeader from "../ReturnFlowHeader"
 import OwnerReturnNav from "../OwnerReturnNav"
 import { OWNER_RETURN_STEPS } from "../returnSteps"
-import { backpack01, profile01, tent01, tools01 } from "../../../../utils/images"
-
-const proofMedia = [tools01, tent01, backpack01]
+import { useRental } from "../../../../hooks/queries/useRentals"
 
 function OwnerReturnReview() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const rentalId = params.get("rentalId") || ""
+  const { data: rental, isPending } = useRental(rentalId)
+  const when = rental?.returnMeetupAt ? new Date(rental.returnMeetupAt) : null
+
+  if (!rentalId) return <p className="px-6 py-10 text-muted">Choose a rental first.</p>
+  if (isPending || !rental) return <p className="px-6 py-10 text-muted">Loading rental…</p>
 
   return (
     <RaContainerLG>
@@ -24,7 +28,7 @@ function OwnerReturnReview() {
           <div>
             <div className="text-xl font-bold">Review Return</div>
             <div className="text-sm md:text-base font-light text-muted">
-              Check item, renter, and meetup details before pickup.
+              Optional check before pickup. Skip if you already agree the item looks fine.
             </div>
           </div>
 
@@ -34,10 +38,10 @@ function OwnerReturnReview() {
               Listing
             </div>
             <div className="flex gap-x-4">
-              <img src={tools01} alt="Item" className="size-16 rounded-lg object-cover" />
+              <img src={rental.listingImage} alt="" className="size-16 rounded-lg object-cover" />
               <div>
-                <div className="font-semibold">Sony A7R IV Professional Kit</div>
-                <div className="text-sm text-muted">Nrs. 999 / day</div>
+                <div className="font-semibold">{rental.listingTitle}</div>
+                <div className="text-sm text-muted">Nrs. {Number(rental.dailyRate).toLocaleString()} / day</div>
               </div>
             </div>
           </RaCard>
@@ -48,12 +52,12 @@ function OwnerReturnReview() {
               Renter
             </div>
             <div className="flex items-center gap-x-3">
-              <img src={profile01} alt="Renter" className="size-10 rounded-full object-cover" />
+              {rental.renterAvatarUrl ? <img src={rental.renterAvatarUrl} alt="" className="size-10 rounded-full object-cover" /> : <div className="size-10 rounded-full bg-surface" />}
               <div className="flex-1">
-                <div className="font-semibold">Anish Sharma</div>
+                <div className="font-semibold">{rental.renterName}</div>
                 <div className="text-sm text-muted">Active renter</div>
               </div>
-              <ChatLink context={chatWithRenter} size="sm" widthFill={false} />
+              <ChatLink rentalId={rental.id} size="sm" widthFill={false} />
             </div>
           </RaCard>
 
@@ -64,28 +68,15 @@ function OwnerReturnReview() {
             </div>
             <div className="flex justify-between">
               <div className="flex gap-x-2 text-muted"><IoCalendarOutline className="size-4 text-primary" /> Date</div>
-              <div className="font-medium">Oct 27, 2023</div>
+              <div className="font-medium">{when ? when.toLocaleDateString() : "—"}</div>
             </div>
             <div className="flex justify-between">
               <div className="flex gap-x-2 text-muted"><IoTimeOutline className="size-4 text-primary" /> Time</div>
-              <div className="font-medium">10:30 AM</div>
+              <div className="font-medium">{when ? when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</div>
             </div>
             <div className="flex justify-between">
               <div className="flex gap-x-2 text-muted"><IoLocationOutline className="size-4 text-primary" /> Location</div>
-              <div className="font-medium">Lazimpat, Kathmandu</div>
-            </div>
-          </RaCard>
-
-          <RaCard round="round" styleClass="flex flex-col gap-y-3">
-            <div className="flex items-center gap-2 font-semibold">
-              <IoImagesOutline className="size-5 text-primary" />
-              Condition Summary
-            </div>
-            <div className="text-sm text-muted">Pre-return photos uploaded.</div>
-            <div className="grid grid-cols-3 gap-2">
-              {proofMedia.map((src) => (
-                <img key={src} src={src} alt="Condition" className="aspect-square rounded-xl object-cover" />
-              ))}
+              <div className="font-medium">{rental.returnMeetupLocation || rental.meetupLocation}</div>
             </div>
           </RaCard>
 
@@ -95,14 +86,15 @@ function OwnerReturnReview() {
               Safety Checklist
             </div>
             <ul className="list-disc pl-5 text-sm font-light text-muted space-y-1">
-              <li>Item condition matches uploaded proof.</li>
-              <li>Scan only after both of you agree the return is complete.</li>
+              <li>Item condition matches what you expect.</li>
+              <li>Scan QR only after both of you agree the return is complete.</li>
             </ul>
           </RaCard>
 
           <OwnerReturnNav
-            onPrev={() => navigate("/user/rent/return-schedule?role=owner")}
-            onNext={() => navigate("/user/rent/owner-return-pickup")}
+            onPrev={() => navigate(`/user/rent/return-schedule?rentalId=${rental.id}`)}
+            onNext={() => navigate(`/user/rent/return-meetup?rentalId=${rental.id}`)}
+            nextText="Skip to meetup"
           />
         </div>
       </RaContainerPadding>

@@ -7,9 +7,11 @@ import ForgotPassword from "../pages/auth/forgotPassword/ForgotPassword";
 import UserDashboard from "../pages/user/core/dashboard/UserDashboard";
 import Listing from "../pages/user/listing/Listing";
 import RequestToRent from "../pages/user/rent/requestToRent/RequestToRent";
+import RequestWaiting from "../pages/user/rent/requestWaiting/RequestWaiting";
 import Checkout from "../pages/user/rent/checkout/Checkout";
 import Meetup from "../pages/user/rent/meetup/Meetup";
 import Confirmation from "../pages/user/rent/confirmation/Confirmation";
+import PaymentCallback from "../pages/user/rent/checkout/PaymentCallback";
 import ConditionProof from "../pages/user/rent/conditionProof/ConditionProof";
 import ReturnSchedule from "../pages/user/rent/returnSchedule/ReturnSchedule";
 import ReturnMeetup from "../pages/user/rent/returnMeetup/ReturnMeetup";
@@ -32,6 +34,9 @@ import OwnerReturnReview from "../pages/user/rent/ownerReturnReview/OwnerReturnR
 import OwnerReturnPickup from "../pages/user/rent/ownerReturnPickup/OwnerReturnPickup";
 import RateRental from "../pages/user/rent/rateRental/RateRental";
 import Profile from "../pages/user/core/account/Profile";
+import PublicProfile from "../pages/user/core/publicProfile/PublicProfile";
+import PublicReviews from "../pages/user/core/publicProfile/PublicReviews";
+import PublicListings from "../pages/user/core/publicProfile/PublicListings";
 import PaymentMethods from "../pages/user/core/account/PaymentMethods";
 import Kyc from "../pages/user/core/account/Kyc";
 import Security from "../pages/user/core/account/Security";
@@ -101,6 +106,9 @@ const router = createBrowserRouter([
           { path: "search", element: <SearchResults /> },
           { path: "notifications", element: <Notifications /> },
           { path: "profile", element: <Profile /> },
+          { path: "people/:id", element: <PublicProfile /> },
+          { path: "people/:id/reviews", element: <PublicReviews /> },
+          { path: "people/:id/listings", element: <PublicListings /> },
           { path: "payment-methods", element: <PaymentMethods /> },
           { path: "kyc", element: <Kyc /> },
           { path: "security", element: <Security /> },
@@ -112,9 +120,9 @@ const router = createBrowserRouter([
         element: <UserFlowLayout />,
         children: [
           { path: "add-listing", element: <RequireTransactReady><AddListing /></RequireTransactReady> },
-          { path: "listing", element: <Listing /> },
+          { path: "listing/:id", element: <Listing /> },
+          { path: "my-listing-details/:id", element: <MyListingDetails /> },
           { path: "rental-details", element: <RentalDetails /> },
-          { path: "my-listing-details", element: <MyListingDetails /> },
           { path: "listing-requests", element: <ListingRequests /> },
           { path: "request-details/:id", element: <RequestDetails /> },
           { path: "report", element: <ReportIssue /> },
@@ -125,6 +133,9 @@ const router = createBrowserRouter([
         element: <UserFlowLayout />,
         children: [
           { path: "request-to-rent", element: <RequireTransactReady><RequestToRent /></RequireTransactReady> },
+          { path: "waiting", element: <RequestWaiting /> },
+          { path: "payment/callback/:gateway/:rentalId", element: <PaymentCallback /> },
+          { path: "payment/callback", element: <PaymentCallback /> },
           { path: "meetup", element: <Meetup /> },
           { path: "checkout", element: <RequireTransactReady><Checkout /></RequireTransactReady> },
           { path: "confirmation", element: <Confirmation /> },

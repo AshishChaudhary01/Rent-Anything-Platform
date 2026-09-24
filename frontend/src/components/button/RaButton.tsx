@@ -9,6 +9,11 @@ export interface IButtonProps {
   | "outline"
   | "danger"
   | "inverted"
+  | "success"
+  | "secondary"
+  | "ghost"
+  | "camera"
+  | "upload"
   size?: "sm" | "md" | "large";
   icon?: React.ReactElement;
   iconPosition?: "left" | "right";
@@ -22,6 +27,11 @@ const variantStlyes = {
   outline: "bg-light text-primary hover:bg-[image:var(--gradient-primary)] hover:text-white border border-primary",
   danger: "bg-danger text-white hover:bg-soft-danger hover:text-danger border border-danger",
   inverted: "bg-white text-primary hover:bg-light",
+  success: "bg-success text-white hover:bg-soft-success hover:text-success border border-success",
+  secondary: "bg-accent-secondary text-muted-secondary hover:opacity-90 border border-transparent",
+  ghost: "bg-transparent text-muted border border-gray-200 hover:bg-light hover:text-primary",
+  camera: "bg-primary text-white hover:opacity-90 border border-primary",
+  upload: "bg-accent text-primary hover:bg-soft-info border border-accent",
 };
 
 const buttonStyles = {
