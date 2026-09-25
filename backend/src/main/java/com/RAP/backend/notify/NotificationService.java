@@ -62,7 +62,7 @@ public class NotificationService {
 			mailService.sendHtml(
 					user.getEmail(),
 					title,
-					templates.notification(title, body, url, "Open in RAP"),
+					templates.notification(kind, title, body, url),
 					false
 			);
 		}

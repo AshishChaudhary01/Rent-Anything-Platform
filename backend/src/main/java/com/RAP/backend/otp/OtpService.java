@@ -63,13 +63,16 @@ public class OtpService {
 		repository.save(otp);
 		String heading = purpose == OtpPurpose.RESET_PASSWORD ? "Reset your RAP password" : "Confirm your new email";
 		String intro = purpose == OtpPurpose.RESET_PASSWORD
-				? "Use this one-time code to choose a new password."
-				: "Use this one-time code to confirm this email on your RAP account.";
+				? "Enter this code on the forgot-password screen to choose a new password for your RAP account."
+				: "Enter this code in RAP to confirm this address as the email on your account.";
+		String notice = purpose == OtpPurpose.RESET_PASSWORD
+				? "If you did not ask to reset your password, ignore this email. Your current password stays the same. Do not share this code."
+				: "If you did not ask to change your RAP email, ignore this message. Your current email stays on the account until a valid code is entered.";
 		try {
 			mailService.sendHtml(
 					email,
 					heading,
-					templates.otp(heading, intro, code, (int) TTL.toMinutes()),
+					templates.otp(heading, intro, code, (int) TTL.toMinutes(), notice),
 					true
 			);
 		} catch (RuntimeException ex) {
