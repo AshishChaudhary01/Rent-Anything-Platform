@@ -96,7 +96,7 @@ const FeaturedItems = () => {
         <RaContainerPadding>
           <div className="flex justify-between items-end">
             <h3 className="text-2xl md:text-3xl lg:text-5xl font-extrabold">Featured Items</h3>
-            <Link to={""} className="flex gap-2 text-xs md:text-base text-primary hover:underline">
+            <Link to="/user" className="flex gap-2 text-xs md:text-base text-primary hover:underline">
               View All<IoArrowForward />
             </Link>
           </div>

@@ -1,6 +1,7 @@
 import type { IContainerProp } from '../components/container/RaContainer'
 import Footer from '../components/footer/Footer'
 import RaAppNavbar from '../components/nav/RaAppNavbar'
+import RaLoginGate from '../components/auth/RaLoginGate'
 import Hero from '../pages/home/hero/Hero'
 
 const RaAppLayout = ({ children }: IContainerProp) => {
@@ -14,6 +15,7 @@ const RaAppLayout = ({ children }: IContainerProp) => {
       <footer className='inset-shadow-xs'>
         <Footer />
       </footer>
+      <RaLoginGate />
     </div>
   )
 }

@@ -84,6 +84,9 @@ public class SecurityConfig {
 						)
 						.permitAll()
 						.requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/listings/mine").authenticated()
+						.requestMatchers(HttpMethod.GET, "/listings", "/listings/*", "/listings/*/reviews").permitAll()
+						.requestMatchers(HttpMethod.GET, "/account/profiles/**").permitAll()
 						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, exception) -> {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

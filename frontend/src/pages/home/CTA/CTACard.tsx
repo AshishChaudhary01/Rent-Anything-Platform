@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom"
 import RaButton from "../../../components/button/RaButton"
+import AuthLink from "../../../components/auth/AuthLink"
 
 function CTACard() {
   return (
@@ -15,9 +15,9 @@ function CTACard() {
           </div>
         </div>
         <div className="flex justify-center align-middle">
-          <Link to={""}>
-            <RaButton size="large" btnText="List an Item" variant="inverted" widthFill={false} />
-          </Link>
+          <AuthLink to="/user/add-listing" message="Sign in to list an item on RAP.">
+            <RaButton type="button" size="large" btnText="List an Item" variant="inverted" widthFill={false} />
+          </AuthLink>
         </div>
       </div>
     </div>

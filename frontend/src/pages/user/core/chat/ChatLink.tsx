@@ -2,6 +2,8 @@ import { IoChatbubbleOutline } from "react-icons/io5"
 import { useNavigate } from "react-router-dom"
 import RaButton, { type IButtonProps } from "../../../../components/button/RaButton"
 import { raToast } from "../../../../lib/raToast"
+import { useAuthStore } from "../../../../store/authStore"
+import { openLoginGate } from "../../../../store/loginGateStore"
 import { useOpenChat } from "../../../../hooks/queries/useChats"
 import type { ChatContext } from "./chatTypes"
 
@@ -24,6 +26,7 @@ function ChatLink({
 } & Omit<IButtonProps, "clickFunc" | "type" | "btnText">) {
   const navigate = useNavigate()
   const openChat = useOpenChat()
+  const token = useAuthStore((s) => s.accessToken)
 
   return (
     <RaButton
@@ -35,6 +38,13 @@ function ChatLink({
       iconPosition={iconPosition}
       disabled={rest.disabled || openChat.isPending}
       clickFunc={() => {
+        if (!token) {
+          openLoginGate({
+            message: "Sign in to chat with the other person.",
+            next: listingId ? `/user/listing/${listingId}` : "/user/chat",
+          })
+          return
+        }
         if (listingId || rentalId) {
           openChat.mutate(
             { listingId, rentalId, draft },

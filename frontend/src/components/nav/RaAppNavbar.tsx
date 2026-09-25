@@ -78,10 +78,12 @@ function RaAppNavbar() {
             ))}
           </div>
           <div className="hidden lg:flex items-center gap-3">
-            <Link to={`/auth/login`}>
-              <RaButton btnText="Log in" variant="outline" widthFill={false} />
+            <Link to="/auth/login">
+              <RaButton type="button" btnText="Log in" variant="outline" widthFill={false} />
             </Link>
-            <RaButton btnText="Get Started" widthFill={false} />
+            <Link to="/user">
+              <RaButton type="button" btnText="Get Started" widthFill={false} />
+            </Link>
           </div>
 
           <button
@@ -122,7 +124,9 @@ function RaAppNavbar() {
                 <Link to={"/auth/login"}>
                   <RaButton btnText="Log in" variant="outline" />
                 </Link>
-                <RaButton btnText="Get Started" widthFill={false} />
+                <Link to="/user">
+                  <RaButton type="button" btnText="Get Started" />
+                </Link>
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom"
 import RaButton from "../../../../components/button/RaButton"
+import AuthLink from "../../../../components/auth/AuthLink"
 import type { Listing } from "../../../../types/listing.types"
 
 const RequestToRentButton = ({ listing }: { listing: Listing }) => {
@@ -14,14 +14,18 @@ const RequestToRentButton = ({ listing }: { listing: Listing }) => {
     )
   }
   return (
-    <Link to={`/user/rent/request-to-rent?listing=${listing.id}`}>
+    <AuthLink
+      to={`/user/rent/request-to-rent?listing=${listing.id}`}
+      message="Sign in to request this rental."
+      className="block"
+    >
       <RaButton
         type="button"
         btnText={listing.status === "RENTED" ? "Request other dates" : "Request to Rent"}
         size="large"
         variant={listing.status === "RENTED" ? "secondary" : "primary"}
       />
-    </Link>
+    </AuthLink>
   )
 }
 

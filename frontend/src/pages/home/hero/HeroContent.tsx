@@ -16,7 +16,9 @@ const HeroContent = () => {
         Join Nepal's premier peer-to-peer rental marketplace. Save money, reduce waste and earn locally.
       </p>
       <div className="flex items-center gap-4">
-        <RaButton btnText="Browse Items" widthFill={false} />
+        <Link to="/user">
+          <RaButton type="button" btnText="Browse Items" widthFill={false} />
+        </Link>
         <Link to={"/how-it-works"}>
           <RaButton
             btnText="How It Works"

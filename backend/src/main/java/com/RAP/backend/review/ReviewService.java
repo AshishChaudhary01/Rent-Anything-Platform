@@ -8,6 +8,7 @@ import com.RAP.backend.listing.Listing;
 import com.RAP.backend.listing.ListingRepository;
 import com.RAP.backend.review.dto.ListingReviewsResponse;
 import com.RAP.backend.review.dto.ReviewResponse;
+import com.RAP.backend.user.User;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -38,8 +39,9 @@ public class ReviewService {
 	public ListingReviewsResponse forListing(UUID listingId) {
 		Listing listing = listingRepository.findById(listingId)
 				.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Listing not found"));
-		UUID viewerId = currentUser.require().getId();
-		return rapCache.getOrLoad(RapCaches.LISTING_REVIEWS, viewerId + "|" + listingId, () -> {
+		UUID viewerId = currentUser.find().map(User::getId).orElse(null);
+		String cacheKey = (viewerId == null ? "anon" : viewerId) + "|" + listingId;
+		return rapCache.getOrLoad(RapCaches.LISTING_REVIEWS, cacheKey, () -> {
 			List<ReviewResponse> items = reviewRepository.findListingReviews(listing).stream()
 					.map(review -> ReviewResponse.from(review, viewerId))
 					.toList();

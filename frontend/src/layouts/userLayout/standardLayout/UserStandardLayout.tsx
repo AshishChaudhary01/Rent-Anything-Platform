@@ -1,12 +1,13 @@
 import { Outlet } from "react-router-dom";
-import RequireAuth from "../../../components/auth/RequireAuth";
+import UserArea from "../../../components/auth/UserArea";
 import RaUserTopNavbar from "../../../components/nav/RaUserTopNavbar";
 import RaUserBottomNavbar from "../../../components/nav/RaUserBottomNavbar";
 import RaHelpPanel from "../../../components/help/RaHelpPanel";
+import RaLoginGate from "../../../components/auth/RaLoginGate";
 
 const UserStandardLayout = () => {
   return (
-    <RequireAuth>
+    <UserArea>
       <div className="overflow-hidden bg-bg flex flex-col min-h-dvh">
         <header className="h-14 md:h-16">
           <RaUserTopNavbar />
@@ -16,8 +17,9 @@ const UserStandardLayout = () => {
         </main>
         <RaUserBottomNavbar />
         <RaHelpPanel />
+        <RaLoginGate />
       </div>
-    </RequireAuth>
+    </UserArea>
   )
 }
 

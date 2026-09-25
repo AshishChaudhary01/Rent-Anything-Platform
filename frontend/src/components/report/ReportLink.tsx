@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom"
 import { IoFlagOutline } from "react-icons/io5"
+import AuthLink from "../auth/AuthLink"
 import RaButton from "../button/RaButton"
 import { reportHref, type ReportDraft } from "../../data/reports"
 
@@ -21,13 +21,13 @@ function ReportLink({
   const to = reportHref(draft)
   if (iconOnly) {
     return (
-      <Link to={to} className="text-muted hover:text-danger shrink-0" aria-label={btnText} title={btnText}>
+      <AuthLink to={to} message="Sign in to report a problem." className="text-muted hover:text-danger shrink-0" >
         <IoFlagOutline className="size-5" />
-      </Link>
+      </AuthLink>
     )
   }
   return (
-    <Link to={to} className={widthFill ? "block w-full" : "inline-block"}>
+    <AuthLink to={to} message="Sign in to report a problem." className={widthFill ? "block w-full" : "inline-block"}>
       <RaButton
         type="button"
         btnText={btnText}
@@ -37,7 +37,7 @@ function ReportLink({
         icon={<IoFlagOutline className="size-4" />}
         iconPosition="left"
       />
-    </Link>
+    </AuthLink>
   )
 }
 

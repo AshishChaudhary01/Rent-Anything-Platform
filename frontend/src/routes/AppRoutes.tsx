@@ -41,6 +41,7 @@ import PaymentMethods from "../pages/user/core/account/PaymentMethods";
 import Kyc from "../pages/user/core/account/Kyc";
 import Security from "../pages/user/core/account/Security";
 import RequireTransactReady from "../components/auth/RequireTransactReady";
+import RequireAuth from "../components/auth/RequireAuth";
 import UserStandardLayout from "../layouts/userLayout/standardLayout/UserStandardLayout";
 import UserFlowLayout from "../layouts/userLayout/flowLayout/UserFlowLayout";
 import AdminLayout from "../layouts/adminLayout/AdminLayout";
@@ -101,57 +102,57 @@ const router = createBrowserRouter([
         element: <UserStandardLayout />,
         children: [
           { path: "", element: <UserDashboard /> },
-          { path: "my-rentals", element: <MyRentals /> },
-          { path: "rental-history", element: <RentalHistory /> },
-          { path: "pending-requests", element: <PendingRequests /> },
-          { path: "active-rentals", element: <ActiveRentals /> },
-          { path: "my-listings", element: <MyListings /> },
-          { path: "chat", element: <Chat /> },
+          { path: "my-rentals", element: <RequireAuth><MyRentals /></RequireAuth> },
+          { path: "rental-history", element: <RequireAuth><RentalHistory /></RequireAuth> },
+          { path: "pending-requests", element: <RequireAuth><PendingRequests /></RequireAuth> },
+          { path: "active-rentals", element: <RequireAuth><ActiveRentals /></RequireAuth> },
+          { path: "my-listings", element: <RequireAuth><MyListings /></RequireAuth> },
+          { path: "chat", element: <RequireAuth><Chat /></RequireAuth> },
           { path: "category/:slug", element: <CategoryListings /> },
           { path: "search", element: <SearchResults /> },
-          { path: "notifications", element: <Notifications /> },
-          { path: "profile", element: <Profile /> },
+          { path: "notifications", element: <RequireAuth><Notifications /></RequireAuth> },
+          { path: "profile", element: <RequireAuth><Profile /></RequireAuth> },
           { path: "people/:id", element: <PublicProfile /> },
           { path: "people/:id/reviews", element: <PublicReviews /> },
           { path: "people/:id/listings", element: <PublicListings /> },
-          { path: "payment-methods", element: <PaymentMethods /> },
-          { path: "kyc", element: <Kyc /> },
-          { path: "security", element: <Security /> },
+          { path: "payment-methods", element: <RequireAuth><PaymentMethods /></RequireAuth> },
+          { path: "kyc", element: <RequireAuth><Kyc /></RequireAuth> },
+          { path: "security", element: <RequireAuth><Security /></RequireAuth> },
           { path: "help", element: <HelpCenter /> },
-          { path: "reports", element: <MyReports /> },
-          { path: "reports/:id", element: <MyReportDetails /> },
+          { path: "reports", element: <RequireAuth><MyReports /></RequireAuth> },
+          { path: "reports/:id", element: <RequireAuth><MyReportDetails /></RequireAuth> },
         ]
       },
       {
         element: <UserFlowLayout />,
         children: [
-          { path: "add-listing", element: <RequireTransactReady><AddListing /></RequireTransactReady> },
+          { path: "add-listing", element: <RequireAuth><RequireTransactReady><AddListing /></RequireTransactReady></RequireAuth> },
           { path: "listing/:id", element: <Listing /> },
-          { path: "my-listing-details/:id", element: <MyListingDetails /> },
-          { path: "rental-details", element: <RentalDetails /> },
-          { path: "listing-requests", element: <ListingRequests /> },
-          { path: "request-details/:id", element: <RequestDetails /> },
-          { path: "report", element: <ReportIssue /> },
+          { path: "my-listing-details/:id", element: <RequireAuth><MyListingDetails /></RequireAuth> },
+          { path: "rental-details", element: <RequireAuth><RentalDetails /></RequireAuth> },
+          { path: "listing-requests", element: <RequireAuth><ListingRequests /></RequireAuth> },
+          { path: "request-details/:id", element: <RequireAuth><RequestDetails /></RequireAuth> },
+          { path: "report", element: <RequireAuth><ReportIssue /></RequireAuth> },
         ]
       },
       {
         path: "rent",
         element: <UserFlowLayout />,
         children: [
-          { path: "request-to-rent", element: <RequireTransactReady><RequestToRent /></RequireTransactReady> },
-          { path: "waiting", element: <RequestWaiting /> },
-          { path: "payment/callback/:gateway/:rentalId", element: <PaymentCallback /> },
-          { path: "payment/callback", element: <PaymentCallback /> },
-          { path: "meetup", element: <Meetup /> },
-          { path: "checkout", element: <RequireTransactReady><Checkout /></RequireTransactReady> },
-          { path: "confirmation", element: <Confirmation /> },
-          { path: "return-schedule", element: <ReturnSchedule /> },
-          { path: "condition-proof", element: <ConditionProof /> },
-          { path: "return-meetup", element: <ReturnMeetup /> },
-          { path: "owner-return-review", element: <OwnerReturnReview /> },
-          { path: "owner-return-pickup", element: <OwnerReturnPickup /> },
-          { path: "owner-return-confirm", element: <OwnerReturnConfirm /> },
-          { path: "rate", element: <RateRental /> },
+          { path: "request-to-rent", element: <RequireAuth><RequireTransactReady><RequestToRent /></RequireTransactReady></RequireAuth> },
+          { path: "waiting", element: <RequireAuth><RequestWaiting /></RequireAuth> },
+          { path: "payment/callback/:gateway/:rentalId", element: <RequireAuth><PaymentCallback /></RequireAuth> },
+          { path: "payment/callback", element: <RequireAuth><PaymentCallback /></RequireAuth> },
+          { path: "meetup", element: <RequireAuth><Meetup /></RequireAuth> },
+          { path: "checkout", element: <RequireAuth><RequireTransactReady><Checkout /></RequireTransactReady></RequireAuth> },
+          { path: "confirmation", element: <RequireAuth><Confirmation /></RequireAuth> },
+          { path: "return-schedule", element: <RequireAuth><ReturnSchedule /></RequireAuth> },
+          { path: "condition-proof", element: <RequireAuth><ConditionProof /></RequireAuth> },
+          { path: "return-meetup", element: <RequireAuth><ReturnMeetup /></RequireAuth> },
+          { path: "owner-return-review", element: <RequireAuth><OwnerReturnReview /></RequireAuth> },
+          { path: "owner-return-pickup", element: <RequireAuth><OwnerReturnPickup /></RequireAuth> },
+          { path: "owner-return-confirm", element: <RequireAuth><OwnerReturnConfirm /></RequireAuth> },
+          { path: "rate", element: <RequireAuth><RateRental /></RequireAuth> },
         ]
       }
     ]

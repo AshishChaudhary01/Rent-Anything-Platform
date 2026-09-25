@@ -65,7 +65,7 @@ public class ListingService {
 
 	@Transactional(readOnly = true)
 	public ListingPageResponse browse(String category, String query, String sort, int page, int size) {
-		User viewer = currentUser.require();
+		UUID viewerId = currentUser.find().map(User::getId).orElse(null);
 		String categoryFilter = blankToNull(category);
 		if (categoryFilter != null && !CATEGORIES.contains(categoryFilter)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Unknown category");
@@ -75,12 +75,12 @@ public class ListingService {
 		if (search != null) {
 			search = "%" + search.toLowerCase(Locale.ROOT) + "%";
 		}
-		String cacheKey = viewer.getId() + "|" + nullToEmpty(categoryFilter) + "|" + searchKey + "|" + sort + "|" + page + "|" + size;
+		String cacheKey = (viewerId == null ? "anon" : viewerId) + "|" + nullToEmpty(categoryFilter) + "|" + searchKey + "|" + sort + "|" + page + "|" + size;
 		final String searchLike = search;
 		return rapCache.<ListingPageResponse>getOrLoad(
 				RapCaches.LISTING_BROWSE,
 				cacheKey,
-				() -> loadBrowsePage(viewer.getId(), categoryFilter, searchLike, sort, page, size)
+				() -> loadBrowsePage(viewerId, categoryFilter, searchLike, sort, page, size)
 		);
 	}
 
@@ -105,15 +105,17 @@ public class ListingService {
 
 	@Transactional(readOnly = true)
 	public ListingResponse get(UUID id) {
-		User viewer = currentUser.require();
+		User viewer = currentUser.find().orElse(null);
 		Listing listing = listingRepository.findById(id)
 				.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Listing not found"));
-		if (listing.getStatus() == ListingStatus.REMOVED && !listing.getOwner().getId().equals(viewer.getId())) {
+		if (listing.getStatus() == ListingStatus.REMOVED
+				&& (viewer == null || !listing.getOwner().getId().equals(viewer.getId()))) {
 			throw new ApiException(HttpStatus.NOT_FOUND, "Listing not found");
 		}
+		String cacheKey = (viewer == null ? "anon" : viewer.getId()) + "|" + id;
 		return rapCache.<ListingResponse>getOrLoad(
 				RapCaches.LISTING_DETAIL,
-				viewer.getId() + "|" + id,
+				cacheKey,
 				() -> toResponse(listing, viewer)
 		);
 	}
@@ -213,7 +215,8 @@ public class ListingService {
 	}
 
 	private ListingResponse toResponse(Listing listing, User viewer) {
-		return ListingResponse.from(listing, viewer.getId(), bookingForOwner(listing, viewer), activityFor(listing));
+		UUID viewerId = viewer == null ? null : viewer.getId();
+		return ListingResponse.from(listing, viewerId, bookingForOwner(listing, viewer), activityFor(listing));
 	}
 
 	private List<ListingActivityResponse> activityFor(Listing listing) {

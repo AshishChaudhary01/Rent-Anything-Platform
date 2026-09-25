@@ -1,9 +1,30 @@
 import { Link } from "react-router-dom"
 import { useAccountStore } from "../../store/accountStore"
+import { useAuthStore } from "../../store/authStore"
 import { openHelp } from "../../store/helpStore"
+import { openLoginGate } from "../../store/loginGateStore"
 
 function AccountSetupBanner() {
+  const token = useAuthStore((s) => s.accessToken)
   const { hasAvatar, profileComplete, kycStatus, canTransact } = useAccountStore()
+
+  if (!token) {
+    return (
+      <div className="rounded-2xl bg-primary/10 px-4 py-3 text-sm">
+        <div className="font-semibold">Browse freely. Sign in to rent or list.</div>
+        <div className="text-muted mt-1">
+          You can search listings and open item pages without an account. Log in or register when you are ready to request a rental, chat, or publish an item.
+        </div>
+        <button
+          type="button"
+          className="text-primary font-medium mt-2 cursor-pointer"
+          onClick={() => openLoginGate({ message: "Create an account or log in to rent and list on RAP." })}
+        >
+          Log in or sign up
+        </button>
+      </div>
+    )
+  }
 
   if (canTransact) return null
 

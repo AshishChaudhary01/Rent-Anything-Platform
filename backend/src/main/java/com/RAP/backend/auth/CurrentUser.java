@@ -4,6 +4,7 @@ import com.RAP.backend.common.ApiException;
 import com.RAP.backend.user.Role;
 import com.RAP.backend.user.User;
 import com.RAP.backend.user.UserRepository;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -20,12 +21,15 @@ public class CurrentUser {
 	}
 
 	public User require() {
+		return find().orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+	}
+
+	public Optional<User> find() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || !(authentication.getPrincipal() instanceof UUID userId)) {
-			throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+			return Optional.empty();
 		}
-		return userRepository.findById(userId)
-				.orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Account not found"));
+		return userRepository.findById(userId);
 	}
 
 	public User requireStaff() {

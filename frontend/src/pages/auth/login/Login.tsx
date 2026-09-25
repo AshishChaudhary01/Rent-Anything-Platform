@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import RaButton from "../../../components/button/RaButton"
 import RaContainerXS from "../../../components/container/RaContainerXS"
 import GoogleAuthButton from "../../../components/button/GoogleAuthButton"
@@ -20,6 +20,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
+  const location = useLocation()
   const {
     register,
     handleSubmit,
@@ -110,7 +111,7 @@ const Login = () => {
         <div className="text-muted text-sm font-light text-center">
           Don't have an account?
           <span className="text-primary">
-            <Link to={"/auth/register"} className="font-semibold"> Signup</Link>
+            <Link to="/auth/register" state={location.state} className="font-semibold"> Signup</Link>
           </span>
         </div>
       </div>

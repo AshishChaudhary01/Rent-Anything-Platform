@@ -2,10 +2,12 @@ import { authKeys } from "../../lib/queryKeys";
 import { googleAuth, loginUser, registerUser } from "../../services/auth.service";
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { takePostLoginPath } from "../../store/loginGateStore";
 
-function homeForRole(role: string) {
-  return role === "USER" ? "/user" : "/admin";
+function postAuthPath(role: string, from?: string) {
+  if (from) sessionStorage.setItem("rap-next", from)
+  return takePostLoginPath(role)
 }
 
 export const useRegister = () => {
@@ -26,13 +28,14 @@ export const useLogin = () => {
   const queryClient = useQueryClient();
   const setAuth = useAuthStore((state) => state.setAuth);
   const navigate = useNavigate();
+  const location = useLocation();
 
   return useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
       setAuth(data.accessKey, data.role, data.userId, data.isActive);
       queryClient.invalidateQueries({ queryKey: authKeys.currentUser() });
-      navigate(homeForRole(data.role));
+      navigate(postAuthPath(data.role, (location.state as { from?: string } | null)?.from));
     },
     onError: (error) => {
       console.error("Login failed", error);
@@ -50,7 +53,7 @@ export const useGoogleAuth = () => {
     onSuccess: (data) => {
       setAuth(data.accessKey, data.role, data.userId, data.isActive);
       queryClient.invalidateQueries({ queryKey: authKeys.currentUser() });
-      navigate(homeForRole(data.role));
+      navigate(postAuthPath(data.role));
     },
     onError: (error) => {
       console.error("Google OAuth failed: ", error);

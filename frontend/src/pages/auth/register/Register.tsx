@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import RaContainerXS from "../../../components/container/RaContainerXS"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,7 @@ import { userRegisterBody, type UserRegisterType } from "../../../types/user.typ
 
 function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { mutate: registerUser, isPending } = useRegister();
 
   const {
@@ -130,7 +131,7 @@ function Register() {
         <div className="text-muted text-sm font-light text-center">
           Already have an account?
           <span className="text-primary">
-            <Link to={"/auth/login"} className="font-semibold"> Login</Link>
+            <Link to="/auth/login" state={location.state} className="font-semibold"> Login</Link>
           </span>
           <div className="mt-2">
             <Link to="/auth/forgot-password" className="text-primary font-semibold">Forgot password?</Link>

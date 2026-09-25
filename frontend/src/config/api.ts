@@ -30,6 +30,9 @@ api.interceptors.response.use(
       !originalConfig._retry &&
       !isAuthRoute
     ) {
+      if (!useAuthStore.getState().accessToken) {
+        return Promise.reject(error);
+      }
       originalConfig._retry = true;
 
       try {
