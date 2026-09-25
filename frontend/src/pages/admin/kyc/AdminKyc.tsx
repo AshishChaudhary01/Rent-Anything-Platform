@@ -9,6 +9,7 @@ import AdminPagination from "../../../components/admin/AdminPagination"
 import { matchesSearch, paginate, selectClass, statusClass } from "../../../components/admin/adminUi"
 import { profile01 } from "../../../utils/images"
 import { useAdminKyc } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function AdminKyc() {
   const { data: kycCases = [], isPending } = useAdminKyc()
@@ -60,7 +61,7 @@ function AdminKyc() {
         </select>
       </div>
       {isPending ? (
-        <div className="text-sm text-muted">Loading KYC cases…</div>
+        <RaPageLoader label="Loading KYC cases…" />
       ) : (
         <div className="flex flex-col gap-3">
           {slice.map((item) => (

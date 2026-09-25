@@ -24,6 +24,7 @@ import { raToast } from "../../../../lib/raToast"
 import ReportLink from "../../../../components/report/ReportLink"
 import { useRental, useStartRental, useReportNoShow } from "../../../../hooks/queries/useRentals"
 import { decodeQrFromFile, decodeQrFromVideo } from "../../../../lib/decodeQr"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function Meetup() {
   const navigate = useNavigate()
@@ -140,7 +141,7 @@ function Meetup() {
   useEffect(() => () => stream?.getTracks().forEach((t) => t.stop()), [stream])
 
   if (isPending || !rental) {
-    return <p className="px-6 py-10 text-muted">Loading meetup…</p>
+    return <RaPageLoader label="Loading meetup…" />
   }
 
   const peerName = rental.owner ? rental.renterName : rental.ownerName

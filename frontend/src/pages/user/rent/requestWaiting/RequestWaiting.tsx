@@ -12,6 +12,7 @@ import { RENT_STEPS } from "../returnSteps"
 import ChatLink from "../../core/chat/ChatLink"
 import { raToast } from "../../../../lib/raToast"
 import { useCancelRental, useRental } from "../../../../hooks/queries/useRentals"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function RequestWaiting() {
   const navigate = useNavigate()
@@ -42,7 +43,7 @@ function RequestWaiting() {
   }, [rental, navigate])
 
   if (!rentalId) return <p className="px-6 py-10 text-muted">Missing request.</p>
-  if (isPending || !rental) return <p className="px-6 py-10 text-muted">Loading request…</p>
+  if (isPending || !rental) return <RaPageLoader label="Loading request…" />
 
   return (
     <RaContainerLG>

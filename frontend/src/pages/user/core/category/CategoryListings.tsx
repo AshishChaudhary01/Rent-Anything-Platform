@@ -6,6 +6,7 @@ import ListingBrowse from "../../../../components/listingBrowse/ListingBrowse"
 import { categories } from "../../../../components/categoryBar/CategoryBar"
 import { useListings } from "../../../../hooks/queries/useListings"
 import { toListingCard } from "../../../../types/listing.types"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function CategoryListings() {
   const { slug = "all" } = useParams()
@@ -24,7 +25,7 @@ function CategoryListings() {
         <div className="flex flex-col gap-y-4">
           <RaBreadcrumb items={[{ label: title }]} />
           {isPending ? (
-            <div className="text-muted py-10">Loading listings…</div>
+            <RaPageLoader label="Loading listings…" />
           ) : (
             <ListingBrowse
               title={title}

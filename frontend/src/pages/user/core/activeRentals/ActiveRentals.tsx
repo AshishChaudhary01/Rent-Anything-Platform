@@ -7,6 +7,7 @@ import RaButton from "../../../../components/button/RaButton"
 import ActiveRentalCard from "../myRentals/ActiveRentalCard"
 import { PAGE_SIZE } from "../../../../data/catalog"
 import { useMyRentals } from "../../../../hooks/queries/useRentals"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 const selectClass = "bg-white border border-gray-200 rounded-full px-4 py-2 text-sm outline-none"
 const gridClass = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -49,7 +50,7 @@ function ActiveRentals() {
               <option value="name">Name</option>
             </select>
           </div>
-          {isPending ? <p className="text-muted">Loading…</p> : slice.length === 0 ? (
+          {isPending ? <RaPageLoader /> : slice.length === 0 ? (
             <div className="text-muted py-8 text-center">No active rentals match your search.</div>
           ) : (
             <div className={gridClass}>

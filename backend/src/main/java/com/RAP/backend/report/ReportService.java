@@ -1,6 +1,7 @@
 package com.RAP.backend.report;
 
 import com.RAP.backend.auth.CurrentUser;
+import com.RAP.backend.cache.RapCacheStore;
 import com.RAP.backend.common.ApiException;
 import com.RAP.backend.listing.Listing;
 import com.RAP.backend.listing.ListingRepository;
@@ -33,6 +34,7 @@ public class ReportService {
 	private final StorageService storageService;
 	private final CurrentUser currentUser;
 	private final NotificationService notificationService;
+	private final RapCacheStore rapCache;
 
 	public ReportService(
 			UserReportRepository reportRepository,
@@ -41,7 +43,8 @@ public class ReportService {
 			UserRepository userRepository,
 			StorageService storageService,
 			CurrentUser currentUser,
-			NotificationService notificationService
+			NotificationService notificationService,
+			RapCacheStore rapCache
 	) {
 		this.reportRepository = reportRepository;
 		this.listingRepository = listingRepository;
@@ -50,6 +53,7 @@ public class ReportService {
 		this.storageService = storageService;
 		this.currentUser = currentUser;
 		this.notificationService = notificationService;
+		this.rapCache = rapCache;
 	}
 
 	@Transactional(readOnly = true)
@@ -182,6 +186,7 @@ public class ReportService {
 		if (decided.toLowerCase(Locale.ROOT).contains("listing") && report.getListing() != null) {
 			report.getListing().setStatus(ListingStatus.REMOVED);
 			listingRepository.save(report.getListing());
+			rapCache.evictCatalog();
 		}
 		UserReport saved = reportRepository.save(report);
 		String listingTitle = saved.getListing() == null ? "a RAP listing" : saved.getListing().getTitle();

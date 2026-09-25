@@ -10,6 +10,7 @@ import type { MediaItem } from "../../../../components/mediaGallery/MediaGallery
 import { raToast } from "../../../../lib/raToast"
 import { useListing, useUpdateListing } from "../../../../hooks/queries/useListings"
 import type { Listing } from "../../../../types/listing.types"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 export type ListingDraftMedia = MediaItem & { file?: File }
 
@@ -55,7 +56,7 @@ function MyListingDetails() {
   }, [data, editing])
 
   if (isPending || !listing || !saved) {
-    return <div className="px-6 py-10 text-muted">Loading listing…</div>
+    return <RaPageLoader label="Loading listing…" />
   }
   if (isError || !data) {
     return <div className="px-6 py-10 text-muted">This listing is not available.</div>

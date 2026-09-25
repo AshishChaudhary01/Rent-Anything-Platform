@@ -7,6 +7,7 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import StarRating from "../../../../components/rating/StarRating"
 import { usePublicProfile, usePublicReviews } from "../../../../hooks/queries/usePublicProfile"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function joinedLabel(joinedAt?: string | null) {
   if (!joinedAt) return null
@@ -21,7 +22,7 @@ function PublicProfile() {
   const { data: reviews } = usePublicReviews(id, { page: 0, size: 3, sort: "newest" })
 
   if (isPending) {
-    return <p className="px-6 py-10 text-muted">Loading profile…</p>
+    return <RaPageLoader label="Loading profile…" />
   }
   if (isError || !profile) {
     return <p className="px-6 py-10 text-muted">This profile is not available.</p>

@@ -5,6 +5,7 @@ import RaCard from "../../../../components/card/RaCard"
 import ReportLink from "../../../../components/report/ReportLink"
 import { useChat, useSendChat } from "../../../../hooks/queries/useChats"
 import { raToast } from "../../../../lib/raToast"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function ChatConversation({
   threadId,
@@ -30,7 +31,7 @@ function ChatConversation({
   }
 
   if (isPending || !thread) {
-    return <RaCard round="round" styleClass="flex h-[calc(100dvh-11rem)] items-center justify-center text-muted">Loading chat…</RaCard>
+    return <RaPageLoader label="Loading chat…" />
   }
 
   return (

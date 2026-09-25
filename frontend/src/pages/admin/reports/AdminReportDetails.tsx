@@ -13,6 +13,7 @@ import ProofGallery from "../../../components/report/ProofGallery"
 import { useAccountStore } from "../../../store/accountStore"
 import { useAuthStore } from "../../../store/authStore"
 import { useAdminReport, useResolveAdminReport, useSetAdminListingStatus, useSetAdminUserStatus } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function AdminReportDetails() {
   const { id } = useParams()
@@ -28,7 +29,7 @@ function AdminReportDetails() {
   const [notesError, setNotesError] = useState("")
 
   if (isPending) {
-    return <div className="text-muted">Loading report…</div>
+    return <RaPageLoader label="Loading report…" />
   }
 
   if (!report) {

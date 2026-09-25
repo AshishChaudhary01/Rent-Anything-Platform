@@ -5,6 +5,7 @@ import RaBreadcrumb from "../../../../components/breadcrumb/RaBreadcrumb"
 import ListingBrowse from "../../../../components/listingBrowse/ListingBrowse"
 import { useListings } from "../../../../hooks/queries/useListings"
 import { toListingCard } from "../../../../types/listing.types"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function SearchResults() {
   const [params] = useSearchParams()
@@ -18,7 +19,7 @@ function SearchResults() {
         <div className="flex flex-col gap-y-4">
           <RaBreadcrumb items={[{ label: "Search" }]} />
           {isPending ? (
-            <div className="text-muted py-10">Searching listings…</div>
+            <RaPageLoader label="Searching listings…" />
           ) : (
             <ListingBrowse
               title={q ? `Results for “${q}”` : "Search"}

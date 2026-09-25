@@ -7,13 +7,14 @@ import { formatNptDateTime, statusClass } from "../../../../components/admin/adm
 import TicketResolution from "../../../../components/report/TicketResolution"
 import ProofGallery from "../../../../components/report/ProofGallery"
 import { useReport } from "../../../../hooks/queries/useReports"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function MyReportDetails() {
   const { id } = useParams()
   const { data: report, isPending, isError } = useReport(id)
 
   if (isPending) {
-    return <div className="px-6 py-10 text-muted">Loading report…</div>
+    return <RaPageLoader label="Loading report…" />
   }
   if (isError || !report) {
     return (

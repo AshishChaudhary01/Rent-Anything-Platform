@@ -7,6 +7,7 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import RaBadge from "../../../../components/badge/RaBadge"
 import { usePublicListings, usePublicProfile } from "../../../../hooks/queries/usePublicProfile"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 const selectClass = "bg-white border border-gray-200 rounded-full px-4 py-2 text-sm outline-none"
 const PAGE = 9
@@ -55,7 +56,7 @@ function PublicListings() {
             </select>
           </div>
           {isPending ? (
-            <p className="text-muted">Loading listings…</p>
+            <RaPageLoader label="Loading listings…" />
           ) : (data?.items.length ?? 0) === 0 ? (
             <p className="text-muted py-8 text-center">No listings match these filters.</p>
           ) : (

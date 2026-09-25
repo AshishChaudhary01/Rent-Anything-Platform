@@ -11,6 +11,7 @@ import { useAuthStore } from "../../../store/authStore"
 import { raToast } from "../../../lib/raToast"
 import { apiErrorMessage } from "../../../lib/formErrors"
 import { useAdminStaffMember, useDeleteAdminAccount, useSetAdminStaffStatus, useUpdateAdminAccount } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function passwordError(password: string) {
   if (!password) return ""
@@ -47,7 +48,7 @@ function AdminStaffDetails() {
   }
 
   if (isPending) {
-    return <div className="text-muted">Loading admin…</div>
+    return <RaPageLoader label="Loading admin…" />
   }
 
   if (!admin) {

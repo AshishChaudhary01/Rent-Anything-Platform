@@ -8,6 +8,7 @@ import RaSearchBar from "../../../components/searchbar/RaSearchbar"
 import AdminPagination from "../../../components/admin/AdminPagination"
 import { matchesSearch, paginate, selectClass, statusClass, formatNptDateTime } from "../../../components/admin/adminUi"
 import { useAdminReports } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function AdminReports() {
   const { data: reports = [], isPending } = useAdminReports()
@@ -70,7 +71,7 @@ function AdminReports() {
         </select>
       </div>
       {isPending ? (
-        <div className="text-sm text-muted">Loading reports…</div>
+        <RaPageLoader label="Loading reports…" />
       ) : (
         <div className="flex flex-col gap-3">
           {slice.map((report) => (

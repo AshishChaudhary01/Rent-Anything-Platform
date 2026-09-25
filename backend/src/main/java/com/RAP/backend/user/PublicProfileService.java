@@ -5,6 +5,8 @@ import com.RAP.backend.listing.Listing;
 import com.RAP.backend.listing.ListingCovers;
 import com.RAP.backend.listing.ListingRepository;
 import com.RAP.backend.listing.ListingStatus;
+import com.RAP.backend.cache.RapCacheStore;
+import com.RAP.backend.cache.RapCaches;
 import com.RAP.backend.rental.RentalRepository;
 import com.RAP.backend.rental.RentalStatus;
 import com.RAP.backend.review.Review;
@@ -30,21 +32,28 @@ public class PublicProfileService {
 	private final ReviewRepository reviewRepository;
 	private final ListingRepository listingRepository;
 	private final RentalRepository rentalRepository;
+	private final RapCacheStore rapCache;
 
 	public PublicProfileService(
 			UserRepository userRepository,
 			ReviewRepository reviewRepository,
 			ListingRepository listingRepository,
-			RentalRepository rentalRepository
+			RentalRepository rentalRepository,
+			RapCacheStore rapCache
 	) {
 		this.userRepository = userRepository;
 		this.reviewRepository = reviewRepository;
 		this.listingRepository = listingRepository;
 		this.rentalRepository = rentalRepository;
+		this.rapCache = rapCache;
 	}
 
 	@Transactional(readOnly = true)
 	public PublicProfileResponse get(UUID id) {
+		return rapCache.getOrLoad(RapCaches.PUBLIC_PROFILE, id.toString(), () -> loadProfile(id));
+	}
+
+	private PublicProfileResponse loadProfile(UUID id) {
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
 		Double average = reviewRepository.averageForSubject(user);
@@ -74,6 +83,11 @@ public class PublicProfileService {
 
 	@Transactional(readOnly = true)
 	public PublicListingPageResponse listings(UUID id, int page, int size, String status, String sort) {
+		String key = id + "|" + page + "|" + size + "|" + status + "|" + sort;
+		return rapCache.getOrLoad(RapCaches.PUBLIC_LISTINGS, key, () -> loadListings(id, page, size, status, sort));
+	}
+
+	private PublicListingPageResponse loadListings(UUID id, int page, int size, String status, String sort) {
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
 		List<ListingStatus> statuses = switch (status == null ? "ALL" : status.toUpperCase()) {
@@ -111,6 +125,11 @@ public class PublicProfileService {
 
 	@Transactional(readOnly = true)
 	public PublicReviewPageResponse reviews(UUID id, int page, int size, int rating, String role, String sort) {
+		String key = id + "|" + page + "|" + size + "|" + rating + "|" + role + "|" + sort;
+		return rapCache.getOrLoad(RapCaches.PUBLIC_REVIEWS, key, () -> loadReviews(id, page, size, rating, role, sort));
+	}
+
+	private PublicReviewPageResponse loadReviews(UUID id, int page, int size, int rating, String role, String sort) {
 		if (!userRepository.existsById(id)) {
 			throw new ApiException(HttpStatus.NOT_FOUND, "User not found");
 		}

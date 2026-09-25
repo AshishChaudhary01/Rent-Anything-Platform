@@ -6,6 +6,7 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import { formatNptDateTime, statusClass } from "../../../../components/admin/adminUi"
 import { useMyReports } from "../../../../hooks/queries/useReports"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function MyReports() {
   const { data: mine = [], isPending } = useMyReports()
@@ -22,7 +23,7 @@ function MyReports() {
             </div>
           </div>
           {isPending ? (
-            <div className="text-sm text-muted">Loading reports…</div>
+            <RaPageLoader label="Loading reports…" />
           ) : mine.length === 0 ? (
             <div className="text-sm text-muted">You have not submitted any reports yet.</div>
           ) : (

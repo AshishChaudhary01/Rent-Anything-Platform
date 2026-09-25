@@ -9,6 +9,7 @@ import ActiveRentalCard from "./ActiveRentalCard"
 import StarRating from "../../../../components/rating/StarRating"
 import { useMyRentals } from "../../../../hooks/queries/useRentals"
 import type { RentalStatus } from "../../../../types/rental.types"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 const historyPath = "/user/rental-history"
 const pendingPath = "/user/pending-requests"
@@ -73,7 +74,7 @@ function MyRentals() {
               <Link to={activePath} className="text-sm text-primary">See all</Link>
             </div>
             <div className={previewGrid}>
-              {isPending && <p className="text-sm text-muted">Loading…</p>}
+              {isPending && <RaPageLoader />}
               {!isPending && active.length === 0 && <p className="text-sm text-muted">No active rentals yet.</p>}
               {active.slice(0, 3).map((item) => (
                 <ActiveRentalCard

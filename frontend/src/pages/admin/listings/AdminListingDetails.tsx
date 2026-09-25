@@ -18,6 +18,7 @@ import { raToast } from "../../../lib/raToast"
 import { apiErrorMessage } from "../../../lib/formErrors"
 import { statusClass } from "../../../components/admin/adminUi"
 import { useAdminListing, useAdminRentals, useSetAdminListingStatus } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function Fact({
   icon: Icon,
@@ -55,7 +56,7 @@ function AdminListingDetails() {
   const activeRental = rentals.find((item) => item.listingId === listing?.id && item.status === "Active")
 
   if (isPending) {
-    return <div className="text-muted">Loading listing…</div>
+    return <RaPageLoader label="Loading listing…" />
   }
 
   if (!listing) {

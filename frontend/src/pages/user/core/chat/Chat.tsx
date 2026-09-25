@@ -4,6 +4,7 @@ import RaContainer from "../../../../components/container/RaContainer"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import ChatConversation from "./ChatConversation"
 import { useChats } from "../../../../hooks/queries/useChats"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function Chat() {
   const [params] = useSearchParams()
@@ -30,7 +31,7 @@ function Chat() {
                 <div className="text-sm text-muted">Messages about your listings and rentals</div>
               </div>
               <div className="flex-1 overflow-y-auto">
-                {isPending && <p className="px-4 py-6 text-sm text-muted">Loading chats…</p>}
+                {isPending && <RaPageLoader label="Loading chats…" />}
                 {!isPending && threads.length === 0 && (
                   <p className="px-4 py-6 text-sm text-muted">No conversations yet.</p>
                 )}

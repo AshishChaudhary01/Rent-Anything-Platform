@@ -8,6 +8,7 @@ import ReturnFlowHeader from "../ReturnFlowHeader"
 import { raToast } from "../../../../lib/raToast"
 import { useRental } from "../../../../hooks/queries/useRentals"
 import { useState } from "react"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function ConditionProof() {
   const [files, setFiles] = useState<MediaFile[]>([])
@@ -17,7 +18,7 @@ function ConditionProof() {
   const { data: rental, isPending } = useRental(rentalId)
 
   if (!rentalId) return <p className="px-6 py-10 text-muted">Choose a rental first.</p>
-  if (isPending || !rental) return <p className="px-6 py-10 text-muted">Loading rental…</p>
+  if (isPending || !rental) return <RaPageLoader label="Loading rental…" />
 
   const goMeetup = () => navigate(`/user/rent/return-meetup?rentalId=${rental.id}`)
 

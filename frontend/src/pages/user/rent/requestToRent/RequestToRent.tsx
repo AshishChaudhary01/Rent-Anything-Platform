@@ -13,6 +13,7 @@ import RaButton from "../../../../components/button/RaButton";
 import ReturnFlowHeader from "../ReturnFlowHeader";
 import { RENT_STEPS } from "../returnSteps";
 import { IoArrowBackOutline } from "react-icons/io5";
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function RequestToRent() {
   const isMobile = useMediaQuery({ maxWidth: 768 });
@@ -72,7 +73,7 @@ function RequestToRent() {
     return (
       <RaContainer>
         <RaContainerPadding>
-          <p className="text-muted">Loading listing…</p>
+          <RaPageLoader label="Loading listing…" />
         </RaContainerPadding>
       </RaContainer>
     );

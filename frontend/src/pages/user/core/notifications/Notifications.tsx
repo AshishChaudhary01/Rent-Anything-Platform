@@ -8,6 +8,7 @@ import NotificationItem from "../../../../components/notificationDropdown/Notifi
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications } from "../../../../hooks/queries/useNotifications"
 import { raToast } from "../../../../lib/raToast"
 import { useState } from "react"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function Notifications() {
   const [page, setPage] = useState(0)
@@ -46,7 +47,7 @@ function Notifications() {
             />
           </div>
           {isPending ? (
-            <p className="text-muted">Loading notifications…</p>
+            <RaPageLoader label="Loading notifications…" />
           ) : items.length === 0 ? (
             <p className="text-muted text-center py-8">No notifications yet.</p>
           ) : (

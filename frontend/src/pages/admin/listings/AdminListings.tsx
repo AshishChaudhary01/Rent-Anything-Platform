@@ -10,6 +10,7 @@ import { apiErrorMessage } from "../../../lib/formErrors"
 import AdminPagination from "../../../components/admin/AdminPagination"
 import { matchesSearch, paginate, selectClass, statusClass } from "../../../components/admin/adminUi"
 import { useAdminListings, useSetAdminListingStatus } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function AdminListings() {
   const { data: listings = [], isPending } = useAdminListings()
@@ -59,7 +60,7 @@ function AdminListings() {
       </div>
 
       {isPending ? (
-        <div className="text-sm text-muted">Loading listings…</div>
+        <RaPageLoader label="Loading listings…" />
       ) : (
         <div className="flex flex-col gap-3">
           {slice.map((item) => (

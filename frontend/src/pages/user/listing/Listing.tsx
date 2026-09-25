@@ -6,6 +6,7 @@ import ListingMain from "./main/ListingMain"
 import SummaryCard from "./summaryCard/SummaryCard"
 import { useMediaQuery } from "react-responsive"
 import { useListing } from "../../../hooks/queries/useListings"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function Listing() {
   const { id } = useParams()
@@ -13,7 +14,7 @@ function Listing() {
   const { data: listing, isPending, isError } = useListing(id)
 
   if (isPending) {
-    return <div className="px-6 py-10 text-muted">Loading listing…</div>
+    return <RaPageLoader label="Loading listing…" />
   }
   if (isError || !listing) {
     return <div className="px-6 py-10 text-muted">This listing is not available.</div>

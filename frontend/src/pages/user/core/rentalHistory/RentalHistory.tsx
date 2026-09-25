@@ -9,6 +9,7 @@ import RaSearchBar from "../../../../components/searchbar/RaSearchbar"
 import RaBadge from "../../../../components/badge/RaBadge"
 import StarRating from "../../../../components/rating/StarRating"
 import { useMyRentals } from "../../../../hooks/queries/useRentals"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 const selectClass = "bg-white border border-gray-200 rounded-full px-4 py-2 text-sm outline-none"
 
@@ -49,7 +50,7 @@ function RentalHistory() {
               <option value="name">Name</option>
             </select>
           </div>
-          {isPending && <p className="text-muted">Loading…</p>}
+          {isPending && <RaPageLoader />}
           {!isPending && filtered.length === 0 && (
             <div className="text-muted py-8 text-center">No past rentals match your search.</div>
           )}

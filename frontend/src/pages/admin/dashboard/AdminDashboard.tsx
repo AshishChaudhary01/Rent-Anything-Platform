@@ -25,6 +25,7 @@ import AdminPageHeader, { AdminSectionTitle } from "../../../components/admin/Ad
 import { raToast } from "../../../lib/raToast"
 import type { AdminRental } from "../../../services/admin.service"
 import { useAdminKyc, useAdminListings, useAdminRentals, useAdminReports, useAdminUsers } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function Stat({
   label,
@@ -158,7 +159,7 @@ function AdminDashboard() {
   }, [users, listings, rentals, reports, kycCases, selected, range, asOf])
 
   if (usersPending || listingsPending || rentalsPending || reportsPending || kycPending) {
-    return <div className="text-sm text-muted">Loading dashboard…</div>
+    return <RaPageLoader label="Loading dashboard…" />
   }
 
   const maxBar = Math.max(...scoped.chart.map((m) => m.amount), 1)

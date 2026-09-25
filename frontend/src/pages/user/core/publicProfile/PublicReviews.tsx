@@ -7,6 +7,7 @@ import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import StarRating from "../../../../components/rating/StarRating"
 import { usePublicProfile, usePublicReviews } from "../../../../hooks/queries/usePublicProfile"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 const selectClass = "bg-white border border-gray-200 rounded-full px-4 py-2 text-sm outline-none"
 const PAGE = 6
@@ -59,7 +60,7 @@ function PublicReviews() {
             </select>
           </div>
           {isPending ? (
-            <p className="text-muted">Loading reviews…</p>
+            <RaPageLoader label="Loading reviews…" />
           ) : (data?.items.length ?? 0) === 0 ? (
             <p className="text-muted py-8 text-center">No reviews match these filters.</p>
           ) : (

@@ -10,6 +10,7 @@ import {
 import RaCard from "../../../components/card/RaCard"
 import { statusClass } from "../../../components/admin/adminUi"
 import { useAdminRental } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function Fact({
   icon: Icon,
@@ -36,7 +37,7 @@ function AdminRentalDetails() {
   const { data: rental, isPending } = useAdminRental(id)
 
   if (isPending) {
-    return <div className="text-muted">Loading rental…</div>
+    return <RaPageLoader label="Loading rental…" />
   }
 
   if (!rental) {

@@ -14,6 +14,7 @@ import ChatLink from "../../core/chat/ChatLink"
 import { useRental } from "../../../../hooks/queries/useRentals"
 import { downloadReceipt } from "../../../../services/rental.service"
 import { raToast } from "../../../../lib/raToast"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function Confirmation() {
   const navigate = useNavigate()
@@ -41,7 +42,7 @@ function Confirmation() {
   }, [rental, navigate])
 
   if (isPending || !rental) {
-    return <p className="px-6 py-10 text-muted">Loading confirmation…</p>
+    return <RaPageLoader label="Loading confirmation…" />
   }
 
   return (

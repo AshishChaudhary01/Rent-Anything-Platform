@@ -8,6 +8,7 @@ import { apiErrorMessage } from "../../../lib/formErrors"
 import { statusClass } from "../../../components/admin/adminUi"
 import { profile01 } from "../../../utils/images"
 import { useAdminListings, useAdminRentals, useAdminUser, useSetAdminUserStatus } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -26,7 +27,7 @@ function AdminUserDetails() {
   const setUserStatus = useSetAdminUserStatus()
 
   if (isPending) {
-    return <div className="text-muted">Loading user…</div>
+    return <RaPageLoader label="Loading user…" />
   }
 
   if (!user) {

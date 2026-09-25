@@ -8,6 +8,7 @@ import RaSearchBar from "../../../components/searchbar/RaSearchbar"
 import AdminPagination from "../../../components/admin/AdminPagination"
 import { matchesSearch, paginate, selectClass, statusClass } from "../../../components/admin/adminUi"
 import { useAdminRentals } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function AdminRentals() {
   const { data: rentals = [], isPending } = useAdminRentals()
@@ -65,7 +66,7 @@ function AdminRentals() {
         </select>
       </div>
       {isPending ? (
-        <div className="text-sm text-muted">Loading rentals…</div>
+        <RaPageLoader label="Loading rentals…" />
       ) : (
         <div className="flex flex-col gap-3">
           {slice.map((rental) => (

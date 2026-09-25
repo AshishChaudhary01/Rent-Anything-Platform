@@ -12,6 +12,7 @@ import { PAGE_SIZE } from "../../../../data/catalog"
 import { raToast } from "../../../../lib/raToast"
 import { useAcceptRental, useDeclineRental, useOwnedRentals } from "../../../../hooks/queries/useRentals"
 import type { Rental, RentalStatus } from "../../../../types/rental.types"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 import {
   ownerDetailsPath,
   requestCardAction,
@@ -118,7 +119,7 @@ function ListingRequests() {
           </div>
 
           {isPending ? (
-            <div className="text-muted py-8 text-center">Loading requests…</div>
+            <RaPageLoader label="Loading requests…" />
           ) : slice.length === 0 ? (
             <div className="text-muted py-8 text-center">No requests match your search.</div>
           ) : (

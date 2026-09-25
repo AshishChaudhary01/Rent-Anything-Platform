@@ -8,6 +8,7 @@ import RaSearchBar from "../../../components/searchbar/RaSearchbar"
 import AdminPagination from "../../../components/admin/AdminPagination"
 import { matchesSearch, paginate, selectClass, statusClass } from "../../../components/admin/adminUi"
 import { useAdminListings, useAdminRentals, useAdminUser } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
   const { id } = useParams()
@@ -37,7 +38,7 @@ function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
   }, [rentals, user, query, status])
 
   if (isPending) {
-    return <div className="text-muted">Loading…</div>
+    return <RaPageLoader />
   }
 
   if (!user) {

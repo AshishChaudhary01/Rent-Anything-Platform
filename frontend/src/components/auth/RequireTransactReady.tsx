@@ -3,13 +3,14 @@ import { useMe } from "../../hooks/queries/useAccount"
 import { useAccountStore } from "../../store/accountStore"
 import RaCard from "../card/RaCard"
 import RaButton from "../button/RaButton"
+import RaPageLoader from "../feedback/RaPageLoader"
 
 function RequireTransactReady({ children }: { children: React.ReactNode }) {
   const { isPending } = useMe()
   const { canTransact, hasAvatar, profileComplete, kycStatus } = useAccountStore()
 
   if (isPending && !canTransact) {
-    return <div className="px-6 py-10 text-muted text-sm">Checking your account…</div>
+    return <RaPageLoader label="Checking your account…" />
   }
 
   if (canTransact) return children

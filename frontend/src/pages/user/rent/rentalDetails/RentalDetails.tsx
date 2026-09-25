@@ -7,6 +7,7 @@ import RentalDetailsMain from "./RentalDetailsMain"
 import RentalDetailsSummary from "./RentalDetailsSummary"
 import { useRental } from "../../../../hooks/queries/useRentals"
 import { useListing } from "../../../../hooks/queries/useListings"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function RentalDetails() {
   const isMobile = useMediaQuery({ maxWidth: 768 })
@@ -19,7 +20,7 @@ function RentalDetails() {
     return <p className="px-6 py-10 text-muted">Choose a rental from My rentals or your listing.</p>
   }
   if (isPending) {
-    return <p className="px-6 py-10 text-muted">Loading rental…</p>
+    return <RaPageLoader label="Loading rental…" />
   }
   if (isError || !rental) {
     return <p className="px-6 py-10 text-muted">This rental is not available.</p>

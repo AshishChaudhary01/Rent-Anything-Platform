@@ -92,7 +92,7 @@ const Login = () => {
           <Link to="/auth/forgot-password" className="text-primary text-end">Forgot password?</Link>
 
           {/* Login */}
-          <RaButton type="submit" btnText={isPending || isSubmitting ? "Signing in" : "Login"} variant="primary" disabled={isPending || isSubmitting} />
+          <RaButton type="submit" btnText={isPending || isSubmitting ? "Signing in" : "Login"} variant="primary" loading={isPending || isSubmitting} />
         </form>
 
 

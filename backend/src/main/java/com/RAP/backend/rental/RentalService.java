@@ -8,6 +8,7 @@ import com.RAP.backend.listing.Listing;
 import com.RAP.backend.listing.ListingCovers;
 import com.RAP.backend.listing.ListingRepository;
 import com.RAP.backend.listing.ListingStatus;
+import com.RAP.backend.cache.RapCacheStore;
 import com.RAP.backend.notify.NotificationKind;
 import com.RAP.backend.notify.NotificationService;
 import com.RAP.backend.payment.PaymentGateway;
@@ -58,6 +59,7 @@ public class RentalService {
 	private final NotificationService notificationService;
 	@SuppressWarnings("unused")
 	private final ReceiptService receiptService;
+	private final RapCacheStore rapCache;
 	private final SecureRandom random = new SecureRandom();
 
 	public RentalService(
@@ -69,7 +71,8 @@ public class RentalService {
 			WalletService walletService,
 			ReviewRepository reviewRepository,
 			NotificationService notificationService,
-			ReceiptService receiptService
+			ReceiptService receiptService,
+			RapCacheStore rapCache
 	) {
 		this.rentalRepository = rentalRepository;
 		this.listingRepository = listingRepository;
@@ -80,6 +83,7 @@ public class RentalService {
 		this.reviewRepository = reviewRepository;
 		this.notificationService = notificationService;
 		this.receiptService = receiptService;
+		this.rapCache = rapCache;
 	}
 
 	@Transactional(readOnly = true)
@@ -645,6 +649,7 @@ public class RentalService {
 		Listing listing = rental.getListing();
 		listing.setStatus(ListingStatus.RENTED);
 		listingRepository.save(listing);
+		rapCache.evictCatalog();
 	}
 
 	private void notifyCommitmentPaid(Rental rental) {
@@ -718,6 +723,7 @@ public class RentalService {
 		if (remaining == 0 && listing.getStatus() == ListingStatus.RENTED) {
 			listing.setStatus(ListingStatus.AVAILABLE);
 			listingRepository.save(listing);
+			rapCache.evictCatalog();
 		}
 	}
 

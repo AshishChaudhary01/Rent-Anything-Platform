@@ -9,6 +9,7 @@ import AdminPagination from "../../../components/admin/AdminPagination"
 import { matchesSearch, paginate, selectClass, statusClass } from "../../../components/admin/adminUi"
 import { profile01 } from "../../../utils/images"
 import { useAdminUsers } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function AdminUsers() {
   const { data: users = [], isPending } = useAdminUsers()
@@ -41,7 +42,7 @@ function AdminUsers() {
         </select>
       </div>
       {isPending ? (
-        <div className="text-sm text-muted">Loading users…</div>
+        <RaPageLoader label="Loading users…" />
       ) : (
         <div className="flex flex-col gap-3">
           {slice.map((user) => (

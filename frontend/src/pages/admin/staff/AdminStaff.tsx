@@ -10,6 +10,7 @@ import { matchesSearch, paginate, selectClass, statusClass } from "../../../comp
 import { profile01 } from "../../../utils/images"
 import { useAuthStore } from "../../../store/authStore"
 import { useAdminStaff } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function AdminStaff() {
   const role = useAuthStore((s) => s.role)
@@ -59,7 +60,7 @@ function AdminStaff() {
       </div>
 
       {isPending ? (
-        <div className="text-sm text-muted">Loading admins…</div>
+        <RaPageLoader label="Loading admins…" />
       ) : (
         <div className="flex flex-col gap-3">
           {slice.map((user) => (

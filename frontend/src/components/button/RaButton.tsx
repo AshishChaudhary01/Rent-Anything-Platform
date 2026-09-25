@@ -19,6 +19,7 @@ export interface IButtonProps {
   iconPosition?: "left" | "right";
   widthFill?: boolean;
   styleClass?: string;
+  loading?: boolean;
 }
 
 const variantStlyes = {
@@ -51,26 +52,33 @@ const RaButton = ({
   icon,
   iconPosition,
   styleClass,
+  loading = false,
 }: IButtonProps) => {
   const iconIsLeft = iconPosition === "left";
+  const busy = Boolean(disabled || loading);
   return (
     <button
       type={type}
       onClick={clickFunc}
-      disabled={disabled}
+      disabled={busy}
+      aria-busy={loading || undefined}
       className={`${buttonStyles[size]} rounded-full font-bold ${variantStlyes[variant]} ${!widthFill ? "" : "w-full px-auto"} flex items-center justify-center gap-2 hover:shadow-lg transition group cursor-pointer disabled:opacity-50 
         disabled:cursor-not-allowed 
         disabled:pointer-events-none 
         disabled:shadow-none
-        ${!disabled ? "cursor-pointer" : ""} ${styleClass}`}
+        ${!busy ? "cursor-pointer" : ""} ${styleClass}`}
     >
-      {iconIsLeft && icon && (
-        <span className="group-hover:translate-x-2 transition-transform duration-300">
-          {icon}
-        </span>
+      {loading ? (
+        <span className="rap-spinner size-4 border-2" />
+      ) : (
+        iconIsLeft && icon && (
+          <span className="group-hover:translate-x-2 transition-transform duration-300">
+            {icon}
+          </span>
+        )
       )}
       <span>{btnText}</span>
-      {!iconIsLeft && icon && (
+      {!loading && !iconIsLeft && icon && (
         <span className="group-hover:translate-x-2 transition-transform duration-300">
           {icon}
         </span>

@@ -8,6 +8,7 @@ import ReturnFlowHeader from "../ReturnFlowHeader"
 import OwnerReturnNav from "../OwnerReturnNav"
 import { OWNER_RETURN_STEPS } from "../returnSteps"
 import { useRental } from "../../../../hooks/queries/useRentals"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function OwnerReturnReview() {
   const navigate = useNavigate()
@@ -17,7 +18,7 @@ function OwnerReturnReview() {
   const when = rental?.returnMeetupAt ? new Date(rental.returnMeetupAt) : null
 
   if (!rentalId) return <p className="px-6 py-10 text-muted">Choose a rental first.</p>
-  if (isPending || !rental) return <p className="px-6 py-10 text-muted">Loading rental…</p>
+  if (isPending || !rental) return <RaPageLoader label="Loading rental…" />
 
   return (
     <RaContainerLG>

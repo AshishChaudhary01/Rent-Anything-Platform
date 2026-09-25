@@ -6,6 +6,7 @@ import ListingsSection from "../../../../components/listingsSection/ListingsSect
 import RaSearchBar from "../../../../components/searchbar/RaSearchbar"
 import { useListings } from "../../../../hooks/queries/useListings"
 import { toListingCard } from "../../../../types/listing.types"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 const UserDashboard = () => {
   const { data, isPending } = useListings({ size: 40, sort: "newest" })
@@ -26,7 +27,7 @@ const UserDashboard = () => {
               <RaCategoryBar />
             </div>
             {isPending ? (
-              <div className="text-muted py-10">Loading listings…</div>
+              <RaPageLoader label="Loading listings…" />
             ) : cards.length === 0 ? (
               <div className="text-muted py-10">No listings yet. Be the first to share an item nearby.</div>
             ) : (

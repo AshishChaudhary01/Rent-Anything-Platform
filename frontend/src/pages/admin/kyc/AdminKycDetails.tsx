@@ -8,6 +8,7 @@ import { raToast } from "../../../lib/raToast"
 import { apiErrorMessage } from "../../../lib/formErrors"
 import { statusClass } from "../../../components/admin/adminUi"
 import { useAdminKycCase, useReviewAdminKyc } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function AdminKycDetails() {
   const { id } = useParams()
@@ -17,7 +18,7 @@ function AdminKycDetails() {
   const [notesError, setNotesError] = useState("")
 
   if (isPending) {
-    return <div className="text-muted">Loading KYC case…</div>
+    return <RaPageLoader label="Loading KYC case…" />
   }
 
   if (!item) {

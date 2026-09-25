@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import { useListingReviews } from "../../../../hooks/queries/useRentals"
 import StarRating from "../../../../components/rating/StarRating"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function ListingReview({ listingId }: { listingId?: string }) {
   const { data, isPending } = useListingReviews(listingId)
@@ -18,7 +19,7 @@ function ListingReview({ listingId }: { listingId?: string }) {
       <div>
         <p className="text-lg md:text-2xl font-bold">Reviews</p>
         {isPending ? (
-          <p className="text-sm text-muted mt-1">Loading reviews…</p>
+          <RaPageLoader label="Loading reviews…" />
         ) : count === 0 ? (
           <p className="text-sm text-muted mt-1">No reviews yet. Ratings appear after completed rentals.</p>
         ) : (

@@ -24,6 +24,7 @@ import ReportLink from "../../../../components/report/ReportLink"
 import { raToast } from "../../../../lib/raToast"
 import { useAcceptRental, useDeclineRental, useRental } from "../../../../hooks/queries/useRentals"
 import type { Rental } from "../../../../types/rental.types"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 import {
   OWNER_RENT_STEPS,
   ownerNextAction,
@@ -103,7 +104,7 @@ function RequestDetails() {
   const { data: rental, isPending, isError } = useRental(id)
 
   if (isPending) {
-    return <p className="px-6 py-10 text-muted">Loading request…</p>
+    return <RaPageLoader label="Loading request…" />
   }
   if (isError || !rental) {
     return (

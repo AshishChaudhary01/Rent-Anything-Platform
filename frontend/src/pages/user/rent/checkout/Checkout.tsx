@@ -14,6 +14,7 @@ import { useCancelRental, usePaymentConfig, useRental } from "../../../../hooks/
 import RaButton from "../../../../components/button/RaButton"
 import { initiatePayment, submitEsewaForm } from "../../../../services/rental.service"
 import { esewa } from "../../../../utils/images"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function Checkout() {
   const navigate = useNavigate()
@@ -73,7 +74,7 @@ function Checkout() {
     return <p className="px-6 py-10 text-muted">Missing rental. Start from a listing.</p>
   }
   if (isPending || !rental) {
-    return <p className="px-6 py-10 text-muted">Loading checkout…</p>
+    return <RaPageLoader label="Loading checkout…" />
   }
 
   const remaining = rental.status === "MEETUP_CONFIRMED"

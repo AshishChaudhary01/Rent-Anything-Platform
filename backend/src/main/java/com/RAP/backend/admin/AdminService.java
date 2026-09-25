@@ -9,6 +9,7 @@ import com.RAP.backend.admin.dto.ReviewKycRequest;
 import com.RAP.backend.admin.dto.UpdateAdminRequest;
 import com.RAP.backend.auth.CurrentUser;
 import com.RAP.backend.auth.RefreshTokenRepository;
+import com.RAP.backend.cache.RapCacheStore;
 import com.RAP.backend.common.ApiException;
 import com.RAP.backend.config.PaymentProperties;
 import com.RAP.backend.listing.Listing;
@@ -52,6 +53,7 @@ public class AdminService {
 	private final SavedWalletRepository walletRepository;
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final EmailOtpRepository emailOtpRepository;
+	private final RapCacheStore rapCache;
 
 	public AdminService(
 			CurrentUser currentUser,
@@ -65,7 +67,8 @@ public class AdminService {
 			AppNotificationRepository notificationRepository,
 			SavedWalletRepository walletRepository,
 			RefreshTokenRepository refreshTokenRepository,
-			EmailOtpRepository emailOtpRepository
+			EmailOtpRepository emailOtpRepository,
+			RapCacheStore rapCache
 	) {
 		this.currentUser = currentUser;
 		this.userRepository = userRepository;
@@ -79,6 +82,7 @@ public class AdminService {
 		this.walletRepository = walletRepository;
 		this.refreshTokenRepository = refreshTokenRepository;
 		this.emailOtpRepository = emailOtpRepository;
+		this.rapCache = rapCache;
 	}
 
 	@Transactional(readOnly = true)
@@ -177,7 +181,9 @@ public class AdminService {
 		} else {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Use Available, Disabled, or Removed");
 		}
-		return AdminListingResponse.from(listingRepository.save(listing));
+		Listing saved = listingRepository.save(listing);
+		rapCache.evictCatalog();
+		return AdminListingResponse.from(saved);
 	}
 
 	@Transactional(readOnly = true)

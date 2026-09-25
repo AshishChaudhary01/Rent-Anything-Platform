@@ -4,6 +4,7 @@ import RaCard from "../../../components/card/RaCard"
 import AdminPageHeader, { AdminSectionTitle } from "../../../components/admin/AdminPageHeader"
 import { useAuthStore } from "../../../store/authStore"
 import { useAdminOverview } from "../../../hooks/queries/useAdmin"
+import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
 function Rule({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
@@ -33,7 +34,7 @@ function AdminSettings() {
 
       <RaCard round="round" styleClass="flex flex-col gap-3 text-sm">
         {isPending || !overview ? (
-          <div className="text-muted">Loading rules…</div>
+          <RaPageLoader label="Loading rules…" />
         ) : (
           <>
             <Rule icon={IoCashOutline} label="Platform commission" value={`${feePercent}%`} />

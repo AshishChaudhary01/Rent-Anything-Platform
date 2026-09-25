@@ -8,6 +8,7 @@ import StarRating from "../../../../components/rating/StarRating"
 import { raToast } from "../../../../lib/raToast"
 import ReportLink from "../../../../components/report/ReportLink"
 import { useRental, useSubmitReview } from "../../../../hooks/queries/useRentals"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function RateRental() {
   const navigate = useNavigate()
@@ -33,7 +34,7 @@ function RateRental() {
     return <p className="px-6 py-10 text-muted">Choose a completed rental to rate.</p>
   }
   if (isPending || !rental) {
-    return <p className="px-6 py-10 text-muted">Loading rental…</p>
+    return <RaPageLoader label="Loading rental…" />
   }
 
   return (

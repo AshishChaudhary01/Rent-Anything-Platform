@@ -11,6 +11,7 @@ import { useMyListings } from "../../../../hooks/queries/useListings"
 import { useOwnedRentals } from "../../../../hooks/queries/useRentals"
 import { listingCover, listingOccupancy, type Listing } from "../../../../types/listing.types"
 import { ownerDetailsPath } from "../listingRequests/ownerRequestProgress"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function badgeVariant(key: ReturnType<typeof listingOccupancy>["key"]) {
   if (key === "active") return "warning" as const
@@ -140,7 +141,7 @@ function MyListings() {
 
           <div className="text-lg md:text-xl font-bold">Your inventory</div>
           {isPending ? (
-            <div className="text-muted">Loading your listings…</div>
+            <RaPageLoader label="Loading your listings…" />
           ) : filtered.length === 0 ? (
             <div className="text-muted">No listings match these filters.</div>
           ) : (

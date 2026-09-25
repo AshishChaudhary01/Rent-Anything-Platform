@@ -2,6 +2,8 @@ package com.RAP.backend.listing;
 
 import com.RAP.backend.account.AccountReadiness;
 import com.RAP.backend.auth.CurrentUser;
+import com.RAP.backend.cache.RapCacheStore;
+import com.RAP.backend.cache.RapCaches;
 import com.RAP.backend.common.ApiException;
 import com.RAP.backend.listing.dto.ActiveBookingResponse;
 import com.RAP.backend.listing.dto.CreateListingRequest;
@@ -45,17 +47,20 @@ public class ListingService {
 	private final RentalRepository rentalRepository;
 	private final CurrentUser currentUser;
 	private final StorageService storageService;
+	private final RapCacheStore rapCache;
 
 	public ListingService(
 			ListingRepository listingRepository,
 			RentalRepository rentalRepository,
 			CurrentUser currentUser,
-			StorageService storageService
+			StorageService storageService,
+			RapCacheStore rapCache
 	) {
 		this.listingRepository = listingRepository;
 		this.rentalRepository = rentalRepository;
 		this.currentUser = currentUser;
 		this.storageService = storageService;
+		this.rapCache = rapCache;
 	}
 
 	@Transactional(readOnly = true)
@@ -66,16 +71,27 @@ public class ListingService {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Unknown category");
 		}
 		String search = blankToNull(query);
+		String searchKey = search == null ? "" : search.toLowerCase(Locale.ROOT);
 		if (search != null) {
 			search = "%" + search.toLowerCase(Locale.ROOT) + "%";
 		}
+		String cacheKey = viewer.getId() + "|" + nullToEmpty(categoryFilter) + "|" + searchKey + "|" + sort + "|" + page + "|" + size;
+		final String searchLike = search;
+		return rapCache.<ListingPageResponse>getOrLoad(
+				RapCaches.LISTING_BROWSE,
+				cacheKey,
+				() -> loadBrowsePage(viewer.getId(), categoryFilter, searchLike, sort, page, size)
+		);
+	}
+
+	private ListingPageResponse loadBrowsePage(UUID viewerId, String categoryFilter, String searchLike, String sort, int page, int size) {
 		Page<Listing> results = listingRepository.searchPublic(
 				List.of(ListingStatus.AVAILABLE, ListingStatus.RENTED),
 				categoryFilter,
-				search,
+				searchLike,
 				PageRequest.of(Math.max(page, 0), clampSize(size), sortBy(sort))
 		);
-		return ListingPageResponse.from(results.map(listing -> ListingResponse.from(listing, viewer.getId())));
+		return ListingPageResponse.from(results.map(listing -> ListingResponse.from(listing, viewerId)));
 	}
 
 	@Transactional(readOnly = true)
@@ -95,7 +111,11 @@ public class ListingService {
 		if (listing.getStatus() == ListingStatus.REMOVED && !listing.getOwner().getId().equals(viewer.getId())) {
 			throw new ApiException(HttpStatus.NOT_FOUND, "Listing not found");
 		}
-		return toResponse(listing, viewer);
+		return rapCache.<ListingResponse>getOrLoad(
+				RapCaches.LISTING_DETAIL,
+				viewer.getId() + "|" + id,
+				() -> toResponse(listing, viewer)
+		);
 	}
 
 	@Transactional
@@ -137,7 +157,9 @@ public class ListingService {
 		if (listing.getMedia().size() > MAX_MEDIA) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "You can add up to 8 photos or videos");
 		}
-		return ListingResponse.from(listingRepository.save(listing), owner.getId());
+		ListingResponse created = ListingResponse.from(listingRepository.save(listing), owner.getId());
+		rapCache.evictCatalog();
+		return created;
 	}
 
 	@Transactional
@@ -185,7 +207,9 @@ public class ListingService {
 		if (listing.getMedia().size() > MAX_MEDIA) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "You can add up to 8 photos or videos");
 		}
-		return ListingResponse.from(listingRepository.save(listing), user.getId(), bookingForOwner(listing, user), activityFor(listing));
+		ListingResponse updated = ListingResponse.from(listingRepository.save(listing), user.getId(), bookingForOwner(listing, user), activityFor(listing));
+		rapCache.evictCatalog();
+		return updated;
 	}
 
 	private ListingResponse toResponse(Listing listing, User viewer) {
@@ -303,6 +327,10 @@ public class ListingService {
 			return 20;
 		}
 		return Math.min(size, 50);
+	}
+
+	private static String nullToEmpty(String value) {
+		return value == null ? "" : value;
 	}
 
 	private static String blankToNull(String value) {
