@@ -103,6 +103,10 @@ public class User {
 	@Column(name = "updated_at", nullable = false)
 	private Instant updatedAt;
 
+	public boolean hasLocalPassword() {
+		return passwordHash != null && !passwordHash.isBlank();
+	}
+
 	@PrePersist
 	void onCreate() {
 		Instant now = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS);

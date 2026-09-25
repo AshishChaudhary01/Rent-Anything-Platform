@@ -122,12 +122,12 @@ public class AccountService {
 	@Transactional
 	public void changePassword(ChangePasswordRequest request) {
 		User user = currentUser.require();
-		if (user.getPasswordHash() == null || user.getPasswordHash().isBlank()) {
+		if (!user.hasLocalPassword()) {
 			throw new ApiException(
 					HttpStatus.BAD_REQUEST,
 					"This account uses Google sign-in",
 					"This account uses Google sign-in",
-					Map.of("currentPassword", "This account uses Google sign-in. Set a password after linking one.")
+					Map.of("currentPassword", "Google accounts sign in with Google, not a RAP password")
 			);
 		}
 		if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {

@@ -14,6 +14,7 @@ export type MeUser = {
   hasAvatar: boolean
   profileComplete: boolean
   canTransact: boolean
+  hasPassword: boolean
   createdAt: string
   isActive: boolean
   accountLocked: boolean

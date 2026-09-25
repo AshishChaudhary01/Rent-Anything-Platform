@@ -30,7 +30,7 @@ public class PasswordResetService {
 	public void request(String email) {
 		String normalized = OtpService.normalize(email);
 		User user = userRepository.findByEmailIgnoreCase(normalized).orElse(null);
-		if (user == null || user.getPasswordHash() == null || user.getPasswordHash().isBlank()) {
+		if (user == null || !user.hasLocalPassword()) {
 			return;
 		}
 		otpService.send(normalized, OtpPurpose.RESET_PASSWORD);
@@ -42,6 +42,9 @@ public class PasswordResetService {
 		otpService.consume(email, OtpPurpose.RESET_PASSWORD, request.code());
 		User user = userRepository.findByEmailIgnoreCase(email)
 				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "No password account matches that email"));
+		if (!user.hasLocalPassword()) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "This account uses Google sign-in");
+		}
 		user.setPasswordHash(passwordEncoder.encode(request.password()));
 		userRepository.save(user);
 	}

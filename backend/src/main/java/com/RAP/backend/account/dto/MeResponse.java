@@ -4,6 +4,7 @@ import com.RAP.backend.account.AccountReadiness;
 import com.RAP.backend.user.KycStatus;
 import com.RAP.backend.user.Role;
 import com.RAP.backend.user.User;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ public record MeResponse(
 		boolean hasAvatar,
 		boolean profileComplete,
 		boolean canTransact,
+		@JsonProperty("hasPassword") boolean hasPassword,
 		Instant createdAt,
 		boolean isActive,
 		boolean accountLocked,
@@ -42,6 +44,7 @@ public record MeResponse(
 				AccountReadiness.hasAvatar(user),
 				AccountReadiness.profileComplete(user),
 				AccountReadiness.canTransact(user),
+				user.hasLocalPassword(),
 				user.getCreatedAt(),
 				user.isActive(),
 				user.isAccountLocked(),

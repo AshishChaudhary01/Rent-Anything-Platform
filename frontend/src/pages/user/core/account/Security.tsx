@@ -12,15 +12,17 @@ import { useAccountStore } from "../../../../store/accountStore"
 import { useChangePassword, useMe } from "../../../../hooks/queries/useAccount"
 import { apiFieldErrors } from "../../../../lib/formErrors"
 import { requiredPassword } from "../../../../schemas/zod.schema"
+import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
 function Security() {
   const { email } = useAccountStore()
-  const { refetch } = useMe()
+  const { data: me, isPending: loadingMe, refetch } = useMe()
   const { mutate: savePassword, isPending } = useChangePassword()
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const canChangePassword = Boolean(me?.hasPassword)
 
   return (
     <RaContainer>
@@ -30,7 +32,12 @@ function Security() {
           <div>
             <div className="text-xl md:text-2xl font-bold">Security</div>
             <div className="text-sm md:text-base font-light text-muted">
-              Email changes need a one-time code sent to the new address. Password updates use your current password.
+              Email changes need a one-time code sent to the new address
+              {loadingMe
+                ? "."
+                : canChangePassword
+                  ? ". Password updates use your current password."
+                  : ". This account signs in with Google."}
             </div>
           </div>
 
@@ -41,6 +48,16 @@ function Security() {
             }}
           />
 
+          {loadingMe ? (
+            <RaPageLoader label="Loading security…" />
+          ) : !canChangePassword ? (
+            <RaCard round="round">
+              <div className="font-semibold">Password</div>
+              <p className="text-sm text-muted mt-1">
+                You registered with Google, so RAP does not keep a password for this account. Continue signing in with Google.
+              </p>
+            </RaCard>
+          ) : (
           <form
             className="flex flex-col gap-y-4"
             onSubmit={(e) => {
@@ -113,6 +130,7 @@ function Security() {
             </RaCard>
             <RaButton type="submit" btnText={isPending ? "Updating" : "Update password"} disabled={isPending} />
           </form>
+          )}
         </div>
       </RaContainerPadding>
     </RaContainer>
