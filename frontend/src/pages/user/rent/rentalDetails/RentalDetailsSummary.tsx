@@ -4,6 +4,8 @@ import RaButton from "../../../../components/button/RaButton"
 import RaCard from "../../../../components/card/RaCard"
 import RaMapView from "../../../../components/maps/RaMapView"
 import ReportLink from "../../../../components/report/ReportLink"
+import { downloadReceipt } from "../../../../services/rental.service"
+import { raToast } from "../../../../lib/raToast"
 import type { Rental } from "../../../../types/rental.types"
 
 function RentalDetailsSummary({ rental }: { rental: Rental }) {
@@ -59,7 +61,7 @@ function RentalDetailsSummary({ rental }: { rental: Rental }) {
           </div>
         )}
         <div className="flex justify-between text-lg font-bold">
-          <span>Due at pickup</span>
+          <span>{rental.remainingPaid ? "Deposit due at pickup" : "Due to start (remaining rent + deposit)"}</span>
           <span className="text-primary">Nrs. {Number(rental.payLater).toLocaleString()}</span>
         </div>
 
@@ -91,10 +93,38 @@ function RentalDetailsSummary({ rental }: { rental: Rental }) {
             <RaButton type="button" btnText="Go to meetup / scan QR" variant="camera" />
           </Link>
         )}
+        {rental.status === "MEETUP_CONFIRMED" && rental.renter && (
+          <Link to={`/user/rent/checkout?rentalId=${rental.id}&phase=remaining`}>
+            <RaButton type="button" btnText="Pay remaining rent" />
+          </Link>
+        )}
+        {rental.status === "MEETUP_CONFIRMED" && rental.owner && (
+          <div className="text-sm text-muted">Waiting for the renter to pay remaining rent.</div>
+        )}
         {rental.status === "ACTIVE" && (
           <Link to={rental.returnScheduled ? `/user/rent/return-meetup?rentalId=${rental.id}` : `/user/rent/return-schedule?rentalId=${rental.id}`}>
             <RaButton type="button" btnText={rental.returnScheduled ? "Continue return meetup" : "Start return"} variant="success" />
           </Link>
+        )}
+        {(rental.status === "PAID" || rental.status === "MEETUP_CONFIRMED" || rental.status === "ACTIVE" || rental.status === "COMPLETED") && (
+          <RaButton
+            type="button"
+            btnText="Download commitment receipt"
+            variant="outline"
+            clickFunc={() => {
+              void downloadReceipt(rental.id, "COMMITMENT").catch((error) => raToast.fromError(error, "Could not download receipt"))
+            }}
+          />
+        )}
+        {(rental.status === "ACTIVE" || rental.status === "COMPLETED") && (
+          <RaButton
+            type="button"
+            btnText="Download rent receipt"
+            variant="outline"
+            clickFunc={() => {
+              void downloadReceipt(rental.id, "RENT").catch((error) => raToast.fromError(error, "Could not download receipt"))
+            }}
+          />
         )}
         {rental.canReview && (
           <Link to={`/user/rent/rate?rentalId=${rental.id}`}>

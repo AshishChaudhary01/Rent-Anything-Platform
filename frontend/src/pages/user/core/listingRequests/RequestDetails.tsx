@@ -74,7 +74,10 @@ function Actions({ rental }: { rental: Rental }) {
         </div>
       )}
       {rental.status === "PENDING_PAYMENT" && (
-        <div className="text-sm text-muted">No action needed until the renter pays.</div>
+        <div className="text-sm text-muted">No action needed until the renter pays the commitment fee.</div>
+      )}
+      {rental.status === "MEETUP_CONFIRMED" && (
+        <div className="text-sm text-muted">Pickup QR matched. Waiting for the renter to pay remaining rent.</div>
       )}
       <ChatLink rentalId={rental.id} btnText={`Chat with ${rental.renterName}`} variant="outline" />
       <ReportLink

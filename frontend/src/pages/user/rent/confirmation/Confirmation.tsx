@@ -1,15 +1,6 @@
 import { useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import {
-  IoArrowForwardOutline,
-  IoCalendarOutline,
-  IoCheckmarkCircle,
-  IoCubeOutline,
-  IoLocationOutline,
-  IoPersonOutline,
-  IoShieldCheckmarkOutline,
-  IoQrCodeOutline,
-} from "react-icons/io5"
+import { IoArrowForwardOutline, IoCalendarOutline, IoCheckmarkCircle, IoCubeOutline, IoDownloadOutline, IoLocationOutline, IoPersonOutline, IoShieldCheckmarkOutline, IoQrCodeOutline } from "react-icons/io5"
 import RaContainerLG from "../../../../components/container/RaContainerLG"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import RaCard from "../../../../components/card/RaCard"
@@ -21,6 +12,8 @@ import RentFlowLeave from "../RentFlowLeave"
 import { RENT_STEPS } from "../returnSteps"
 import ChatLink from "../../core/chat/ChatLink"
 import { useRental } from "../../../../hooks/queries/useRentals"
+import { downloadReceipt } from "../../../../services/rental.service"
+import { raToast } from "../../../../lib/raToast"
 
 function Confirmation() {
   const navigate = useNavigate()
@@ -40,6 +33,10 @@ function Confirmation() {
     }
     if (rental.status === "PENDING_PAYMENT" || rental.status === "CANCELLED") {
       navigate(`/user/rent/checkout?rentalId=${rental.id}`, { replace: true })
+      return
+    }
+    if (rental.status === "MEETUP_CONFIRMED") {
+      navigate(`/user/rent/checkout?rentalId=${rental.id}&phase=remaining`, { replace: true })
     }
   }, [rental, navigate])
 
@@ -51,18 +48,22 @@ function Confirmation() {
     <RaContainerLG>
       <RaContainerPadding>
         <div className="max-w-xl mx-auto flex flex-col gap-y-6 pb-10">
-          <ReturnFlowHeader current={2} title="Rent Item" steps={RENT_STEPS} />
+          <ReturnFlowHeader current={rental.status === "ACTIVE" ? 4 : 2} title="Rent Item" steps={RENT_STEPS} />
 
           <div className="text-center space-y-2">
             <IoCheckmarkCircle className="size-14 mx-auto text-success" />
-            <div className="text-xl font-bold">Booking Confirmed</div>
+            <div className="text-xl font-bold">{rental.status === "ACTIVE" ? "Rental started" : "Booking Confirmed"}</div>
             <div className="text-sm md:text-base font-light text-muted">
-              Payment received. You can leave now and come back from My rentals, or go to meetup when you meet the owner.
+              {rental.status === "ACTIVE"
+                ? "Remaining rent is paid. The rental is now active."
+                : "Commitment received. Meet the owner, scan QR, then pay remaining rent to start."}
             </div>
           </div>
 
-          <RentHint icon={<IoQrCodeOutline className="size-6" />} title="Next: scan at pickup" tone="success">
-            The rental starts only after one of you scans the other person’s QR. You do not need to stay on this page.
+          <RentHint icon={<IoQrCodeOutline className="size-6" />} title={rental.status === "ACTIVE" ? "Item is with you" : "Next: scan at pickup"} tone="success">
+            {rental.status === "ACTIVE"
+              ? "Return later from My rentals. Download your payment receipt below."
+              : "The rental starts only after pickup QR and remaining payment."}
           </RentHint>
 
           <RaCard round="round" bg="accent" styleClass="flex flex-col gap-y-3">
@@ -79,9 +80,13 @@ function Confirmation() {
               <div>
                 <div className="flex items-center gap-2">
                   <div className="font-semibold">{rental.listingTitle}</div>
-                  <RaBadge badgeText="Paid" size="sm" />
+                  <RaBadge badgeText={rental.status === "ACTIVE" ? "Active" : "Paid"} size="sm" />
                 </div>
-                <div className="text-sm text-muted">Nrs. {Number(rental.commitmentFee)} held as commitment</div>
+                <div className="text-sm text-muted">
+                  {rental.status === "ACTIVE"
+                    ? `Nrs. ${Number(rental.rentalTotal).toLocaleString()} rental paid`
+                    : `Nrs. ${Number(rental.commitmentFee).toLocaleString()} held as commitment`}
+                </div>
               </div>
             </div>
           </RaCard>
@@ -122,16 +127,39 @@ function Confirmation() {
 
           <RentHint icon={<IoShieldCheckmarkOutline className="size-6" />} title="Fee is held, not paid out" tone="warning">
             {rental.escrowNote || "RAP holds the commitment fee until the rental is completed."}
-            {" "}Daily rent and deposit are due at pickup. If the owner cancels before pickup, you get a refund. If you cancel within a day of start, the fee may be kept.
           </RentHint>
 
+          {rental.status !== "ACTIVE" && (
+            <RaButton
+              type="button"
+              btnText="Go to meetup / scan QR"
+              variant="primary"
+              icon={<IoArrowForwardOutline />}
+              clickFunc={() => navigate(`/user/rent/meetup?rentalId=${rental.id}`)}
+            />
+          )}
           <RaButton
             type="button"
-            btnText="Go to meetup / scan QR"
-            variant="primary"
-            icon={<IoArrowForwardOutline />}
-            clickFunc={() => navigate(`/user/rent/meetup?rentalId=${rental.id}`)}
+            btnText="Download commitment receipt"
+            variant="secondary"
+            icon={<IoDownloadOutline />}
+            iconPosition="left"
+            clickFunc={() => {
+              void downloadReceipt(rental.id, "COMMITMENT").catch((error) => raToast.fromError(error, "Could not download receipt"))
+            }}
           />
+          {rental.status === "ACTIVE" && Number(rental.rentalTotal) > Number(rental.commitmentFee) && (
+            <RaButton
+              type="button"
+              btnText="Download rent receipt"
+              variant="outline"
+              icon={<IoDownloadOutline />}
+              iconPosition="left"
+              clickFunc={() => {
+                void downloadReceipt(rental.id, "RENT").catch((error) => raToast.fromError(error, "Could not download receipt"))
+              }}
+            />
+          )}
           <RentFlowLeave owner={rental.owner} listingId={rental.listingId} rentalId={rental.id} />
         </div>
       </RaContainerPadding>

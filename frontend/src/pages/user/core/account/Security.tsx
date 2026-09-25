@@ -9,13 +9,13 @@ import RaInput from "../../../../components/input/RaInput"
 import RaButton from "../../../../components/button/RaButton"
 import ContactOtpChange from "../../../../components/account/ContactOtpChange"
 import { useAccountStore } from "../../../../store/accountStore"
-import { useChangePassword, useUpdateContact } from "../../../../hooks/queries/useAccount"
+import { useChangePassword, useMe } from "../../../../hooks/queries/useAccount"
 import { apiFieldErrors } from "../../../../lib/formErrors"
 import { requiredPassword } from "../../../../schemas/zod.schema"
 
 function Security() {
   const { email } = useAccountStore()
-  const { mutateAsync: saveContact } = useUpdateContact()
+  const { refetch } = useMe()
   const { mutate: savePassword, isPending } = useChangePassword()
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -36,8 +36,8 @@ function Security() {
 
           <ContactOtpChange
             current={email}
-            onVerified={async (value) => {
-              await saveContact({ email: value })
+            onVerified={async () => {
+              await refetch()
             }}
           />
 

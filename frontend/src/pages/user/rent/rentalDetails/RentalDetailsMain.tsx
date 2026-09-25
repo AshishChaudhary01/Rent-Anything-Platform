@@ -12,6 +12,7 @@ import type { Listing } from "../../../../types/listing.types"
 function statusLabel(status: Rental["status"]) {
   if (status === "ACTIVE") return "Active rental"
   if (status === "PAID") return "Paid — meetup pending"
+  if (status === "MEETUP_CONFIRMED") return "Meetup confirmed — pay remaining"
   if (status === "PENDING_PAYMENT") return "Awaiting payment"
   return status
 }

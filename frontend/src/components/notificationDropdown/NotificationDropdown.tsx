@@ -1,106 +1,68 @@
 import { useEffect, useRef, useState } from "react";
 import { IoCheckmarkOutline, IoChevronForwardOutline, IoNotificationsOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
-import { initialNotifications } from "../../data/notifications";
 import NotificationItem from "./NotificationItem";
+import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications } from "../../hooks/queries/useNotifications";
 
 const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-
-  const [notifications, setNotifications] = useState(initialNotifications);
-
+  const { data } = useNotifications(0, 4);
+  const markRead = useMarkNotificationRead();
+  const markAll = useMarkAllNotificationsRead();
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const markAllAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((notification) => ({
-        ...notification,
-        read: true,
-      }))
-    );
-  };
+  const items = data?.items ?? [];
+  const unreadCount = data?.unread ?? 0;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Trigger */}
-      <button
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="relative p-2 top-1"
-      >
+      <button onClick={() => setIsOpen((prev) => !prev)} className="relative p-2 top-1">
         <IoNotificationsOutline className="size-5" />
-
         {unreadCount > 0 && (
           <span className="absolute top-1 right-0 flex size-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-            {unreadCount}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
-
-      {/* Dropdown */}
       {isOpen && (
         <div className="absolute top-12 -right-14 mt-2 w-80 rounded-xl bg-white border-t border-gray-200 shadow-lg z-50">
-          {/* Header */}
           <div className="text-gray-500 rounded-t-xl flex items-center justify-between border-b border-border p-4">
-            <h3 className="font-bold">
-              Notifications
-            </h3>
-
+            <h3 className="font-bold">Notifications</h3>
             <button
-              onClick={markAllAsRead}
+              onClick={() => markAll.mutate()}
               className="text-xs hover:underline flex items-end gap-x-2"
             >
               <IoCheckmarkOutline className="size-4" />
               <p>Mark all as read</p>
             </button>
           </div>
-
-          {/* List */}
           <div className="max-h-80 overflow-y-auto">
-            {notifications.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted">
-                No notifications
-              </div>
+            {items.length === 0 ? (
+              <div className="p-4 text-center text-sm text-muted">No notifications</div>
             ) : (
-              notifications.slice(0, 4).map((notification) => (
+              items.map((notification) => (
                 <NotificationItem
                   key={notification.id}
                   item={notification}
                   compact
                   onClick={() => setIsOpen(false)}
-                  onMarkRead={(id) =>
-                    setNotifications((prev) =>
-                      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-                    )
-                  }
+                  onMarkRead={(id) => markRead.mutate(id)}
                 />
               ))
             )}
           </div>
-
-          {/* View all */}
-          <Link to="/user/notifications" onClick={() => setIsOpen(false)} className="m-2 p-3 rounded-sm bg-gray-100 text-xs text-muted font-semibold flex justify-center gap-x-2">View all notifications <IoChevronForwardOutline /></Link>
+          <Link to="/user/notifications" onClick={() => setIsOpen(false)} className="m-2 p-3 rounded-sm bg-gray-100 text-xs text-muted font-semibold flex justify-center gap-x-2">
+            View all notifications <IoChevronForwardOutline />
+          </Link>
         </div>
       )}
     </div>

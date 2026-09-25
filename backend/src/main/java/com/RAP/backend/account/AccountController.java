@@ -1,10 +1,12 @@
 package com.RAP.backend.account;
 
 import com.RAP.backend.account.dto.ChangePasswordRequest;
+import com.RAP.backend.account.dto.ConfirmEmailRequest;
 import com.RAP.backend.account.dto.MeResponse;
 import com.RAP.backend.account.dto.SubmitKycRequest;
 import com.RAP.backend.account.dto.UpdateContactRequest;
 import com.RAP.backend.account.dto.UpdateProfileRequest;
+import com.RAP.backend.otp.dto.SendOtpRequest;
 import com.RAP.backend.review.dto.PublicReviewPageResponse;
 import com.RAP.backend.user.PublicProfileService;
 import com.RAP.backend.user.dto.PublicListingPageResponse;
@@ -49,6 +51,16 @@ public class AccountController {
 	@PatchMapping("/contact")
 	public MeResponse updateContact(@Valid @RequestBody UpdateContactRequest request) {
 		return accountService.updateContact(request);
+	}
+
+	@PostMapping("/email/otp")
+	public void sendEmailOtp(@Valid @RequestBody SendOtpRequest request) {
+		accountService.sendEmailOtp(request);
+	}
+
+	@PostMapping("/email")
+	public MeResponse confirmEmail(@Valid @RequestBody ConfirmEmailRequest request) {
+		return accountService.confirmEmail(request);
 	}
 
 	@PostMapping("/password")

@@ -6,6 +6,8 @@ import com.RAP.backend.chat.dto.OpenChatRequest;
 import com.RAP.backend.common.ApiException;
 import com.RAP.backend.listing.Listing;
 import com.RAP.backend.listing.ListingRepository;
+import com.RAP.backend.notify.NotificationKind;
+import com.RAP.backend.notify.NotificationService;
 import com.RAP.backend.rental.Rental;
 import com.RAP.backend.rental.RentalRepository;
 import com.RAP.backend.user.User;
@@ -24,19 +26,22 @@ public class ChatService {
 	private final ListingRepository listingRepository;
 	private final RentalRepository rentalRepository;
 	private final CurrentUser currentUser;
+	private final NotificationService notificationService;
 
 	public ChatService(
 			ChatThreadRepository threadRepository,
 			ChatMessageRepository messageRepository,
 			ListingRepository listingRepository,
 			RentalRepository rentalRepository,
-			CurrentUser currentUser
+			CurrentUser currentUser,
+			NotificationService notificationService
 	) {
 		this.threadRepository = threadRepository;
 		this.messageRepository = messageRepository;
 		this.listingRepository = listingRepository;
 		this.rentalRepository = rentalRepository;
 		this.currentUser = currentUser;
+		this.notificationService = notificationService;
 	}
 
 	@Transactional(readOnly = true)
@@ -120,6 +125,16 @@ public class ChatService {
 		message.setSender(user);
 		message.setText(text.trim());
 		messageRepository.save(message);
+		User peer = thread.getUserA().getId().equals(user.getId()) ? thread.getUserB() : thread.getUserA();
+		notificationService.notify(
+				peer,
+				NotificationKind.MESSAGE,
+				"New message from " + user.getFullName(),
+				text.trim().length() > 80 ? text.trim().substring(0, 80) + "…" : text.trim(),
+				"/user/chat?thread=" + thread.getId(),
+				user.getAvatarUrl(),
+				false
+		);
 		return ChatThreadResponse.from(thread, user, messageRepository.findByThreadOrderByCreatedAtAsc(thread));
 	}
 

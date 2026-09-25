@@ -19,6 +19,7 @@ function pendingLabel(status: string) {
   if (status === "REQUESTED") return "Waiting for owner"
   if (status === "PENDING_PAYMENT") return "Accepted — pay now"
   if (status === "PAID") return "Paid — meetup pending"
+  if (status === "MEETUP_CONFIRMED") return "Meetup done — pay remaining"
   return status
 }
 
@@ -38,7 +39,7 @@ function pastBadge(status: RentalStatus) {
 function MyRentals() {
   const { data: rentals = [], isPending } = useMyRentals()
   const active = rentals.filter((item) => item.status === "ACTIVE")
-  const pending = rentals.filter((item) => item.status === "REQUESTED" || item.status === "PENDING_PAYMENT" || item.status === "PAID")
+  const pending = rentals.filter((item) => item.status === "REQUESTED" || item.status === "PENDING_PAYMENT" || item.status === "PAID" || item.status === "MEETUP_CONFIRMED")
   const past = rentals.filter((item) => item.status === "COMPLETED" || item.status === "CANCELLED" || item.status === "DECLINED")
   const rated = past.filter((item) => item.myRating)
   const average = rated.length

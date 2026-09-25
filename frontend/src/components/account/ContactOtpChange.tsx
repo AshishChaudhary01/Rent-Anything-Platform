@@ -5,7 +5,7 @@ import RaInput from "../input/RaInput"
 import RaOtpInput from "../input/RaOtpInput"
 import RaButton from "../button/RaButton"
 import RaCard from "../card/RaCard"
-import { sendOtp, verifyOtp } from "../../services/otp.service"
+import { confirmEmailChange, sendEmailChangeOtp } from "../../services/otp.service"
 import { IoMailOutline } from "react-icons/io5"
 
 function ContactOtpChange({
@@ -13,18 +13,18 @@ function ContactOtpChange({
   onVerified,
 }: {
   current: string
-  onVerified: (value: string) => Promise<void> | void
+  onVerified?: (value: string) => Promise<void> | void
 }) {
   const [nextValue, setNextValue] = useState("")
   const [awaitingOtp, setAwaitingOtp] = useState(false)
   const [otpError, setOtpError] = useState("")
   const [emailError, setEmailError] = useState("")
   const [otpKey, setOtpKey] = useState(0)
-  const [demoCode, setDemoCode] = useState("")
+  const [sending, setSending] = useState(false)
 
   const destination = nextValue.trim()
 
-  const requestCode = () => {
+  const requestCode = async () => {
     if (!destination.includes("@")) {
       setEmailError("Enter a valid email")
       return
@@ -34,31 +34,33 @@ function ContactOtpChange({
       return
     }
     setEmailError("")
-    const code = sendOtp(destination)
-    setDemoCode(code)
-    setAwaitingOtp(true)
-    setOtpError("")
-    setOtpKey((n) => n + 1)
-    raToast.success(`Code sent to ${destination}`)
+    setSending(true)
+    try {
+      await sendEmailChangeOtp(destination)
+      setAwaitingOtp(true)
+      setOtpError("")
+      setOtpKey((n) => n + 1)
+      raToast.success(`Code sent to ${destination}`)
+    } catch (error) {
+      const fields = apiFieldErrors(error)
+      setEmailError(fields.email || "Could not send the code")
+      raToast.fromError(error, "Could not send the email code")
+    } finally {
+      setSending(false)
+    }
   }
 
   const checkCode = async (otp: string) => {
-    const result = verifyOtp(destination, otp)
-    if (!result.ok) {
-      setOtpError(result.message)
-      return
-    }
     try {
-      await onVerified(destination)
+      await confirmEmailChange({ email: destination, code: otp })
+      await onVerified?.(destination)
       setNextValue("")
       setAwaitingOtp(false)
-      setDemoCode("")
       setOtpError("")
       raToast.success("Email updated")
     } catch (error) {
       const fields = apiFieldErrors(error)
-      setEmailError(fields.email || "Could not update email")
-      setAwaitingOtp(false)
+      setOtpError(fields.code || fields.email || "Could not verify that code")
     }
   }
 
@@ -67,7 +69,7 @@ function ContactOtpChange({
       className="flex flex-col gap-y-4"
       onSubmit={(e) => {
         e.preventDefault()
-        if (!awaitingOtp) requestCode()
+        if (!awaitingOtp) void requestCode()
       }}
     >
       <RaCard round="round" styleClass="flex flex-col gap-y-4">
@@ -87,27 +89,21 @@ function ContactOtpChange({
             setNextValue(e.target.value)
             setEmailError("")
             setAwaitingOtp(false)
-            setDemoCode("")
           }}
         />
         {awaitingOtp && (
-          <>
-            <RaOtpInput
-              key={otpKey}
-              email={destination}
-              isError={Boolean(otpError)}
-              error={otpError}
-              onComplete={checkCode}
-              onResend={requestCode}
-            />
-            <div className="text-xs text-muted">
-              Prototype code: {demoCode}. This will be delivered by email when SMTP is connected.
-            </div>
-          </>
+          <RaOtpInput
+            key={otpKey}
+            email={destination}
+            isError={Boolean(otpError)}
+            error={otpError}
+            onComplete={checkCode}
+            onResend={() => void requestCode()}
+          />
         )}
       </RaCard>
       {!awaitingOtp && (
-        <RaButton type="submit" btnText="Send email code" />
+        <RaButton type="submit" btnText={sending ? "Sending…" : "Send email code"} disabled={sending} />
       )}
     </form>
   )

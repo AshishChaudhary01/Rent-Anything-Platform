@@ -2,6 +2,7 @@ export type RentalStatus =
   | "REQUESTED"
   | "PENDING_PAYMENT"
   | "PAID"
+  | "MEETUP_CONFIRMED"
   | "ACTIVE"
   | "COMPLETED"
   | "DECLINED"
@@ -19,6 +20,8 @@ export type Rental = {
   commitmentFee: number
   rentalTotal: number
   payLater: number
+  remainingDue?: number
+  remainingPaid?: boolean
   days: number
   startDate: string
   endDate: string

@@ -5,8 +5,11 @@ import com.RAP.backend.auth.CurrentUser;
 import com.RAP.backend.common.ApiException;
 import com.RAP.backend.config.PaymentProperties;
 import com.RAP.backend.listing.Listing;
+import com.RAP.backend.listing.ListingCovers;
 import com.RAP.backend.listing.ListingRepository;
 import com.RAP.backend.listing.ListingStatus;
+import com.RAP.backend.notify.NotificationKind;
+import com.RAP.backend.notify.NotificationService;
 import com.RAP.backend.payment.PaymentGateway;
 import com.RAP.backend.payment.PaymentGatewayService;
 import com.RAP.backend.payment.WalletService;
@@ -14,6 +17,7 @@ import com.RAP.backend.payment.dto.PaymentConfigResponse;
 import com.RAP.backend.payment.dto.PaymentInitiateResponse;
 import com.RAP.backend.rental.dto.CreateRentalRequest;
 import com.RAP.backend.rental.dto.InitiatePaymentRequest;
+import com.RAP.backend.rental.dto.RentalMapper;
 import com.RAP.backend.rental.dto.RentalResponse;
 import com.RAP.backend.rental.dto.ScheduleReturnRequest;
 import com.RAP.backend.rental.dto.StartRentalRequest;
@@ -48,8 +52,12 @@ public class RentalService {
 	private final CurrentUser currentUser;
 	private final PaymentProperties paymentProperties;
 	private final PaymentGatewayService paymentGatewayService;
+	@SuppressWarnings("unused")
 	private final WalletService walletService;
 	private final ReviewRepository reviewRepository;
+	private final NotificationService notificationService;
+	@SuppressWarnings("unused")
+	private final ReceiptService receiptService;
 	private final SecureRandom random = new SecureRandom();
 
 	public RentalService(
@@ -59,7 +67,9 @@ public class RentalService {
 			PaymentProperties paymentProperties,
 			PaymentGatewayService paymentGatewayService,
 			WalletService walletService,
-			ReviewRepository reviewRepository
+			ReviewRepository reviewRepository,
+			NotificationService notificationService,
+			ReceiptService receiptService
 	) {
 		this.rentalRepository = rentalRepository;
 		this.listingRepository = listingRepository;
@@ -68,6 +78,8 @@ public class RentalService {
 		this.paymentGatewayService = paymentGatewayService;
 		this.walletService = walletService;
 		this.reviewRepository = reviewRepository;
+		this.notificationService = notificationService;
+		this.receiptService = receiptService;
 	}
 
 	@Transactional(readOnly = true)
@@ -139,7 +151,7 @@ public class RentalService {
 		if (meetup.isBlank()) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Choose a meetup location");
 		}
-		if (rentalRepository.hasOverlap(listing, List.of(RentalStatus.PAID, RentalStatus.ACTIVE), start, end)) {
+		if (rentalRepository.hasOverlap(listing, RentalStatus.occupying(), start, end)) {
 			throw new ApiException(HttpStatus.CONFLICT, "Those dates overlap an existing booking");
 		}
 
@@ -164,25 +176,57 @@ public class RentalService {
 		rental.setEscrowStatus(EscrowStatus.NONE);
 		rental.setMeetupCode(randomCode());
 		rental.setMeetupRenterCode(randomCode());
-		return toResponse(rentalRepository.save(rental), renter);
+		Rental saved = rentalRepository.save(rental);
+		String image = ListingCovers.imageUrl(listing);
+		notify(
+				listing.getOwner(),
+				NotificationKind.REQUEST,
+				"New rental request",
+				renter.getFullName() + " requested " + listing.getTitle() + ".",
+				"/user/request-details/" + saved.getId(),
+				image,
+				true
+		);
+		return toResponse(saved, renter);
 	}
 
 	@Transactional
 	public PaymentInitiateResponse initiatePayment(UUID id, InitiatePaymentRequest request) {
 		User renter = currentUser.require();
 		Rental rental = requireRenter(id, renter);
-		if (rental.getStatus() == RentalStatus.PAID || rental.getStatus() == RentalStatus.ACTIVE) {
+		if (rental.getStatus() == RentalStatus.ACTIVE) {
+			throw new ApiException(HttpStatus.CONFLICT, "This rental is already paid");
+		}
+		if (rental.getStatus() == RentalStatus.PAID) {
 			throw new ApiException(HttpStatus.CONFLICT, "This rental is already paid");
 		}
 		if (rental.getStatus() == RentalStatus.CANCELLED) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "This rental was cancelled");
+		}
+		if (rental.getStatus() == RentalStatus.MEETUP_CONFIRMED) {
+			BigDecimal remaining = rental.remainingRent();
+			if (remaining.signum() <= 0) {
+				activateRental(rental);
+				throw new ApiException(HttpStatus.CONFLICT, "This rental is already paid");
+			}
+			if (request.gateway() == PaymentGateway.ESEWA) {
+				rental.setRemainingPaymentRef(rental.getId() + "-r" + System.currentTimeMillis());
+			}
+			rental.setPaymentGateway(request.gateway());
+			rentalRepository.save(rental);
+			if (request.gateway() == PaymentGateway.KHALTI) {
+				PaymentInitiateResponse initiated = paymentGatewayService.initiateKhalti(rental, renter, remaining, false);
+				rentalRepository.save(rental);
+				return initiated;
+			}
+			return paymentGatewayService.initiateEsewa(rental, remaining, rental.getRemainingPaymentRef());
 		}
 		requirePending(rental);
 		Listing listing = rental.getListing();
 		if (listing.getStatus() == ListingStatus.REMOVED || listing.getStatus() == ListingStatus.UNAVAILABLE) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "This listing is no longer available");
 		}
-		if (rentalRepository.hasOverlap(listing, List.of(RentalStatus.PAID, RentalStatus.ACTIVE), rental.getStartDate(), rental.getEndDate())) {
+		if (rentalRepository.hasOverlap(listing, RentalStatus.occupying(), rental.getStartDate(), rental.getEndDate())) {
 			throw new ApiException(HttpStatus.CONFLICT, "Those dates overlap an existing booking");
 		}
 		rental.setPaymentGateway(request.gateway());
@@ -202,12 +246,22 @@ public class RentalService {
 	public RentalResponse verifyEsewa(UUID id, String data) {
 		User renter = currentUser.require();
 		Rental rental = requireRenter(id, renter);
-		if (rental.getStatus() == RentalStatus.PAID || rental.getStatus() == RentalStatus.ACTIVE) {
+		if (rental.getStatus() == RentalStatus.ACTIVE) {
+			return toResponse(rental, renter);
+		}
+		if (rental.getStatus() == RentalStatus.MEETUP_CONFIRMED) {
+			paymentGatewayService.verifyEsewa(rental, data, rental.remainingRent(), rental.getRemainingPaymentRef());
+			activateRental(rental);
+			notifyRentPaid(rental);
+			return toResponse(rentalRepository.save(rental), renter);
+		}
+		if (rental.getStatus() == RentalStatus.PAID) {
 			return toResponse(rental, renter);
 		}
 		requirePending(rental);
 		paymentGatewayService.verifyEsewa(rental, data);
 		markPaid(rental, PaymentGateway.ESEWA);
+		notifyCommitmentPaid(rental);
 		return toResponse(rentalRepository.save(rental), renter);
 	}
 
@@ -215,12 +269,22 @@ public class RentalService {
 	public RentalResponse verifyKhalti(UUID id, String pidx) {
 		User renter = currentUser.require();
 		Rental rental = requireRenter(id, renter);
-		if (rental.getStatus() == RentalStatus.PAID || rental.getStatus() == RentalStatus.ACTIVE) {
+		if (rental.getStatus() == RentalStatus.ACTIVE) {
+			return toResponse(rental, renter);
+		}
+		if (rental.getStatus() == RentalStatus.MEETUP_CONFIRMED) {
+			paymentGatewayService.verifyKhalti(rental, pidx, rental.remainingRent(), rental.getRemainingPaymentRef());
+			activateRental(rental);
+			notifyRentPaid(rental);
+			return toResponse(rentalRepository.save(rental), renter);
+		}
+		if (rental.getStatus() == RentalStatus.PAID) {
 			return toResponse(rental, renter);
 		}
 		requirePending(rental);
 		paymentGatewayService.verifyKhalti(rental, pidx);
 		markPaid(rental, PaymentGateway.KHALTI);
+		notifyCommitmentPaid(rental);
 		return toResponse(rentalRepository.save(rental), renter);
 	}
 
@@ -230,22 +294,42 @@ public class RentalService {
 		Rental rental = requireParticipant(id, user);
 		ensureMeetupCodes(rental);
 		rentalRepository.save(rental);
-		if (rental.getStatus() == RentalStatus.ACTIVE) {
+		if (rental.getStatus() == RentalStatus.ACTIVE || rental.getStatus() == RentalStatus.MEETUP_CONFIRMED) {
 			return toResponse(rental, user);
 		}
 		if (rental.getStatus() != RentalStatus.PAID) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Pay the commitment fee before meetup");
 		}
-		boolean isOwner = rental.getOwner().getId().equals(user.getId());
 		requirePeerScan(rental, user, request.code(), false);
 		Listing listing = rental.getListing();
 		if (listing.getStatus() == ListingStatus.REMOVED) {
 			throw new ApiException(HttpStatus.CONFLICT, "This listing is no longer available");
 		}
-		rental.setStatus(RentalStatus.ACTIVE);
-		rental.setStartedAt(Instant.now());
-		listing.setStatus(ListingStatus.RENTED);
-		listingRepository.save(listing);
+		if (rental.remainingRent().signum() <= 0) {
+			activateRental(rental);
+			notifyRentPaid(rental);
+		} else {
+			rental.setStatus(RentalStatus.MEETUP_CONFIRMED);
+			String image = ListingCovers.imageUrl(listing);
+			notify(
+					rental.getRenter(),
+					NotificationKind.PAYMENT,
+					"Pay remaining rent to start",
+					"Meetup QR matched for " + listing.getTitle() + ". Pay the remaining rental fee to start.",
+					"/user/rent/checkout?rentalId=" + rental.getId() + "&phase=remaining",
+					image,
+					false
+			);
+			notify(
+					rental.getOwner(),
+					NotificationKind.PICKUP,
+					"Meetup confirmed",
+					rental.getRenter().getFullName() + " scanned pickup QR. Waiting for remaining payment.",
+					"/user/request-details/" + rental.getId(),
+					image,
+					false
+			);
+		}
 		return toResponse(rentalRepository.save(rental), user);
 	}
 
@@ -268,6 +352,27 @@ public class RentalService {
 		}
 		if (rental.getStatus() == RentalStatus.REQUESTED) {
 			rental.setStatus(isOwner ? RentalStatus.DECLINED : RentalStatus.CANCELLED);
+			if (isOwner) {
+				notify(
+						rental.getRenter(),
+						NotificationKind.BOOKING,
+						"Request declined",
+						rental.getOwner().getFullName() + " declined " + rental.getListing().getTitle() + ".",
+						"/user/my-rentals",
+						ListingCovers.imageUrl(rental.getListing()),
+						true
+				);
+			} else {
+				notify(
+						rental.getOwner(),
+						NotificationKind.BOOKING,
+						"Request cancelled",
+						rental.getRenter().getFullName() + " cancelled the request for " + rental.getListing().getTitle() + ".",
+						"/user/request-details/" + rental.getId(),
+						ListingCovers.imageUrl(rental.getListing()),
+						true
+				);
+			}
 			return toResponse(rentalRepository.save(rental), user);
 		}
 		if (rental.getStatus() == RentalStatus.PENDING_PAYMENT) {
@@ -275,9 +380,18 @@ public class RentalService {
 				throw new ApiException(HttpStatus.FORBIDDEN, "Only the renter can cancel an unpaid request");
 			}
 			rental.setStatus(RentalStatus.CANCELLED);
+			notify(
+					rental.getOwner(),
+					NotificationKind.BOOKING,
+					"Request cancelled",
+					rental.getRenter().getFullName() + " cancelled the request for " + rental.getListing().getTitle() + ".",
+					"/user/request-details/" + rental.getId(),
+					ListingCovers.imageUrl(rental.getListing()),
+					true
+			);
 			return toResponse(rentalRepository.save(rental), user);
 		}
-		if (rental.getStatus() != RentalStatus.PAID) {
+		if (rental.getStatus() != RentalStatus.PAID && rental.getStatus() != RentalStatus.MEETUP_CONFIRMED) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "This rental cannot be cancelled");
 		}
 		LocalDate today = LocalDate.now(NEPAL);
@@ -290,6 +404,15 @@ public class RentalService {
 			refundToRenter(rental);
 		}
 		rental.setStatus(RentalStatus.CANCELLED);
+		notify(
+				isOwner ? rental.getRenter() : rental.getOwner(),
+				NotificationKind.BOOKING,
+				"Rental cancelled",
+				"The booking for " + rental.getListing().getTitle() + " was cancelled.",
+				isOwner ? "/user/my-rentals" : "/user/request-details/" + rental.getId(),
+				ListingCovers.imageUrl(rental.getListing()),
+				true
+		);
 		return toResponse(rentalRepository.save(rental), user);
 	}
 
@@ -305,13 +428,22 @@ public class RentalService {
 		}
 		if (rentalRepository.hasOverlap(
 				rental.getListing(),
-				List.of(RentalStatus.PAID, RentalStatus.ACTIVE),
+				RentalStatus.occupying(),
 				rental.getStartDate(),
 				rental.getEndDate()
 		)) {
 			throw new ApiException(HttpStatus.CONFLICT, "Those dates overlap an existing booking");
 		}
 		rental.setStatus(RentalStatus.PENDING_PAYMENT);
+		notify(
+				rental.getRenter(),
+				NotificationKind.BOOKING,
+				"Request accepted",
+				rental.getOwner().getFullName() + " accepted " + rental.getListing().getTitle() + ". Pay the commitment fee to continue.",
+				"/user/rent/checkout?rentalId=" + rental.getId(),
+				ListingCovers.imageUrl(rental.getListing()),
+				true
+		);
 		return toResponse(rentalRepository.save(rental), owner);
 	}
 
@@ -326,6 +458,15 @@ public class RentalService {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "This request is no longer pending");
 		}
 		rental.setStatus(RentalStatus.DECLINED);
+		notify(
+				rental.getRenter(),
+				NotificationKind.BOOKING,
+				"Request declined",
+				rental.getOwner().getFullName() + " declined " + rental.getListing().getTitle() + ".",
+				"/user/my-rentals",
+				ListingCovers.imageUrl(rental.getListing()),
+				true
+		);
 		return toResponse(rentalRepository.save(rental), owner);
 	}
 
@@ -353,7 +494,20 @@ public class RentalService {
 		rental.setReturnMeetupLongitude(request.longitude());
 		rental.setReturnMeetupAt(LocalDateTime.of(date, time).atZone(NEPAL).toInstant());
 		ensureReturnCodes(rental);
-		return toResponse(rentalRepository.save(rental), user);
+		Rental saved = rentalRepository.save(rental);
+		User peer = rental.getOwner().getId().equals(user.getId()) ? rental.getRenter() : rental.getOwner();
+		notify(
+				peer,
+				NotificationKind.RETURN,
+				"Return meetup scheduled",
+				"Return for " + rental.getListing().getTitle() + " is set at " + location + ".",
+				rental.getOwner().getId().equals(peer.getId())
+						? "/user/request-details/" + rental.getId()
+						: "/user/rent/return-meetup?rentalId=" + rental.getId(),
+				ListingCovers.imageUrl(rental.getListing()),
+				false
+		);
+		return toResponse(saved, user);
 	}
 
 	@Transactional
@@ -372,6 +526,24 @@ public class RentalService {
 		ensureReturnCodes(rental);
 		requirePeerScan(rental, user, request.code(), true);
 		settleSuccessfulReturn(rental);
+		notify(
+				rental.getRenter(),
+				NotificationKind.RETURN,
+				"Rental completed",
+				"Return QR confirmed for " + rental.getListing().getTitle() + ".",
+				"/user/rental-details?rentalId=" + rental.getId(),
+				ListingCovers.imageUrl(rental.getListing()),
+				true
+		);
+		notify(
+				rental.getOwner(),
+				NotificationKind.RETURN,
+				"Item returned",
+				rental.getRenter().getFullName() + " completed the return for " + rental.getListing().getTitle() + ".",
+				"/user/request-details/" + rental.getId(),
+				ListingCovers.imageUrl(rental.getListing()),
+				true
+		);
 		return toResponse(rental, user);
 	}
 
@@ -380,7 +552,7 @@ public class RentalService {
 		User user = currentUser.require();
 		Rental rental = requireParticipant(id, user);
 		boolean isOwner = rental.getOwner().getId().equals(user.getId());
-		if (rental.getStatus() != RentalStatus.PAID) {
+		if (rental.getStatus() != RentalStatus.PAID && rental.getStatus() != RentalStatus.MEETUP_CONFIRMED) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "No-show can only be recorded at the first meetup");
 		}
 		if (isOwner) {
@@ -389,6 +561,15 @@ public class RentalService {
 			refundToRenter(rental);
 		}
 		rental.setStatus(RentalStatus.CANCELLED);
+		notify(
+				isOwner ? rental.getRenter() : rental.getOwner(),
+				NotificationKind.PICKUP,
+				"Meetup no-show recorded",
+				"A no-show was recorded for " + rental.getListing().getTitle() + ".",
+				isOwner ? "/user/my-rentals" : "/user/request-details/" + rental.getId(),
+				ListingCovers.imageUrl(rental.getListing()),
+				true
+		);
 		return toResponse(rentalRepository.save(rental), user);
 	}
 
@@ -427,7 +608,7 @@ public class RentalService {
 		long renterReviewCount = reviewRepository.countForSubject(renter);
 		long completedCount = rentalRepository.countByRenterAndStatus(renter, RentalStatus.COMPLETED);
 		String city = renter.getCity() == null || renter.getCity().isBlank() ? renter.getAddressLine() : renter.getCity();
-		return RentalResponse.from(
+		return RentalMapper.from(
 				rental,
 				viewer.getId(),
 				canReview,
@@ -446,6 +627,63 @@ public class RentalService {
 		rental.setPaymentGateway(gateway);
 		rental.setPaidAt(Instant.now());
 		rental.setEscrowStatus(EscrowStatus.HELD);
+	}
+
+	private void activateRental(Rental rental) {
+		rental.setStatus(RentalStatus.ACTIVE);
+		rental.setStartedAt(Instant.now());
+		rental.setRemainingPaidAt(Instant.now());
+		Listing listing = rental.getListing();
+		listing.setStatus(ListingStatus.RENTED);
+		listingRepository.save(listing);
+	}
+
+	private void notifyCommitmentPaid(Rental rental) {
+		String image = ListingCovers.imageUrl(rental.getListing());
+		notify(
+				rental.getOwner(),
+				NotificationKind.PAYMENT,
+				"Commitment paid",
+				rental.getRenter().getFullName() + " paid the commitment for " + rental.getListing().getTitle() + ".",
+				"/user/request-details/" + rental.getId(),
+				image,
+				false
+		);
+		notify(
+				rental.getRenter(),
+				NotificationKind.PAYMENT,
+				"Commitment received",
+				"Your commitment fee for " + rental.getListing().getTitle() + " is held until pickup.",
+				"/user/rent/confirmation?rentalId=" + rental.getId(),
+				image,
+				false
+		);
+	}
+
+	private void notifyRentPaid(Rental rental) {
+		String image = ListingCovers.imageUrl(rental.getListing());
+		notify(
+				rental.getOwner(),
+				NotificationKind.RENTAL,
+				"Rental started",
+				rental.getRenter().getFullName() + " paid remaining rent. " + rental.getListing().getTitle() + " is now rented.",
+				"/user/request-details/" + rental.getId(),
+				image,
+				false
+		);
+		notify(
+				rental.getRenter(),
+				NotificationKind.RENTAL,
+				"Rental started",
+				"Remaining rent is paid. Your rental of " + rental.getListing().getTitle() + " is now active.",
+				"/user/my-rentals",
+				image,
+				false
+		);
+	}
+
+	private void notify(User user, NotificationKind kind, String title, String body, String path, String image, boolean email) {
+		notificationService.notify(user, kind, title, body, path, image, email);
 	}
 
 	private void settleSuccessfulReturn(Rental rental) {
@@ -496,11 +734,11 @@ public class RentalService {
 				? (rental.getReturnRenterCode() == null ? rental.getReturnOwnerCode() : rental.getReturnRenterCode())
 				: (rental.getMeetupRenterCode() == null ? rental.getMeetupCode() : rental.getMeetupRenterCode());
 		String ownerPayload = returning
-				? RentalResponse.returnPayload(rental.getId(), "OWNER", ownerCode)
-				: RentalResponse.payload(rental.getId(), "OWNER", ownerCode);
+				? RentalMapper.returnPayload(rental.getId(), "OWNER", ownerCode)
+				: RentalMapper.payload(rental.getId(), "OWNER", ownerCode);
 		String renterPayload = returning
-				? RentalResponse.returnPayload(rental.getId(), "RENTER", renterCode)
-				: RentalResponse.payload(rental.getId(), "RENTER", renterCode);
+				? RentalMapper.returnPayload(rental.getId(), "RENTER", renterCode)
+				: RentalMapper.payload(rental.getId(), "RENTER", renterCode);
 		boolean scannedOwner = matches(submitted, ownerCode, ownerPayload);
 		boolean scannedRenter = matches(submitted, renterCode, renterPayload);
 		String action = returning ? "finish this return" : "start this rental";

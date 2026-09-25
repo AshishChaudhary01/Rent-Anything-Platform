@@ -14,8 +14,8 @@ function readCallbackData(search: URLSearchParams) {
   return embedded?.[1] ? decodeURIComponent(embedded[1]) : ""
 }
 
-function callbackKey(rentalId: string) {
-  return `pay-verify-${rentalId}`
+function callbackKey(rentalId: string, extra: string) {
+  return `pay-verify-${rentalId}-${extra}`
 }
 
 function PaymentCallback() {
@@ -35,7 +35,7 @@ function PaymentCallback() {
         navigate("/user", { replace: true })
         return
       }
-      const key = callbackKey(rentalId)
+      const key = callbackKey(rentalId, data || pidx || "x")
       const existing = sessionStorage.getItem(key)
       if (existing === "ok") {
         navigate(`/user/rent/confirmation?rentalId=${rentalId}`, { replace: true })

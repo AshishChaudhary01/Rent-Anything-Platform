@@ -10,7 +10,6 @@ import com.RAP.backend.listing.dto.ListingPageResponse;
 import com.RAP.backend.listing.dto.ListingResponse;
 import com.RAP.backend.listing.dto.UpdateListingRequest;
 import com.RAP.backend.media.StorageService;
-import com.RAP.backend.rental.Rental;
 import com.RAP.backend.rental.RentalRepository;
 import com.RAP.backend.rental.RentalStatus;
 import com.RAP.backend.user.User;
@@ -196,7 +195,7 @@ public class ListingService {
 	private List<ListingActivityResponse> activityFor(Listing listing) {
 		return rentalRepository.findByListingAndStatusInOrderByStartDateAsc(
 						listing,
-						List.of(RentalStatus.PAID, RentalStatus.ACTIVE)
+						RentalStatus.occupying()
 				)
 				.stream()
 				.map(ListingActivityResponse::from)
@@ -209,7 +208,7 @@ public class ListingService {
 		}
 		return rentalRepository.findFirstByListingAndStatusInOrderByCreatedAtDesc(
 						listing,
-						List.of(RentalStatus.PAID, RentalStatus.ACTIVE)
+						RentalStatus.occupying()
 				)
 				.map(ActiveBookingResponse::from)
 				.orElse(null);

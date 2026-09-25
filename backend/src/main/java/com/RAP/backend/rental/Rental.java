@@ -94,6 +94,11 @@ public class Rental {
 	@Column(name = "payment_ref", length = 80)
 	private String paymentRef;
 
+	@Column(name = "remaining_payment_ref", length = 80)
+	private String remainingPaymentRef;
+
+	private Instant remainingPaidAt;
+
 	@Column(name = "meetup_code", nullable = false, length = 16)
 	private String meetupCode;
 
@@ -139,6 +144,20 @@ public class Rental {
 
 	@Column(name = "owner_payout", precision = 12, scale = 2)
 	private BigDecimal ownerPayout;
+
+	public BigDecimal remainingRent() {
+		BigDecimal total = rentalTotal == null ? BigDecimal.ZERO : rentalTotal;
+		BigDecimal commitment = commitmentFee == null ? BigDecimal.ZERO : commitmentFee;
+		BigDecimal remaining = total.subtract(commitment);
+		return remaining.signum() < 0 ? BigDecimal.ZERO : remaining;
+	}
+
+	public boolean remainingPaid() {
+		return remainingPaidAt != null
+				|| status == RentalStatus.ACTIVE
+				|| status == RentalStatus.COMPLETED
+				|| remainingRent().signum() == 0;
+	}
 
 	@PrePersist
 	void onCreate() {

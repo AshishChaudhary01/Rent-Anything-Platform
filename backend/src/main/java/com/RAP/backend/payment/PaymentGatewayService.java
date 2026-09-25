@@ -39,41 +39,49 @@ public class PaymentGatewayService {
 	}
 
 	public PaymentInitiateResponse initiateEsewa(Rental rental) {
+		return initiateEsewa(rental, rental.getCommitmentFee(), rental.getPaymentRef());
+	}
+
+	public PaymentInitiateResponse initiateEsewa(Rental rental, BigDecimal amount, String transactionUuid) {
 		if (!properties.getEsewa().isConfigured()) {
 			throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "eSewa is not configured");
 		}
-		String amount = money(rental.getCommitmentFee());
-		String uuid = rental.getPaymentRef();
+		String moneyAmount = money(amount);
+		String uuid = transactionUuid;
 		String product = properties.getEsewa().getProductCode();
-		String signed = "total_amount=" + amount + ",transaction_uuid=" + uuid + ",product_code=" + product;
+		String signed = "total_amount=" + moneyAmount + ",transaction_uuid=" + uuid + ",product_code=" + product;
 		Map<String, String> fields = new LinkedHashMap<>();
-		fields.put("amount", amount);
+		fields.put("amount", moneyAmount);
 		fields.put("tax_amount", "0");
-		fields.put("total_amount", amount);
+		fields.put("total_amount", moneyAmount);
 		fields.put("transaction_uuid", uuid);
 		fields.put("product_code", product);
 		fields.put("product_service_charge", "0");
 		fields.put("product_delivery_charge", "0");
 		fields.put("success_url", esewaCallbackUrl(rental.getId()));
-		fields.put("failure_url", failureUrl(rental.getId()));
+		fields.put("failure_url", failureUrl(rental.getId(), rental.getStatus().name()));
 		fields.put("signed_field_names", "total_amount,transaction_uuid,product_code");
 		fields.put("signature", hmacBase64(signed, properties.getEsewa().getSecret()));
 		return new PaymentInitiateResponse(PaymentGateway.ESEWA, properties.getEsewa().getFormUrl(), fields, null);
 	}
 
 	public PaymentInitiateResponse initiateKhalti(Rental rental, User renter) {
+		return initiateKhalti(rental, renter, rental.getCommitmentFee(), true);
+	}
+
+	public PaymentInitiateResponse initiateKhalti(Rental rental, User renter, BigDecimal amount, boolean commitment) {
 		if (!properties.getKhalti().isConfigured()) {
 			throw new ApiException(
 					HttpStatus.SERVICE_UNAVAILABLE,
 					"Khalti sandbox is not configured. Add a free test merchant secret in application-local.properties"
 			);
 		}
-		int paisa = rental.getCommitmentFee().multiply(BigDecimal.valueOf(100)).intValueExact();
+		int paisa = amount.multiply(BigDecimal.valueOf(100)).intValueExact();
 		Map<String, Object> body = new LinkedHashMap<>();
 		body.put("return_url", callbackUrl(rental.getId(), PaymentGateway.KHALTI));
 		body.put("website_url", properties.getFrontendBaseUrl());
 		body.put("amount", paisa);
-		body.put("purchase_order_id", rental.getId().toString());
+						body.put("purchase_order_id", (commitment ? rental.getId().toString() : rental.getId() + "-rent"));
 		body.put("purchase_order_name", rental.getListing().getTitle());
 		body.put("customer_info", Map.of(
 				"name", renter.getFullName(),
@@ -97,7 +105,11 @@ public class PaymentGatewayService {
 		}
 		Object pidx = response.get("pidx");
 		if (pidx != null && !pidx.toString().isBlank()) {
-			rental.setPaymentRef(pidx.toString());
+			if (commitment) {
+				rental.setPaymentRef(pidx.toString());
+			} else {
+				rental.setRemainingPaymentRef(pidx.toString());
+			}
 		}
 		return new PaymentInitiateResponse(
 				PaymentGateway.KHALTI,
@@ -108,6 +120,10 @@ public class PaymentGatewayService {
 	}
 
 	public void verifyEsewa(Rental rental, String encodedData) {
+		verifyEsewa(rental, encodedData, rental.getCommitmentFee(), rental.getPaymentRef());
+	}
+
+	public void verifyEsewa(Rental rental, String encodedData, BigDecimal amount, String expectedUuid) {
 		String payload = encodedData == null ? "" : encodedData.trim();
 		if (payload.contains("data=")) {
 			payload = payload.substring(payload.indexOf("data=") + 5);
@@ -126,7 +142,7 @@ public class PaymentGatewayService {
 			if (!json.isBlank()) {
 				String status = jsonString(json, "status").toUpperCase(Locale.ROOT);
 				String uuid = jsonString(json, "transaction_uuid");
-				if (!uuid.isBlank() && !uuid.equals(rental.getPaymentRef())) {
+				if (!uuid.isBlank() && expectedUuid != null && !uuid.equals(expectedUuid)) {
 					throw new ApiException(HttpStatus.BAD_REQUEST, "eSewa transaction does not match this rental");
 				}
 				if ("COMPLETE".equals(status)) {
@@ -134,16 +150,20 @@ public class PaymentGatewayService {
 				}
 			}
 		}
-		if (!confirmEsewaStatus(rental)) {
+		if (!confirmEsewaStatus(rental, amount, expectedUuid)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "eSewa payment is not complete");
 		}
 	}
 
 	public void verifyKhalti(Rental rental, String pidx) {
+		verifyKhalti(rental, pidx, rental.getCommitmentFee(), rental.getPaymentRef());
+	}
+
+	public void verifyKhalti(Rental rental, String pidx, BigDecimal expectedAmount, String expectedRef) {
 		if (!properties.getKhalti().isConfigured()) {
 			throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Khalti is not configured");
 		}
-		String id = pidx == null || pidx.isBlank() ? rental.getPaymentRef() : pidx;
+		String id = pidx == null || pidx.isBlank() ? expectedRef : pidx;
 		if (id == null || id.isBlank()) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Missing Khalti payment reference");
 		}
@@ -166,27 +186,26 @@ public class PaymentGatewayService {
 		if (!"Completed".equalsIgnoreCase(status)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Khalti payment is not complete");
 		}
-		int expected = rental.getCommitmentFee().multiply(BigDecimal.valueOf(100)).intValueExact();
+		int expected = expectedAmount.multiply(BigDecimal.valueOf(100)).intValueExact();
 		Object amount = response.get("total_amount");
 		if (amount instanceof Number number && number.intValue() != expected) {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "Khalti amount does not match the commitment fee");
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Khalti amount does not match this payment");
 		}
 	}
 
-	private boolean confirmEsewaStatus(Rental rental) {
-		String uuid = rental.getPaymentRef();
+	private boolean confirmEsewaStatus(Rental rental, BigDecimal amount, String uuid) {
 		if (uuid == null || uuid.isBlank()) {
 			return false;
 		}
 		String product = properties.getEsewa().getProductCode();
-		for (String amount : List.of(
-				money(rental.getCommitmentFee()),
-				rental.getCommitmentFee().setScale(1, RoundingMode.HALF_UP).toPlainString(),
-				rental.getCommitmentFee().setScale(2, RoundingMode.HALF_UP).toPlainString()
+		for (String moneyAmount : List.of(
+				money(amount),
+				amount.setScale(1, RoundingMode.HALF_UP).toPlainString(),
+				amount.setScale(2, RoundingMode.HALF_UP).toPlainString()
 		)) {
 			String url = properties.getEsewa().getStatusUrl()
 					+ "?product_code=" + product
-					+ "&total_amount=" + amount
+					+ "&total_amount=" + moneyAmount
 					+ "&transaction_uuid=" + uuid;
 			try {
 				Map<String, Object> response = restClient.get().uri(url).retrieve().body(MAP);
@@ -212,8 +231,9 @@ public class PaymentGatewayService {
 		return properties.getFrontendBaseUrl() + "/user/rent/payment/callback/" + gateway.name() + "/" + rentalId;
 	}
 
-	private String failureUrl(java.util.UUID rentalId) {
-		return properties.getFrontendBaseUrl() + "/user/rent/checkout?rentalId=" + rentalId + "&failed=1";
+	private String failureUrl(java.util.UUID rentalId, String status) {
+		String extra = "MEETUP_CONFIRMED".equals(status) ? "&phase=remaining" : "";
+		return properties.getFrontendBaseUrl() + "/user/rent/checkout?rentalId=" + rentalId + "&failed=1" + extra;
 	}
 
 	private static String money(BigDecimal value) {

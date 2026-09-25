@@ -5,17 +5,23 @@ import com.RAP.backend.payment.dto.PaymentInitiateResponse;
 import com.RAP.backend.rental.dto.CreateRentalRequest;
 import com.RAP.backend.rental.dto.InitiatePaymentRequest;
 import com.RAP.backend.rental.dto.RentalResponse;
+import com.RAP.backend.rental.dto.ScheduleReturnRequest;
 import com.RAP.backend.rental.dto.StartRentalRequest;
 import com.RAP.backend.rental.dto.VerifyEsewaRequest;
 import com.RAP.backend.rental.dto.VerifyKhaltiRequest;
+import com.RAP.backend.review.dto.SubmitReviewRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,9 +29,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class RentalController {
 
 	private final RentalService rentalService;
+	private final ReceiptService receiptService;
 
-	public RentalController(RentalService rentalService) {
+	public RentalController(RentalService rentalService, ReceiptService receiptService) {
 		this.rentalService = rentalService;
+		this.receiptService = receiptService;
 	}
 
 	@GetMapping("/payment-config")
@@ -46,6 +54,19 @@ public class RentalController {
 	@GetMapping("/{id}")
 	public RentalResponse get(@PathVariable UUID id) {
 		return rentalService.get(id);
+	}
+
+	@GetMapping("/{id}/receipt")
+	public ResponseEntity<byte[]> receipt(
+			@PathVariable UUID id,
+			@RequestParam(defaultValue = "COMMITMENT") String kind
+	) {
+		byte[] pdf = receiptService.pdf(id, kind);
+		String filename = "rap-receipt-" + kind.toLowerCase() + "-" + id + ".pdf";
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+				.contentType(MediaType.APPLICATION_PDF)
+				.body(pdf);
 	}
 
 	@PostMapping
@@ -79,7 +100,7 @@ public class RentalController {
 	@PostMapping("/{id}/return-schedule")
 	public RentalResponse scheduleReturn(
 			@PathVariable UUID id,
-			@Valid @RequestBody com.RAP.backend.rental.dto.ScheduleReturnRequest request
+			@Valid @RequestBody ScheduleReturnRequest request
 	) {
 		return rentalService.scheduleReturn(id, request);
 	}
@@ -105,11 +126,11 @@ public class RentalController {
 	}
 
 	@PostMapping("/{id}/reviews")
-	public RentalResponse review(
-			@PathVariable UUID id,
-			@Valid @RequestBody com.RAP.backend.review.dto.SubmitReviewRequest request
+	public RentalResponse submitReview(
+			@PathVariable("id") UUID id,
+			@RequestBody @Valid SubmitReviewRequest reviewBody
 	) {
-		return rentalService.review(id, request);
+		return rentalService.review(id, reviewBody);
 	}
 
 	@PostMapping("/{id}/cancel")

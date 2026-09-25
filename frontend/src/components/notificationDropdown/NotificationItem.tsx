@@ -7,17 +7,31 @@ import {
   IoCheckmarkOutline,
   IoCubeOutline,
   IoScanOutline,
+  IoSparklesOutline,
 } from "react-icons/io5"
-import type { AppNotification } from "../../data/notifications"
+import type { AppNotification, NotificationKind } from "../../services/notification.service"
 
-const kindIcon = {
-  message: IoChatbubbleOutline,
-  booking: IoCheckmarkCircleOutline,
-  rental: IoCubeOutline,
-  pickup: IoCalendarOutline,
-  request: IoCubeOutline,
-  return: IoScanOutline,
-  payment: IoCardOutline,
+const kindIcon: Record<NotificationKind, typeof IoCubeOutline> = {
+  MESSAGE: IoChatbubbleOutline,
+  BOOKING: IoCheckmarkCircleOutline,
+  RENTAL: IoCubeOutline,
+  PICKUP: IoCalendarOutline,
+  REQUEST: IoCubeOutline,
+  RETURN: IoScanOutline,
+  PAYMENT: IoCardOutline,
+  WELCOME: IoSparklesOutline,
+}
+
+function relativeTime(iso: string) {
+  const ms = Date.now() - new Date(iso).getTime()
+  const min = Math.max(0, Math.floor(ms / 60000))
+  if (min < 1) return "Just now"
+  if (min < 60) return `${min}m ago`
+  const hr = Math.floor(min / 60)
+  if (hr < 24) return `${hr}h ago`
+  const day = Math.floor(hr / 24)
+  if (day < 7) return `${day}d ago`
+  return new Date(iso).toLocaleDateString()
 }
 
 function NotificationItem({
@@ -28,31 +42,37 @@ function NotificationItem({
 }: {
   item: AppNotification
   onClick?: () => void
-  onMarkRead?: (id: number) => void
+  onMarkRead?: (id: string) => void
   compact?: boolean
 }) {
-  const Icon = kindIcon[item.kind]
+  const Icon = kindIcon[item.kind] || IoCubeOutline
+  const path = item.path || "/user/notifications"
 
   return (
     <div className={`flex items-start gap-2 ${item.read ? "" : "bg-accent/50"}`}>
       <Link
-        to={item.path}
+        to={path}
         onClick={onClick}
         className={`flex flex-1 min-w-0 gap-3 ${compact ? "p-3" : "p-4"}`}
       >
         <div className="relative shrink-0">
-          <img
-            src={item.image}
-            alt=""
-            className={`${compact ? "size-11" : "size-14"} rounded-xl object-cover`}
-          />
+          {item.image ? (
+            <img
+              src={item.image}
+              alt=""
+              className={`${compact ? "size-11" : "size-14"} rounded-xl object-cover bg-surface`}
+            />
+          ) : (
+            <div className={`${compact ? "size-11" : "size-14"} rounded-xl bg-surface`} />
+          )}
           <span className="absolute -bottom-1 -right-1 size-5 rounded-full bg-primary text-white flex items-center justify-center">
             <Icon className="size-3" />
           </span>
         </div>
         <div className="min-w-0">
-          <div className={`${compact ? "text-sm" : "font-medium"}`}>{item.message}</div>
-          <div className="text-xs md:text-sm text-muted">{item.time}</div>
+          <div className={`${compact ? "text-sm font-semibold" : "font-semibold"}`}>{item.title}</div>
+          <div className={`${compact ? "text-sm" : "font-medium"} text-muted`}>{item.body}</div>
+          <div className="text-xs md:text-sm text-muted">{relativeTime(item.createdAt)}</div>
         </div>
       </Link>
       {!item.read && (

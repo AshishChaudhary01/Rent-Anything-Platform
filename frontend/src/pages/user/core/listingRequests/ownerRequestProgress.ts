@@ -11,14 +11,16 @@ export function ownerRentStep(status: RentalStatus) {
   if (status === "REQUESTED") return 0
   if (status === "PENDING_PAYMENT") return 1
   if (status === "PAID") return 2
-  if (status === "ACTIVE" || status === "COMPLETED") return 3
+  if (status === "MEETUP_CONFIRMED") return 3
+  if (status === "ACTIVE" || status === "COMPLETED") return 4
   return 0
 }
 
 export function ownerProgressHint(rental: Rental) {
   if (rental.status === "REQUESTED") return "Review this request, then accept or decline."
   if (rental.status === "PENDING_PAYMENT") return "You accepted. Waiting for the renter to pay the commitment fee."
-  if (rental.status === "PAID") return "Paid. Meet the renter and scan QR to start the rental."
+  if (rental.status === "PAID") return "Paid. Meet the renter and scan QR. Remaining rent is paid after the scan."
+  if (rental.status === "MEETUP_CONFIRMED") return "Pickup QR matched. Waiting for the renter to pay remaining rent."
   if (rental.status === "ACTIVE" && rental.returnScheduled) return "Return meetup is set. Scan the return QR when you collect the item."
   if (rental.status === "ACTIVE") return "Rental is in progress. Open details when you are ready to schedule the return."
   if (rental.status === "COMPLETED") return "This rental is complete."
@@ -29,6 +31,9 @@ export function ownerProgressHint(rental: Rental) {
 export function ownerNextAction(rental: Rental): { label: string; to: string } | null {
   if (rental.status === "PAID") {
     return { label: "Go to pickup / scan QR", to: `/user/rent/meetup?rentalId=${rental.id}` }
+  }
+  if (rental.status === "MEETUP_CONFIRMED") {
+    return { label: "Waiting for remaining payment", to: `/user/request-details/${rental.id}` }
   }
   if (rental.status === "ACTIVE") {
     return {
@@ -48,6 +53,7 @@ export function requestCardLabel(status: RentalStatus) {
   if (status === "REQUESTED") return "Pending"
   if (status === "PENDING_PAYMENT") return "Waiting for payment"
   if (status === "PAID") return "Ready for pickup"
+  if (status === "MEETUP_CONFIRMED") return "Awaiting remaining rent"
   if (status === "ACTIVE") return "Active rental"
   if (status === "COMPLETED") return "Completed"
   if (status === "DECLINED") return "Declined"
@@ -58,6 +64,7 @@ export function requestCardAction(status: RentalStatus) {
   if (status === "REQUESTED") return "Review request"
   if (status === "PENDING_PAYMENT") return "See progress"
   if (status === "PAID") return "Open pickup"
+  if (status === "MEETUP_CONFIRMED") return "See progress"
   if (status === "ACTIVE") return "See rental progress"
   if (status === "COMPLETED") return "See details"
   return "See details"

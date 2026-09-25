@@ -1,6 +1,7 @@
 package com.RAP.backend.account;
 
 import com.RAP.backend.account.dto.ChangePasswordRequest;
+import com.RAP.backend.account.dto.ConfirmEmailRequest;
 import com.RAP.backend.account.dto.MeResponse;
 import com.RAP.backend.account.dto.SubmitKycRequest;
 import com.RAP.backend.account.dto.UpdateContactRequest;
@@ -8,6 +9,9 @@ import com.RAP.backend.account.dto.UpdateProfileRequest;
 import com.RAP.backend.auth.CurrentUser;
 import com.RAP.backend.common.ApiException;
 import com.RAP.backend.media.StorageService;
+import com.RAP.backend.otp.OtpPurpose;
+import com.RAP.backend.otp.OtpService;
+import com.RAP.backend.otp.dto.SendOtpRequest;
 import com.RAP.backend.user.KycStatus;
 import com.RAP.backend.user.User;
 import com.RAP.backend.user.UserRepository;
@@ -37,17 +41,20 @@ public class AccountService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final StorageService storageService;
+	private final OtpService otpService;
 
 	public AccountService(
 			CurrentUser currentUser,
 			UserRepository userRepository,
 			PasswordEncoder passwordEncoder,
-			StorageService storageService
+			StorageService storageService,
+			OtpService otpService
 	) {
 		this.currentUser = currentUser;
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.storageService = storageService;
+		this.otpService = otpService;
 	}
 
 	public MeResponse me() {
@@ -69,20 +76,46 @@ public class AccountService {
 	public MeResponse updateContact(UpdateContactRequest request) {
 		User user = currentUser.require();
 		if (request.email() != null && !request.email().isBlank()) {
-			String email = request.email().trim().toLowerCase(Locale.ROOT);
-			if (userRepository.existsByEmailIgnoreCaseAndIdNot(email, user.getId())) {
-				throw new ApiException(
-						HttpStatus.CONFLICT,
-						"An account with this email already exists",
-						"An account with this email already exists",
-						Map.of("email", "An account with this email already exists")
-				);
-			}
-			user.setEmail(email);
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Confirm the new email with a one-time code");
 		}
 		if (request.phone() != null) {
 			applyPhone(user, request.phone());
 		}
+		return MeResponse.from(userRepository.save(user));
+	}
+
+	@Transactional
+	public void sendEmailOtp(SendOtpRequest request) {
+		User user = currentUser.require();
+		String email = OtpService.normalize(request.email());
+		if (email.equalsIgnoreCase(user.getEmail())) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "That is already your email");
+		}
+		if (userRepository.existsByEmailIgnoreCaseAndIdNot(email, user.getId())) {
+			throw new ApiException(
+					HttpStatus.CONFLICT,
+					"An account with this email already exists",
+					"An account with this email already exists",
+					Map.of("email", "An account with this email already exists")
+			);
+		}
+		otpService.send(email, OtpPurpose.CHANGE_EMAIL);
+	}
+
+	@Transactional
+	public MeResponse confirmEmail(ConfirmEmailRequest request) {
+		User user = currentUser.require();
+		String email = OtpService.normalize(request.email());
+		if (userRepository.existsByEmailIgnoreCaseAndIdNot(email, user.getId())) {
+			throw new ApiException(
+					HttpStatus.CONFLICT,
+					"An account with this email already exists",
+					"An account with this email already exists",
+					Map.of("email", "An account with this email already exists")
+			);
+		}
+		otpService.consume(email, OtpPurpose.CHANGE_EMAIL, request.code());
+		user.setEmail(email);
 		return MeResponse.from(userRepository.save(user));
 	}
 

@@ -38,7 +38,7 @@ function MyListingDetailsSummary({
   const listingRequests = owned.filter((req) => req.listingId === listingId)
   const pending = listingRequests.filter((req) => req.status === "REQUESTED")
   const inProgress = listingRequests.filter((req) =>
-    req.status === "PENDING_PAYMENT" || req.status === "PAID" || req.status === "ACTIVE",
+    req.status === "PENDING_PAYMENT" || req.status === "PAID" || req.status === "MEETUP_CONFIRMED" || req.status === "ACTIVE",
   )
 
   return (

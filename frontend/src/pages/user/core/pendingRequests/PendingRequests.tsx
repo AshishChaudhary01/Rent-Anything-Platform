@@ -15,6 +15,7 @@ function pendingLabel(status: string) {
   if (status === "REQUESTED") return "Waiting for owner"
   if (status === "PENDING_PAYMENT") return "Accepted — pay now"
   if (status === "PAID") return "Paid — meetup pending"
+  if (status === "MEETUP_CONFIRMED") return "Meetup done — pay remaining"
   return status
 }
 
@@ -23,7 +24,7 @@ function PendingRequests() {
   const [query, setQuery] = useState("")
   const [sort, setSort] = useState("newest")
   const [page, setPage] = useState(1)
-  const pending = rentals.filter((item) => item.status === "REQUESTED" || item.status === "PENDING_PAYMENT" || item.status === "PAID")
+  const pending = rentals.filter((item) => item.status === "REQUESTED" || item.status === "PENDING_PAYMENT" || item.status === "PAID" || item.status === "MEETUP_CONFIRMED")
 
   const filtered = useMemo(() => {
     let items = pending.filter((item) => item.listingTitle.toLowerCase().includes(query.toLowerCase()))

@@ -73,7 +73,15 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers("/auth/register", "/auth/login", "/auth/refresh", "/auth/logout", "/auth/google")
+						.requestMatchers(
+								"/auth/register",
+								"/auth/login",
+								"/auth/refresh",
+								"/auth/logout",
+								"/auth/google",
+								"/auth/otp",
+								"/auth/password/reset"
+						)
 						.permitAll()
 						.requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
 						.anyRequest().authenticated())

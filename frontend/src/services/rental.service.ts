@@ -161,3 +161,19 @@ export function submitEsewaForm(action: string, fields: Record<string, string>) 
   document.body.appendChild(form)
   form.submit()
 }
+
+export async function downloadReceipt(id: string, kind: "COMMITMENT" | "RENT" = "COMMITMENT") {
+  const { data } = await api.get(`/rentals/${id}/receipt`, {
+    params: { kind },
+    responseType: "blob",
+  })
+  const blob = data instanceof Blob ? data : new Blob([data], { type: "application/pdf" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = `rap-receipt-${kind.toLowerCase()}-${id.slice(0, 8)}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}

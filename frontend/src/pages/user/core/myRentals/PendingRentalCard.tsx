@@ -18,8 +18,11 @@ function PendingRentalCard({ item }: { item: PendingRental }) {
   const cancelRental = useCancelRental()
   const code = item.rentalStatus || item.status
   const paid = code === "PAID" || item.status.toLowerCase().includes("paid")
+  const settle = code === "MEETUP_CONFIRMED"
   const waiting = code === "REQUESTED" || item.status.toLowerCase().includes("waiting")
-  const href = paid
+  const href = settle
+    ? `/user/rent/checkout?rentalId=${item.id}&phase=remaining`
+    : paid
     ? `/user/rent/confirmation?rentalId=${item.id}`
     : waiting
       ? `/user/rent/waiting?rentalId=${item.id}`

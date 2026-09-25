@@ -12,7 +12,7 @@
 # app.cloudinary.api-secret=
 
 # Gmail SMTP app password for OTP / verification mail
-# EMAIL_USERNAME=
+# EMAIL_USERNAME=ac9949044@gmail.com
 # EMAIL_PASSWORD=
 
 # eSewa sandbox uses public EPAYTEST credentials by default (no real money).

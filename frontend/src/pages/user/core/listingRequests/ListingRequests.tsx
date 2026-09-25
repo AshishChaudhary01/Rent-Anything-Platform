@@ -24,7 +24,7 @@ const gridClass = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
 function badgeVariant(status: RentalStatus) {
   if (status === "REQUESTED") return "warning" as const
   if (status === "DECLINED" || status === "CANCELLED") return "accent" as const
-  if (status === "COMPLETED" || status === "PAID") return "success" as const
+  if (status === "COMPLETED" || status === "PAID" || status === "MEETUP_CONFIRMED") return "success" as const
   if (status === "ACTIVE") return "warning" as const
   return "primary" as const
 }

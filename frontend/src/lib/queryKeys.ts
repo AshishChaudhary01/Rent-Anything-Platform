@@ -39,3 +39,8 @@ export const reportKeys = {
   mine: () => ["reports", "mine"] as const,
   detail: (id: string) => ["reports", "detail", id] as const,
 };
+
+export const notificationKeys = {
+  all: () => ["notifications"] as const,
+  page: (page: number) => ["notifications", "page", page] as const,
+};

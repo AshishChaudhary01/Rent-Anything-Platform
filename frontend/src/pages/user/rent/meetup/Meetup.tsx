@@ -29,7 +29,7 @@ function Meetup() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const rentalId = params.get("rentalId") || ""
-  const { data: rental, isPending } = useRental(rentalId)
+  const { data: rental, isPending } = useRental(rentalId, 4000)
   const startRental = useStartRental()
   const noShow = useReportNoShow()
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -42,6 +42,16 @@ function Meetup() {
     if (!rental) return
     if (rental.status === "REQUESTED") {
       navigate(`/user/rent/waiting?rentalId=${rental.id}`, { replace: true })
+      return
+    }
+    if (rental.status === "MEETUP_CONFIRMED") {
+      if (rental.renter) {
+        raToast.success("Meetup confirmed. Pay remaining rent to start.")
+        navigate(`/user/rent/checkout?rentalId=${rental.id}&phase=remaining`, { replace: true })
+      } else {
+        raToast.success("Meetup confirmed. Waiting for remaining payment.")
+        navigate(`/user/request-details/${rental.id}`, { replace: true })
+      }
       return
     }
     if (rental.status === "PENDING_PAYMENT") {
@@ -69,7 +79,14 @@ function Meetup() {
     startRental.mutate(
       { id: rental.id, code },
       {
-        onSuccess: () => {
+        onSuccess: (updated) => {
+          if (updated.status === "MEETUP_CONFIRMED") {
+            raToast.success("Meetup confirmed")
+            navigate(rental.owner
+              ? `/user/request-details/${rental.id}`
+              : `/user/rent/checkout?rentalId=${rental.id}&phase=remaining`)
+            return
+          }
           raToast.success("Rental started")
           navigate(rental.owner ? `/user/request-details/${rental.id}` : "/user/my-rentals")
         },
@@ -144,7 +161,7 @@ function Meetup() {
           </div>
 
           <RentHint icon={<IoScanOutline className="size-6" />} title="Only one action at a time" tone="info">
-            Scanning your own QR will not start the rental. If the camera fails, upload a photo of {peerName}’s QR instead.
+            Scanning your own QR will not confirm pickup. If the camera fails, upload a photo of {peerName}’s QR instead. After a match, the renter pays remaining rent to start.
           </RentHint>
 
           <div className="grid grid-cols-2 gap-2">

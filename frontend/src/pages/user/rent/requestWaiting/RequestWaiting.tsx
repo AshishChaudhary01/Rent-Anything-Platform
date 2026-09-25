@@ -27,6 +27,10 @@ function RequestWaiting() {
       navigate(`/user/rent/checkout?rentalId=${rental.id}`, { replace: true })
       return
     }
+    if (rental.status === "MEETUP_CONFIRMED") {
+      navigate(`/user/rent/checkout?rentalId=${rental.id}&phase=remaining`, { replace: true })
+      return
+    }
     if (rental.status === "PAID" || rental.status === "ACTIVE") {
       navigate(`/user/rent/confirmation?rentalId=${rental.id}`, { replace: true })
       return

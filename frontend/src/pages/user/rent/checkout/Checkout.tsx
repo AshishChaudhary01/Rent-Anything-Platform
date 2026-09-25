@@ -39,7 +39,11 @@ function Checkout() {
       navigate(`/user/rent/waiting?rentalId=${rental.id}`, { replace: true })
       return
     }
-    if (rental.status === "PAID" || rental.status === "ACTIVE") {
+    if (rental.status === "PAID") {
+      navigate(`/user/rent/confirmation?rentalId=${rental.id}`, { replace: true })
+      return
+    }
+    if (rental.status === "ACTIVE") {
       navigate(`/user/rent/confirmation?rentalId=${rental.id}`, { replace: true })
     }
   }, [rental, navigate])
@@ -72,21 +76,32 @@ function Checkout() {
     return <p className="px-6 py-10 text-muted">Loading checkout…</p>
   }
 
+  const remaining = rental.status === "MEETUP_CONFIRMED"
+  const amount = remaining ? Number(rental.remainingDue ?? 0) : Number(rental.commitmentFee)
+
   return (
     <RaContainerLG>
       <RaContainerPadding>
         <div className="max-w-xl mx-auto flex flex-col gap-y-6 pb-10">
-          <ReturnFlowHeader current={1} title="Rent Item" steps={RENT_STEPS} />
+          <ReturnFlowHeader current={remaining ? 4 : 1} title="Rent Item" steps={RENT_STEPS} />
 
           <div>
-            <div className="text-xl font-bold">Pay commitment</div>
+            <div className="text-xl font-bold">{remaining ? "Pay remaining rent" : "Pay commitment"}</div>
             <div className="text-sm md:text-base font-light text-muted">
-              Pay a small commitment fee. This builds trust between renter and owner.
+              {remaining
+                ? "Meetup is confirmed. Pay the remaining rental fee so this rental can start."
+                : "Pay a small commitment fee. This builds trust between renter and owner."}
             </div>
           </div>
 
-          <RentHint icon={<IoShieldCheckmarkOutline className="size-6" />} title="Held until the rental is done" tone="warning">
-            RAP holds this fee until return QR. It is then deducted from the rental total before commission. Daily rent and deposit are due at pickup.
+          <RentHint
+            icon={<IoShieldCheckmarkOutline className="size-6" />}
+            title={remaining ? "Starts after this payment" : "Held until the rental is done"}
+            tone="warning"
+          >
+            {remaining
+              ? "Commitment already paid is credited. Deposit is still due at pickup and refunded on a clean return."
+              : "RAP holds this fee until pickup QR. After scan you pay remaining rent to start. Deposit is due at pickup."}
           </RentHint>
 
           <RaCard round="round" styleClass="flex flex-col gap-y-3">
@@ -114,16 +129,18 @@ function Checkout() {
 
           <RaCard round="round" styleClass="flex flex-col gap-y-3">
             <div className="flex justify-between text-muted">
-              <span>Commitment fee</span>
-              <span className="font-bold text-inherit">Nrs. {Number(rental.commitmentFee).toLocaleString()}</span>
+              <span>{remaining ? "Remaining rent" : "Commitment fee"}</span>
+              <span className="font-bold text-inherit">Nrs. {amount.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-lg font-semibold">
               <span>Pay now</span>
-              <span className="text-primary">Nrs. {Number(rental.commitmentFee).toLocaleString()}</span>
+              <span className="text-primary">Nrs. {amount.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-muted">
-              <span>Due at pickup (after commitment credit + deposit)</span>
-              <span className="font-semibold text-inherit">Nrs. {Number(rental.payLater).toLocaleString()}</span>
+              <span>{remaining ? "Deposit still due at pickup" : "Due after meetup (remaining rent + deposit)"}</span>
+              <span className="font-semibold text-inherit">
+                Nrs. {Number(remaining ? rental.deposit : rental.payLater).toLocaleString()}
+              </span>
             </div>
           </RaCard>
 
@@ -140,7 +157,7 @@ function Checkout() {
 
           <RaButton
             type="button"
-            btnText={paying ? "Redirecting to eSewa…" : `Pay Nrs. ${Number(rental.commitmentFee).toLocaleString()} with eSewa`}
+            btnText={paying ? "Redirecting to eSewa…" : `Pay Nrs. ${amount.toLocaleString()} with eSewa`}
             disabled={!config?.esewa || paying}
             clickFunc={() => void pay()}
           />
