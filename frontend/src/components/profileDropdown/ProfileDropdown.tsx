@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { IoCardOutline, IoExitOutline, IoFlagOutline, IoLockClosedOutline, IoPersonOutline, IoShieldCheckmarkOutline, IoStarOutline } from "react-icons/io5";
+import { IoCardOutline, IoExitOutline, IoFlagOutline, IoHelpCircleOutline, IoLockClosedOutline, IoPersonOutline, IoShieldCheckmarkOutline, IoStarOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import { useLogout } from "../../hooks/queries/useAccount";
 import { useAuthStore } from "../../store/authStore";
@@ -68,6 +68,11 @@ const ProfileDropdown = ({
       label: "Security",
       icon: <IoLockClosedOutline className="size-5" />,
       path: "/user/security",
+    },
+    {
+      label: "Help & guides",
+      icon: <IoHelpCircleOutline className="size-5" />,
+      path: "/user/help",
     },
     {
       label: "My reports",

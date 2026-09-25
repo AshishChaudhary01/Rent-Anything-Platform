@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import RequireAuth from "../../../components/auth/RequireAuth";
 import RaUserTopNavbar from "../../../components/nav/RaUserTopNavbar";
 import RaUserBottomNavbar from "../../../components/nav/RaUserBottomNavbar";
+import RaHelpPanel from "../../../components/help/RaHelpPanel";
 
 const UserStandardLayout = () => {
   return (
@@ -14,6 +15,7 @@ const UserStandardLayout = () => {
           <Outlet />
         </main>
         <RaUserBottomNavbar />
+        <RaHelpPanel />
       </div>
     </RequireAuth>
   )

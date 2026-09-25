@@ -3,6 +3,8 @@ import RaContainer from "../../components/container/RaContainer"
 import { logoHorizontal } from "../../utils/images"
 import RaContainerXS from "../../components/container/RaContainerXS"
 import Footer from "../../components/footer/Footer"
+import RaHelpButton from "../../components/help/RaHelpButton"
+import RaHelpPanel from "../../components/help/RaHelpPanel"
 
 const Auth = () => {
   return (
@@ -10,10 +12,11 @@ const Auth = () => {
       <header className="flex-none">
         <nav className="bg-white drop-shadow-xs py-2 px-6 md:px-7 lg:px-8 xxl:px-0 fixed z-50 top-0 w-full">
           <RaContainer>
-            <div className="h-12 flex">
-              <Link to={"/"} className="cursor-pointer">
-                <img src={logoHorizontal} className="w-auto h-full"></img>
+            <div className="h-12 flex items-center justify-between">
+              <Link to="/" className="h-full cursor-pointer">
+                <img src={logoHorizontal} alt="Logo" className="w-auto h-full object-contain" />
               </Link>
+              <RaHelpButton topicId="security" />
             </div>
           </RaContainer>
         </nav>
@@ -26,6 +29,7 @@ const Auth = () => {
           </div>
         </RaContainerXS>
       </main>
+      <RaHelpPanel />
       <footer className="inset-shadow-xs flex-none">
         <Footer />
       </footer>

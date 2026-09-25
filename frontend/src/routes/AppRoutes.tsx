@@ -62,9 +62,10 @@ import AdminNotifications from "../pages/admin/notifications/AdminNotifications"
 import AdminStaff from "../pages/admin/staff/AdminStaff";
 import AdminStaffCreate from "../pages/admin/staff/AdminStaffCreate";
 import AdminStaffDetails from "../pages/admin/staff/AdminStaffDetails";
-import ReportIssue from "../pages/user/core/reports/ReportIssue";
+import HelpCenter from "../pages/user/core/help/HelpCenter";
 import MyReports from "../pages/user/core/reports/MyReports";
 import MyReportDetails from "../pages/user/core/reports/MyReportDetails";
+import ReportIssue from "../pages/user/core/reports/ReportIssue";
 
 const router = createBrowserRouter([
   {
@@ -116,6 +117,7 @@ const router = createBrowserRouter([
           { path: "payment-methods", element: <PaymentMethods /> },
           { path: "kyc", element: <Kyc /> },
           { path: "security", element: <Security /> },
+          { path: "help", element: <HelpCenter /> },
           { path: "reports", element: <MyReports /> },
           { path: "reports/:id", element: <MyReportDetails /> },
         ]

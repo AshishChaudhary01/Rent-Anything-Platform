@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { useAccountStore } from "../../store/accountStore"
+import { openHelp } from "../../store/helpStore"
 
 function AccountSetupBanner() {
   const { hasAvatar, profileComplete, kycStatus, canTransact } = useAccountStore()
@@ -37,6 +38,13 @@ function AccountSetupBanner() {
           </li>
         ))}
       </ul>
+      <button
+        type="button"
+        className="text-primary font-medium mt-2 cursor-pointer"
+        onClick={() => openHelp("account-setup")}
+      >
+        How setup works
+      </button>
     </div>
   )
 }

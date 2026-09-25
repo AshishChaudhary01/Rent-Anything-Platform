@@ -2,6 +2,7 @@ import { logoHorizontal } from "../../utils/images"
 import RaContainer from "../container/RaContainer"
 import NotificationDropdown from "../notificationDropdown/NotificationDropdown"
 import ProfileDropdown from "../profileDropdown/ProfileDropdown"
+import RaHelpButton from "../help/RaHelpButton"
 import { useAccountStore } from "../../store/accountStore"
 
 function RaUserTopNavbar() {
@@ -14,7 +15,8 @@ function RaUserTopNavbar() {
           <div className="h-10 md:h-12 cursor-pointer">
             <img src={logoHorizontal} alt="Logo" className="size-full" />
           </div>
-          <div className="flex gap-x-4">
+          <div className="flex gap-x-4 items-center">
+            <RaHelpButton />
             <NotificationDropdown />
             <ProfileDropdown username={fullName} email={email} avatarUrl={hasAvatar ? avatarUrl : ""} />
           </div>

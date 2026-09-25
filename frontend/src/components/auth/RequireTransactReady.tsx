@@ -4,6 +4,7 @@ import { useAccountStore } from "../../store/accountStore"
 import RaCard from "../card/RaCard"
 import RaButton from "../button/RaButton"
 import RaPageLoader from "../feedback/RaPageLoader"
+import { openHelp } from "../../store/helpStore"
 
 function RequireTransactReady({ children }: { children: React.ReactNode }) {
   const { isPending } = useMe()
@@ -40,6 +41,7 @@ function RequireTransactReady({ children }: { children: React.ReactNode }) {
           <Link to="/user/kyc">
             <RaButton type="button" btnText="Go to KYC" widthFill={false} />
           </Link>
+          <RaButton type="button" btnText="How this works" variant="ghost" widthFill={false} clickFunc={() => openHelp("account-setup")} />
         </div>
       </RaCard>
     </div>
