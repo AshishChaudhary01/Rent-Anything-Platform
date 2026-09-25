@@ -1,15 +1,17 @@
 import { useMemo, useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
+import { IoIdCardOutline } from "react-icons/io5"
 import RaCard from "../../../components/card/RaCard"
+import AdminPageHeader from "../../../components/admin/AdminPageHeader"
 import RaButton from "../../../components/button/RaButton"
 import RaSearchBar from "../../../components/searchbar/RaSearchbar"
-import { useAdminStore } from "../../../store/adminStore"
 import AdminPagination from "../../../components/admin/AdminPagination"
 import { matchesSearch, paginate, selectClass, statusClass } from "../../../components/admin/adminUi"
 import { profile01 } from "../../../utils/images"
+import { useAdminKyc } from "../../../hooks/queries/useAdmin"
 
 function AdminKyc() {
-  const kycCases = useAdminStore((s) => s.kycCases)
+  const { data: kycCases = [], isPending } = useAdminKyc()
   const [params, setParams] = useSearchParams()
   const status = params.get("status") || "All"
   const [query, setQuery] = useState("")
@@ -17,8 +19,8 @@ function AdminKyc() {
 
   const filtered = useMemo(() => {
     return kycCases.filter((item) => {
-      const matchesQuery = matchesSearch(query, item.id, item.userId, item.userName, item.docType, item.docNumber)
-      return matchesQuery && (status === "All" || item.status === status)
+      const matchesQuery = matchesSearch(query, item.id, item.fullName, item.kycDocumentType, item.kycDocumentNumber, item.email)
+      return matchesQuery && (status === "All" || item.kycStatus === status)
     })
   }, [kycCases, query, status])
 
@@ -26,14 +28,15 @@ function AdminKyc() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <div className="text-xl md:text-2xl font-bold">KYC verification</div>
-        <div className="text-sm text-muted">Review identity documents. Search by KYC ID or user ID.</div>
-      </div>
+      <AdminPageHeader
+        icon={IoIdCardOutline}
+        title="KYC verification"
+        subtitle="Review identity documents. Verified KYC is required before listing or renting."
+      />
       <div className="flex flex-col md:flex-row gap-3">
         <div className="flex-1">
           <RaSearchBar
-            placeholderText="Search by KYC ID, user ID, name, or document..."
+            placeholderText="Search by user ID, name, or document..."
             value={query}
             onChange={(e) => { setQuery(e.target.value); setPage(1) }}
             suggestions={false}
@@ -56,22 +59,26 @@ function AdminKyc() {
           <option value="Rejected">Rejected</option>
         </select>
       </div>
-      <div className="flex flex-col gap-3">
-        {slice.map((item) => (
-          <RaCard key={item.id} round="round" styleClass="p-4! flex items-center gap-4">
-            <img src={profile01} alt="" className="size-12 rounded-full object-cover" />
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold truncate">{item.userName}</div>
-              <div className="text-sm text-muted truncate">{item.id} · {item.docType} · {item.submitted}</div>
-            </div>
-            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(item.status)}`}>{item.status}</span>
-            <Link to={`/admin/kyc/${item.id}`}>
-              <RaButton type="button" btnText="Review" size="sm" variant="outline" widthFill={false} />
-            </Link>
-          </RaCard>
-        ))}
-        {filtered.length === 0 && <div className="text-sm text-muted">No KYC cases match.</div>}
-      </div>
+      {isPending ? (
+        <div className="text-sm text-muted">Loading KYC cases…</div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {slice.map((item) => (
+            <RaCard key={item.id} round="round" styleClass="p-4! flex items-center gap-4">
+              <img src={item.avatarUrl || profile01} alt="" className="size-12 rounded-full object-cover" />
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold truncate">{item.fullName}</div>
+                <div className="text-sm text-muted truncate">{item.id.slice(0, 8)} · {item.kycDocumentType || "Document"} · {item.joined}</div>
+              </div>
+              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(item.kycStatus)}`}>{item.kycStatus}</span>
+              <Link to={`/admin/kyc/${item.id}`}>
+                <RaButton type="button" btnText="Review" size="sm" variant="outline" widthFill={false} />
+              </Link>
+            </RaCard>
+          ))}
+          {filtered.length === 0 && <div className="text-sm text-muted">No KYC cases match.</div>}
+        </div>
+      )}
       <AdminPagination page={current} total={filtered.length} onPage={setPage} />
     </div>
   )

@@ -1,11 +1,13 @@
 import { Link, useParams } from "react-router-dom"
-import { IoArrowBackOutline } from "react-icons/io5"
+import { IoArrowBackOutline, IoBagHandleOutline, IoBanOutline, IoPauseOutline, IoPersonOutline, IoRefreshOutline, IoSwapHorizontalOutline } from "react-icons/io5"
+import { AdminSectionTitle } from "../../../components/admin/AdminPageHeader"
 import RaCard from "../../../components/card/RaCard"
 import RaButton from "../../../components/button/RaButton"
-import { useAdminStore } from "../../../store/adminStore"
 import { raToast } from "../../../lib/raToast"
+import { apiErrorMessage } from "../../../lib/formErrors"
 import { statusClass } from "../../../components/admin/adminUi"
 import { profile01 } from "../../../utils/images"
+import { useAdminListings, useAdminRentals, useAdminUser, useSetAdminUserStatus } from "../../../hooks/queries/useAdmin"
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -18,12 +20,14 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 function AdminUserDetails() {
   const { id } = useParams()
-  const users = useAdminStore((s) => s.users)
-  const listings = useAdminStore((s) => s.listings)
-  const rentals = useAdminStore((s) => s.rentals)
-  const kycCases = useAdminStore((s) => s.kycCases)
-  const setUserStatus = useAdminStore((s) => s.setUserStatus)
-  const user = users.find((item) => item.id === id)
+  const { data: user, isPending } = useAdminUser(id)
+  const { data: listings = [] } = useAdminListings()
+  const { data: rentals = [] } = useAdminRentals()
+  const setUserStatus = useSetAdminUserStatus()
+
+  if (isPending) {
+    return <div className="text-muted">Loading user…</div>
+  }
 
   if (!user) {
     return <div className="text-muted">User not found. <Link to="/admin/users" className="text-primary">Back</Link></div>
@@ -31,9 +35,17 @@ function AdminUserDetails() {
 
   const theirListings = listings.filter((item) => item.ownerId === user.id)
   const theirRentals = rentals.filter((item) => item.ownerId === user.id || item.renterId === user.id)
-  const kyc = kycCases.find((item) => item.userId === user.id)
   const listingPreview = theirListings.slice(0, 3)
   const rentalPreview = theirRentals.slice(0, 3)
+
+  const changeStatus = async (status: string, message: string) => {
+    try {
+      await setUserStatus.mutateAsync({ id: user.id, status })
+      raToast.success(message)
+    } catch (error) {
+      raToast.error(apiErrorMessage(error))
+    }
+  }
 
   return (
     <div className="max-w-5xl flex flex-col gap-6">
@@ -41,7 +53,7 @@ function AdminUserDetails() {
         <IoArrowBackOutline className="size-4" /> Users
       </Link>
       <RaCard round="round" styleClass="p-4! flex items-center gap-4">
-        <img src={profile01} alt="" className="size-16 rounded-full object-cover" />
+        <img src={user.avatarUrl || profile01} alt="" className="size-16 rounded-full object-cover" />
         <div className="min-w-0 flex-1">
           <div className="font-bold text-lg">{user.fullName}</div>
           <div className="text-sm text-muted">{user.email} · {user.phone}</div>
@@ -51,33 +63,34 @@ function AdminUserDetails() {
       </RaCard>
 
       <RaCard round="round" styleClass="flex flex-col gap-2">
-        <div className="font-semibold mb-1">Profile</div>
+        <div className="mb-1">
+          <AdminSectionTitle icon={IoPersonOutline}>Profile</AdminSectionTitle>
+        </div>
         <Row label="Full name">{user.fullName}</Row>
         <Row label="Email">{user.email}</Row>
-        <Row label="Phone">{user.phone}</Row>
-        <Row label="Address">{user.addressLine}</Row>
-        <Row label="City">{user.city}</Row>
-        <Row label="District">{user.district}</Row>
-        <Row label="Location">{user.location}</Row>
-        <Row label="Bio">{user.bio}</Row>
+        <Row label="Phone">{user.phone || "—"}</Row>
+        <Row label="Address">{user.addressLine || "—"}</Row>
+        <Row label="City">{user.city || "—"}</Row>
+        <Row label="District">{user.district || "—"}</Row>
+        <Row label="Location">{user.location || "—"}</Row>
         <Row label="KYC">
           <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(user.kycStatus)}`}>{user.kycStatus}</span>
         </Row>
-        {kyc && (
-          <Link to={`/admin/kyc/${kyc.id}`} className="text-sm text-primary pt-1">Open KYC case {kyc.id}</Link>
+        {user.kycRaw !== "NOT_STARTED" && (
+          <Link to={`/admin/kyc/${user.id}`} className="text-sm text-primary pt-1">Open KYC case</Link>
         )}
       </RaCard>
 
       {user.role === "USER" && (
         <div className="flex gap-2">
           {user.status !== "Suspended" && (
-            <RaButton type="button" btnText="Suspend" variant="outline" clickFunc={() => { setUserStatus(user.id, "Suspended"); raToast.warning(`${user.fullName} suspended`) }} />
+            <RaButton type="button" btnText="Suspend" variant="outline" icon={<IoPauseOutline />} iconPosition="left" clickFunc={() => void changeStatus("Suspended", `${user.fullName} suspended`)} />
           )}
           {user.status !== "Banned" && (
-            <RaButton type="button" btnText="Ban user" variant="danger" clickFunc={() => { setUserStatus(user.id, "Banned"); raToast.success(`${user.fullName} banned`) }} />
+            <RaButton type="button" btnText="Ban user" variant="danger" icon={<IoBanOutline />} iconPosition="left" clickFunc={() => void changeStatus("Banned", `${user.fullName} banned`)} />
           )}
           {user.status !== "Active" && (
-            <RaButton type="button" btnText="Restore" variant="outline" clickFunc={() => { setUserStatus(user.id, "Active"); raToast.success("Account restored") }} />
+            <RaButton type="button" btnText="Restore" variant="outline" icon={<IoRefreshOutline />} iconPosition="left" clickFunc={() => void changeStatus("Active", "Account restored")} />
           )}
         </div>
       )}
@@ -85,7 +98,7 @@ function AdminUserDetails() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <RaCard round="round" styleClass="p-4! flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
-            <div className="font-semibold">Listings ({theirListings.length})</div>
+            <AdminSectionTitle icon={IoBagHandleOutline}>Listings ({theirListings.length})</AdminSectionTitle>
             {theirListings.length > 0 && (
               <Link to={`/admin/users/${user.id}/listings`} className="text-sm text-primary">View all</Link>
             )}
@@ -98,7 +111,7 @@ function AdminUserDetails() {
                 <img src={item.image} alt="" className="size-10 rounded-lg object-cover" />
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium truncate">{item.title}</div>
-                  <div className="text-xs text-muted">#{item.id} · {item.status}</div>
+                  <div className="text-xs text-muted">#{item.id.slice(0, 8)} · {item.status}</div>
                 </div>
               </Link>
             ))
@@ -106,7 +119,7 @@ function AdminUserDetails() {
         </RaCard>
         <RaCard round="round" styleClass="p-4! flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
-            <div className="font-semibold">Rentals ({theirRentals.length})</div>
+            <AdminSectionTitle icon={IoSwapHorizontalOutline}>Rentals ({theirRentals.length})</AdminSectionTitle>
             {theirRentals.length > 0 && (
               <Link to={`/admin/users/${user.id}/rentals`} className="text-sm text-primary">View all</Link>
             )}
@@ -119,7 +132,7 @@ function AdminUserDetails() {
                 <img src={item.image} alt="" className="size-10 rounded-lg object-cover" />
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium truncate">{item.listingTitle}</div>
-                  <div className="text-xs text-muted">{item.id} · {item.status}</div>
+                  <div className="text-xs text-muted">{item.id.slice(0, 8)} · {item.status}</div>
                 </div>
               </Link>
             ))

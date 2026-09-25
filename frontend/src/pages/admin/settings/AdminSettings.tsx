@@ -1,109 +1,60 @@
-import { useState } from "react"
+import { Link } from "react-router-dom"
+import { IoCashOutline, IoIdCardOutline, IoSettingsOutline, IoShieldOutline } from "react-icons/io5"
 import RaCard from "../../../components/card/RaCard"
-import RaInput from "../../../components/input/RaInput"
-import RaButton from "../../../components/button/RaButton"
-import { useAdminStore } from "../../../store/adminStore"
+import AdminPageHeader, { AdminSectionTitle } from "../../../components/admin/AdminPageHeader"
 import { useAuthStore } from "../../../store/authStore"
-import { raToast } from "../../../lib/raToast"
+import { useAdminOverview } from "../../../hooks/queries/useAdmin"
+
+function Rule({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-3 items-center">
+      <span className="text-muted flex items-center gap-2">
+        <Icon className="size-4 text-primary shrink-0" />
+        {label}
+      </span>
+      <span className="font-medium">{value}</span>
+    </div>
+  )
+}
 
 function AdminSettings() {
   const role = useAuthStore((s) => s.role)
-  const settings = useAdminStore((s) => s.settings)
-  const saveSettings = useAdminStore((s) => s.saveSettings)
-  const createAdmin = useAdminStore((s) => s.createAdmin)
-  const [form, setForm] = useState(settings)
-  const [fullName, setFullName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [adminErrors, setAdminErrors] = useState<Record<string, string>>({})
+  const { data: overview, isPending } = useAdminOverview()
   const isSuper = role === "SUPER_ADMIN"
+  const feePercent = overview ? Math.round(overview.commissionPercent * 1000) / 10 : 8
 
   return (
     <div className="max-w-xl flex flex-col gap-6">
-      <div>
-        <div className="text-xl md:text-2xl font-bold">System settings</div>
-        <div className="text-sm text-muted">Platform fees and global rental rules.</div>
-      </div>
+      <AdminPageHeader
+        icon={IoSettingsOutline}
+        title="System settings"
+        subtitle="Platform rules are fixed. Super admins manage staff from Admins."
+      />
 
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={(e) => {
-          e.preventDefault()
-          saveSettings(form)
-          raToast.success("Settings saved")
-        }}
-      >
-        <RaCard round="round" styleClass="flex flex-col gap-4">
-          <RaInput
-            name="fee"
-            label="Platform fee %"
-            value={String(form.platformFeePercent)}
-            onChange={(e) => setForm({ ...form, platformFeePercent: Number(e.target.value) || 0 })}
-          />
-          <RaInput
-            name="commitment"
-            label="Commitment fee (Nrs.)"
-            value={String(form.commitmentFeeNrs)}
-            onChange={(e) => setForm({ ...form, commitmentFeeNrs: Number(e.target.value) || 0 })}
-          />
-          <RaInput
-            name="minDays"
-            label="Minimum rental days"
-            value={String(form.minRentalDays)}
-            onChange={(e) => setForm({ ...form, minRentalDays: Number(e.target.value) || 1 })}
-          />
-          <RaInput
-            name="maxDays"
-            label="Maximum rental days"
-            value={String(form.maxRentalDays)}
-            onChange={(e) => setForm({ ...form, maxRentalDays: Number(e.target.value) || 1 })}
-          />
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="checkbox" checked={form.requireKycToList} onChange={(e) => setForm({ ...form, requireKycToList: e.target.checked })} />
-            Require KYC to publish a listing
-          </label>
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="checkbox" checked={form.requireKycToRent} onChange={(e) => setForm({ ...form, requireKycToRent: e.target.checked })} />
-            Require KYC to rent
-          </label>
-        </RaCard>
-        <RaButton type="submit" btnText="Save settings" />
-      </form>
-
-      <RaCard round="round" styleClass="flex flex-col gap-4">
-        <div>
-          <div className="font-semibold">Create admin</div>
-          <div className="text-sm text-muted">
-            Public signup cannot create admins. Only a super admin can add staff here.
-          </div>
-        </div>
-        {isSuper ? (
-          <form
-            className="flex flex-col gap-3"
-            onSubmit={(e) => {
-              e.preventDefault()
-              const next: Record<string, string> = {}
-              if (!fullName.trim()) next.adminName = "Full name is required"
-              if (!email.includes("@")) next.adminEmail = "Enter a valid email"
-              if (Object.keys(next).length) {
-                setAdminErrors(next)
-                return
-              }
-              createAdmin({ fullName: fullName.trim(), email: email.trim(), phone: phone.trim() || "—" })
-              setFullName("")
-              setEmail("")
-              setPhone("")
-              setAdminErrors({})
-              raToast.success("Admin account created")
-            }}
-          >
-            <RaInput name="adminName" label="Full name" value={fullName} error={adminErrors.adminName} onChange={(e) => { setFullName(e.target.value); setAdminErrors((p) => ({ ...p, adminName: "" })) }} placeholderText="Staff name" />
-            <RaInput type="email" name="adminEmail" label="Email" value={email} error={adminErrors.adminEmail} onChange={(e) => { setEmail(e.target.value); setAdminErrors((p) => ({ ...p, adminEmail: "" })) }} placeholderText="staff@rap.np" />
-            <RaInput name="adminPhone" label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholderText="9800000000" />
-            <RaButton type="submit" btnText="Create admin" />
-          </form>
+      <RaCard round="round" styleClass="flex flex-col gap-3 text-sm">
+        {isPending || !overview ? (
+          <div className="text-muted">Loading rules…</div>
         ) : (
-          <div className="text-sm text-muted">You need super admin access to add staff.</div>
+          <>
+            <Rule icon={IoCashOutline} label="Platform commission" value={`${feePercent}%`} />
+            <Rule icon={IoCashOutline} label="Commitment fee" value={`Nrs. ${overview.commitmentFee}`} />
+            <Rule icon={IoIdCardOutline} label="KYC for listings and rentals" value="Always required" />
+            <p className="text-muted pt-1">
+              Commission and KYC cannot be turned off from the dashboard. Only verified members can list items or send rental requests.
+            </p>
+          </>
+        )}
+      </RaCard>
+
+      <RaCard round="round" styleClass="flex flex-col gap-3">
+        <AdminSectionTitle icon={IoShieldOutline}>Staff accounts</AdminSectionTitle>
+        {isSuper ? (
+          <>
+            <p className="text-sm text-muted">Add, edit, disable, or delete admin accounts from the Admins module.</p>
+            <Link to="/admin/staff" className="text-sm font-semibold text-primary">Manage admins</Link>
+          </>
+        ) : (
+          <div className="text-sm text-muted">Only a super admin can create or manage staff accounts.</div>
         )}
       </RaCard>
     </div>

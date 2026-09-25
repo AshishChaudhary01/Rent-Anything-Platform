@@ -44,3 +44,20 @@ export const notificationKeys = {
   all: () => ["notifications"] as const,
   page: (page: number) => ["notifications", "page", page] as const,
 };
+
+export const adminKeys = {
+  all: () => ["admin"] as const,
+  overview: () => ["admin", "overview"] as const,
+  users: () => ["admin", "users"] as const,
+  user: (id: string) => ["admin", "users", id] as const,
+  listings: () => ["admin", "listings"] as const,
+  listing: (id: string) => ["admin", "listings", id] as const,
+  rentals: () => ["admin", "rentals"] as const,
+  rental: (id: string) => ["admin", "rentals", id] as const,
+  reports: () => ["admin", "reports"] as const,
+  report: (id: string) => ["admin", "reports", id] as const,
+  staff: () => ["admin", "staff"] as const,
+  staffMember: (id: string) => ["admin", "staff", id] as const,
+  kyc: () => ["admin", "kyc"] as const,
+  kycCase: (id: string) => ["admin", "kyc", id] as const,
+};

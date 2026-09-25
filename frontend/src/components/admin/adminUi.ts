@@ -48,15 +48,84 @@ export function matchesSearch(query: string, ...fields: Array<string | number | 
   return fields.some((field) => String(field ?? "").toLowerCase().includes(q))
 }
 
-export function downloadCsv(filename: string, rows: Record<string, string | number>[]) {
-  if (rows.length === 0) return
-  const headers = Object.keys(rows[0])
+export function nepalDateTime(date = new Date()) {
+  return `${date.toLocaleString("en-GB", {
+    timeZone: "Asia/Kathmandu",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })} NPT`
+}
+
+export function csvFileStamp(date = new Date()) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kathmandu",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      hourCycle: "h23",
+    })
+      .formatToParts(date)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  )
+  return `${parts.year}${parts.month}${parts.day}-${(parts.hour || "00").replace(":", "")}${(parts.minute || "00").replace(":", "")}`
+}
+
+export function formatCsvInstant(iso: string | null | undefined) {
+  if (!iso) return ""
+  const parsed = new Date(iso.length <= 10 ? `${iso}T00:00:00+05:45` : iso)
+  if (Number.isNaN(parsed.getTime())) return iso
+  return nepalDateTime(parsed)
+}
+
+export const formatNptDateTime = formatCsvInstant
+
+export function staffRoleLabel(role: string | null | undefined) {
+  const key = (role || "").trim().toUpperCase().replace(/[\s-]+/g, "_")
+  if (key === "SUPER_ADMIN") return "Super admin"
+  if (key === "ADMIN") return "Admin"
+  return ""
+}
+
+export type CsvExportOptions = {
+  title: string
+  period?: string
+  extra?: string[]
+}
+
+export function downloadCsv(
+  filename: string,
+  rows: Record<string, string | number>[],
+  options?: CsvExportOptions,
+) {
   const escape = (value: string | number) => `"${String(value).replaceAll("\"", "\"\"")}"`
-  const body = [
-    headers.join(","),
-    ...rows.map((row) => headers.map((key) => escape(row[key] ?? "")).join(",")),
-  ].join("\n")
-  const blob = new Blob([body], { type: "text/csv;charset=utf-8;" })
+  const meta = [
+    `# ${options?.title ?? "RAP export"}`,
+    `# Generated at,${escape(nepalDateTime())}`,
+    "# Timezone,Asia/Kathmandu (NPT)",
+  ]
+  if (options?.period) meta.push(`# Report period,${escape(options.period)}`)
+  meta.push(`# Record count,${rows.length}`)
+  for (const line of options?.extra ?? []) {
+    meta.push(`# ${line}`)
+  }
+  meta.push("")
+  const table = rows.length === 0
+    ? ["note", escape("No records in this period")].join("\n")
+    : [
+        Object.keys(rows[0]).join(","),
+        ...rows.map((row) => Object.keys(rows[0]).map((key) => escape(row[key] ?? "")).join(",")),
+      ].join("\n")
+  const blob = new Blob(["\uFEFF", meta.join("\n"), "\n", table], { type: "text/csv;charset=utf-8;" })
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
   link.href = url

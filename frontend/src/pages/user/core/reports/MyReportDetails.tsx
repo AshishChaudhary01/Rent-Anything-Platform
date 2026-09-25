@@ -3,7 +3,9 @@ import RaContainer from "../../../../components/container/RaContainer"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
 import RaBreadcrumb from "../../../../components/breadcrumb/RaBreadcrumb"
 import RaCard from "../../../../components/card/RaCard"
-import { statusClass } from "../../../../components/admin/adminUi"
+import { formatNptDateTime, statusClass } from "../../../../components/admin/adminUi"
+import TicketResolution from "../../../../components/report/TicketResolution"
+import ProofGallery from "../../../../components/report/ProofGallery"
 import { useReport } from "../../../../hooks/queries/useReports"
 
 function MyReportDetails() {
@@ -35,6 +37,7 @@ function MyReportDetails() {
             <div>
               <div className="text-xl md:text-2xl font-bold">{report.reason}</div>
               <div className="text-sm text-muted">{report.listingTitle}</div>
+              <div className="text-xs text-muted mt-1">Opened {formatNptDateTime(report.createdAt)}</div>
             </div>
             <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(report.status === "PENDING" ? "Pending" : "Resolved")}`}>{report.status === "PENDING" ? "Pending" : "Resolved"}</span>
           </div>
@@ -44,21 +47,28 @@ function MyReportDetails() {
             <div className="flex justify-between gap-2"><span className="text-muted">Booking</span><span>{report.rentalId || "None"}</span></div>
             <p className="text-muted pt-2">{report.detail}</p>
           </RaCard>
+          {report.status === "RESOLVED" && (
+            <RaCard round="round" styleClass="p-4!">
+              <TicketResolution
+                ticketId={report.id}
+                context={report.context}
+                openedAt={report.createdAt}
+                resolvedAt={report.resolvedAt}
+                resolverName={report.resolverName}
+                resolverRole={report.resolverRole}
+                resolverEmail={report.resolverEmail}
+                action={report.resolutionAction}
+                notes={report.resolutionNotes}
+              />
+            </RaCard>
+          )}
           <RaCard round="round" styleClass="flex flex-col gap-3">
             <div className="font-semibold">Proof</div>
-            <div className="grid grid-cols-2 gap-3">
-              {report.proofs.map((url) => (
-                <div key={url} className="rounded-xl overflow-hidden bg-surface">
-                  {url.includes("/video/") || url.includes(".mp4") ? (
-                    <video src={url} controls className="w-full aspect-video object-cover bg-black" />
-                  ) : (
-                    <img src={url} alt="" className="w-full aspect-video object-cover" />
-                  )}
-                </div>
-              ))}
-            </div>
+            <ProofGallery urls={report.proofs} />
           </RaCard>
-          <div className="text-sm text-muted">This ticket is still under review.</div>
+          {report.status === "PENDING" && (
+            <div className="text-sm text-muted">This ticket is still under review.</div>
+          )}
         </div>
       </RaContainerPadding>
     </RaContainer>

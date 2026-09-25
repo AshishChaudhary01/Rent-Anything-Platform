@@ -8,4 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserReportRepository extends JpaRepository<UserReport, UUID> {
 
 	List<UserReport> findByReporterOrderByCreatedAtDesc(User reporter);
+
+	List<UserReport> findAllByOrderByCreatedAtDesc();
+
+	long countByStatus(ReportStatus status);
 }

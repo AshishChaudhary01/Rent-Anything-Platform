@@ -1,46 +1,52 @@
 import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
-import { IoArrowBackOutline } from "react-icons/io5"
+import { IoArrowBackOutline, IoCheckmarkDoneOutline, IoImagesOutline, IoPauseOutline, IoTrashOutline } from "react-icons/io5"
+import { AdminSectionTitle } from "../../../components/admin/AdminPageHeader"
 import RaCard from "../../../components/card/RaCard"
 import RaButton from "../../../components/button/RaButton"
 import RaInput from "../../../components/input/RaInput"
-import { useAdminStore } from "../../../store/adminStore"
-import { useAuthStore } from "../../../store/authStore"
 import { raToast } from "../../../lib/raToast"
-import { selectClass, statusClass } from "../../../components/admin/adminUi"
+import { apiErrorMessage } from "../../../lib/formErrors"
+import { selectClass, statusClass, formatNptDateTime, staffRoleLabel } from "../../../components/admin/adminUi"
+import TicketResolution, { resolverDisplayName } from "../../../components/report/TicketResolution"
+import ProofGallery from "../../../components/report/ProofGallery"
+import { useAccountStore } from "../../../store/accountStore"
+import { useAuthStore } from "../../../store/authStore"
+import { useAdminReport, useResolveAdminReport, useSetAdminListingStatus, useSetAdminUserStatus } from "../../../hooks/queries/useAdmin"
 
 function AdminReportDetails() {
   const { id } = useParams()
-  const reports = useAdminStore((s) => s.reports)
-  const users = useAdminStore((s) => s.users)
-  const resolveReport = useAdminStore((s) => s.resolveReport)
-  const setUserStatus = useAdminStore((s) => s.setUserStatus)
-  const setListingStatus = useAdminStore((s) => s.setListingStatus)
-  const authUserId = useAuthStore((s) => s.userId)
-  const report = reports.find((item) => item.id === id)
-  const me = users.find((u) => u.id === authUserId)
+  const { data: report, isPending } = useAdminReport(id)
+  const resolveReport = useResolveAdminReport()
+  const setUserStatus = useSetAdminUserStatus()
+  const setListingStatus = useSetAdminListingStatus()
+  const closerName = useAccountStore((s) => s.fullName)
+  const closerEmail = useAccountStore((s) => s.email)
+  const closerRole = useAuthStore((s) => s.role)
   const [action, setAction] = useState("Warning issued")
   const [notes, setNotes] = useState("")
   const [notesError, setNotesError] = useState("")
+
+  if (isPending) {
+    return <div className="text-muted">Loading report…</div>
+  }
 
   if (!report) {
     return <div className="text-muted">Report not found. <Link to="/admin/reports" className="text-primary">Back</Link></div>
   }
 
-  const closeCase = () => {
+  const closeCase = async () => {
     if (!notes.trim()) {
       setNotesError("Add resolution notes before closing")
       return
     }
     setNotesError("")
-    resolveReport(report.id, {
-      resolverId: me?.id || authUserId || "admin",
-      resolverName: me?.fullName || "Admin",
-      action,
-      notes: notes.trim(),
-      closedAt: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-    })
-    raToast.success("Case closed")
+    try {
+      await resolveReport.mutateAsync({ id: report.id, action, notes: notes.trim() })
+      raToast.success("Case closed")
+    } catch (error) {
+      raToast.error(apiErrorMessage(error))
+    }
   }
 
   return (
@@ -51,55 +57,71 @@ function AdminReportDetails() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-xl font-bold">{report.reason}</div>
-          <div className="text-sm text-muted">{report.id} · opened {report.opened}</div>
+          <div className="text-sm text-muted">{report.id} · opened {formatNptDateTime(report.createdAt) || report.opened}</div>
         </div>
         <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(report.status)}`}>{report.status}</span>
       </div>
 
       <RaCard round="round" styleClass="flex flex-col gap-2 text-sm">
-        <div className="flex justify-between gap-2"><span className="text-muted">Listing</span><Link className="text-primary" to={`/admin/listings/${report.listingId}`}>{report.listingTitle} (#{report.listingId})</Link></div>
-        <div className="flex justify-between gap-2"><span className="text-muted">Reporter</span><Link className="text-primary" to={`/admin/users/${report.reporterId}`}>{report.reporterName}</Link></div>
-        <div className="flex justify-between gap-2"><span className="text-muted">Accused</span><Link className="text-primary" to={`/admin/users/${report.accusedId}`}>{report.accusedName}</Link></div>
+        <div className="flex justify-between gap-2">
+          <span className="text-muted">Listing</span>
+          {report.listingId ? (
+            <Link className="text-primary" to={`/admin/listings/${report.listingId}`}>{report.listingTitle}</Link>
+          ) : (
+            <span>{report.listingTitle || "—"}</span>
+          )}
+        </div>
+        <div className="flex justify-between gap-2">
+          <span className="text-muted">Reporter</span>
+          {report.reporterId ? (
+            <Link className="text-primary" to={`/admin/users/${report.reporterId}`}>{report.reporterName}</Link>
+          ) : (
+            <span>{report.reporterName}</span>
+          )}
+        </div>
+        <div className="flex justify-between gap-2">
+          <span className="text-muted">Accused</span>
+          {report.accusedId ? (
+            <Link className="text-primary" to={`/admin/users/${report.accusedId}`}>{report.accusedName}</Link>
+          ) : (
+            <span>{report.accusedName || "—"}</span>
+          )}
+        </div>
         <div className="flex justify-between gap-2">
           <span className="text-muted">Booking</span>
-          {report.rentalId ? <Link className="text-primary" to={`/admin/rentals/${report.rentalId}`}>{report.rentalId}</Link> : <span>None</span>}
+          {report.rentalId ? <Link className="text-primary" to={`/admin/rentals/${report.rentalId}`}>{report.rentalId.slice(0, 8)}</Link> : <span>None</span>}
         </div>
         <p className="text-muted pt-2">{report.detail}</p>
       </RaCard>
 
       <RaCard round="round" styleClass="flex flex-col gap-3">
-        <div className="font-semibold">Proof</div>
-        <div className="grid grid-cols-2 gap-3">
-          {report.proofs.map((proof) => (
-            <div key={proof.label} className="rounded-xl overflow-hidden bg-surface">
-              {proof.type === "video" ? (
-                <video src={proof.url} poster={proof.url} controls className="w-full aspect-video object-cover bg-black" />
-              ) : (
-                <img src={proof.url} alt={proof.label} className="w-full aspect-video object-cover" />
-              )}
-              <div className="text-xs px-2 py-1.5 flex justify-between">
-                <span>{proof.label}</span>
-                <span className="text-muted">{proof.type}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        <AdminSectionTitle icon={IoImagesOutline}>Proof</AdminSectionTitle>
+        <ProofGallery urls={report.proofs} />
       </RaCard>
 
-      {report.resolution && (
-        <RaCard round="round" styleClass="flex flex-col gap-2 text-sm">
-          <div className="font-semibold">Resolution</div>
-          <div className="flex justify-between gap-2"><span className="text-muted">Resolver</span><span>{report.resolution.resolverName}</span></div>
-          <div className="flex justify-between gap-2"><span className="text-muted">Action</span><span>{report.resolution.action}</span></div>
-          <div className="flex justify-between gap-2"><span className="text-muted">Closed</span><span>{report.resolution.closedAt}</span></div>
-          <p className="text-muted pt-1">{report.resolution.notes}</p>
+      {report.status === "Resolved" && (
+        <RaCard round="round" styleClass="p-4!">
+          <TicketResolution
+            ticketId={report.id}
+            context={report.context}
+            openedAt={report.createdAt}
+            resolvedAt={report.resolvedAt}
+            resolverName={report.resolverName}
+            resolverRole={report.resolverRole}
+            resolverEmail={report.resolverEmail}
+            action={report.resolutionAction}
+            notes={report.resolutionNotes}
+            showStaffContact
+          />
         </RaCard>
       )}
 
       {report.status === "Pending" && (
         <RaCard round="round" styleClass="flex flex-col gap-4">
-          <div className="font-semibold">Close ticket</div>
-          <div className="text-sm text-muted">Resolver: {me?.fullName || "Admin"}</div>
+          <AdminSectionTitle icon={IoCheckmarkDoneOutline}>Close ticket</AdminSectionTitle>
+          <div className="text-sm text-muted">
+            Closing as {resolverDisplayName(closerName, closerEmail)} ({staffRoleLabel(closerRole) || "Admin"}). The reporter and accused get in-app and email notices with this decision.
+          </div>
           <label className="flex flex-col gap-1 text-sm">
             Resolution action
             <select className={selectClass} value={action} onChange={(e) => setAction(e.target.value)}>
@@ -113,19 +135,41 @@ function AdminReportDetails() {
           </label>
           <RaInput name="notes" label="Resolution notes" value={notes} error={notesError} onChange={(e) => { setNotes(e.target.value); setNotesError("") }} placeholderText="What was decided and why" />
           <div className="flex flex-col sm:flex-row gap-2">
-            <RaButton type="button" btnText="Close case" clickFunc={closeCase} />
-            <RaButton
-              type="button"
-              btnText="Suspend accused"
-              variant="outline"
-              clickFunc={() => { setUserStatus(report.accusedId, "Suspended"); raToast.warning(`${report.accusedName} suspended`) }}
-            />
-            <RaButton
-              type="button"
-              btnText="Remove listing"
-              variant="danger"
-              clickFunc={() => { setListingStatus(report.listingId, "Removed"); raToast.success("Listing removed") }}
-            />
+            <RaButton type="button" btnText="Close case" icon={<IoCheckmarkDoneOutline />} iconPosition="left" clickFunc={() => void closeCase()} />
+            {report.accusedId && (
+              <RaButton
+                type="button"
+                btnText="Suspend accused"
+                variant="outline"
+                icon={<IoPauseOutline />}
+                iconPosition="left"
+                clickFunc={async () => {
+                  try {
+                    await setUserStatus.mutateAsync({ id: report.accusedId!, status: "Suspended" })
+                    raToast.warning(`${report.accusedName} suspended`)
+                  } catch (error) {
+                    raToast.error(apiErrorMessage(error))
+                  }
+                }}
+              />
+            )}
+            {report.listingId && (
+              <RaButton
+                type="button"
+                btnText="Remove listing"
+                variant="danger"
+                icon={<IoTrashOutline />}
+                iconPosition="left"
+                clickFunc={async () => {
+                  try {
+                    await setListingStatus.mutateAsync({ id: report.listingId!, status: "Removed" })
+                    raToast.success("Listing removed")
+                  } catch (error) {
+                    raToast.error(apiErrorMessage(error))
+                  }
+                }}
+              />
+            )}
           </div>
         </RaCard>
       )}

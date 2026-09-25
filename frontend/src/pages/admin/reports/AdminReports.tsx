@@ -1,14 +1,16 @@
 import { useMemo, useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
+import { IoAlertCircleOutline } from "react-icons/io5"
 import RaCard from "../../../components/card/RaCard"
+import AdminPageHeader from "../../../components/admin/AdminPageHeader"
 import RaButton from "../../../components/button/RaButton"
 import RaSearchBar from "../../../components/searchbar/RaSearchbar"
-import { useAdminStore } from "../../../store/adminStore"
 import AdminPagination from "../../../components/admin/AdminPagination"
-import { matchesSearch, paginate, selectClass, statusClass } from "../../../components/admin/adminUi"
+import { matchesSearch, paginate, selectClass, statusClass, formatNptDateTime } from "../../../components/admin/adminUi"
+import { useAdminReports } from "../../../hooks/queries/useAdmin"
 
 function AdminReports() {
-  const reports = useAdminStore((s) => s.reports)
+  const { data: reports = [], isPending } = useAdminReports()
   const [params, setParams] = useSearchParams()
   const status = params.get("status") || "All"
   const [query, setQuery] = useState("")
@@ -27,6 +29,7 @@ function AdminReports() {
         item.accusedName,
         item.accusedId,
         item.rentalId,
+        item.resolverName,
       )
       return matchesQuery && (status === "All" || item.status === status)
     })
@@ -36,10 +39,11 @@ function AdminReports() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <div className="text-xl md:text-2xl font-bold">Reports / disputes</div>
-        <div className="text-sm text-muted">Search by case ID, listing, or people involved.</div>
-      </div>
+      <AdminPageHeader
+        icon={IoAlertCircleOutline}
+        title="Reports / disputes"
+        subtitle="New reports email every admin. Closing a case emails the people involved."
+      />
       <div className="flex flex-col md:flex-row gap-3">
         <div className="flex-1">
           <RaSearchBar
@@ -65,21 +69,30 @@ function AdminReports() {
           <option value="Resolved">Resolved</option>
         </select>
       </div>
-      <div className="flex flex-col gap-3">
-        {slice.map((report) => (
-          <RaCard key={report.id} round="round" styleClass="p-4! flex flex-col md:flex-row md:items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold">{report.reason}</div>
-              <div className="text-sm text-muted truncate">{report.id} · {report.listingTitle} · {report.reporterName} → {report.accusedName} · {report.opened}</div>
-            </div>
-            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(report.status)}`}>{report.status}</span>
-            <Link to={`/admin/reports/${report.id}`}>
-              <RaButton type="button" btnText="Open case" size="sm" widthFill={false} />
-            </Link>
-          </RaCard>
-        ))}
-        {filtered.length === 0 && <div className="text-sm text-muted">No reports.</div>}
-      </div>
+      {isPending ? (
+        <div className="text-sm text-muted">Loading reports…</div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {slice.map((report) => (
+            <RaCard key={report.id} round="round" styleClass="p-4! flex flex-col md:flex-row md:items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold">{report.reason}</div>
+                <div className="text-sm text-muted truncate">
+                  {report.id.slice(0, 8)} · {report.listingTitle} · {report.reporterName} → {report.accusedName}
+                  {report.status === "Resolved"
+                    ? ` · Closed ${formatNptDateTime(report.resolvedAt)}${report.resolverName ? ` by ${report.resolverName}` : ""}`
+                    : ` · ${report.opened}`}
+                </div>
+              </div>
+              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(report.status)}`}>{report.status}</span>
+              <Link to={`/admin/reports/${report.id}`}>
+                <RaButton type="button" btnText="Open case" size="sm" widthFill={false} />
+              </Link>
+            </RaCard>
+          ))}
+          {filtered.length === 0 && <div className="text-sm text-muted">No reports.</div>}
+        </div>
+      )}
       <AdminPagination page={current} total={filtered.length} onPage={setPage} />
     </div>
   )

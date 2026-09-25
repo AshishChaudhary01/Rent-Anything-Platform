@@ -1,22 +1,22 @@
 import { useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
-import { IoArrowBackOutline } from "react-icons/io5"
+import { IoArrowBackOutline, IoBagHandleOutline, IoSwapHorizontalOutline } from "react-icons/io5"
+import AdminPageHeader from "../../../components/admin/AdminPageHeader"
 import RaCard from "../../../components/card/RaCard"
 import RaButton from "../../../components/button/RaButton"
 import RaSearchBar from "../../../components/searchbar/RaSearchbar"
-import { useAdminStore } from "../../../store/adminStore"
 import AdminPagination from "../../../components/admin/AdminPagination"
 import { matchesSearch, paginate, selectClass, statusClass } from "../../../components/admin/adminUi"
+import { useAdminListings, useAdminRentals, useAdminUser } from "../../../hooks/queries/useAdmin"
 
 function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
   const { id } = useParams()
-  const users = useAdminStore((s) => s.users)
-  const listings = useAdminStore((s) => s.listings)
-  const rentals = useAdminStore((s) => s.rentals)
+  const { data: user, isPending } = useAdminUser(id)
+  const { data: listings = [] } = useAdminListings()
+  const { data: rentals = [] } = useAdminRentals()
   const [query, setQuery] = useState("")
   const [status, setStatus] = useState("All")
   const [page, setPage] = useState(1)
-  const user = users.find((item) => item.id === id)
 
   const listingItems = useMemo(() => {
     if (!user) return []
@@ -36,6 +36,10 @@ function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
     })
   }, [rentals, user, query, status])
 
+  if (isPending) {
+    return <div className="text-muted">Loading…</div>
+  }
+
   if (!user) {
     return <div className="text-muted">User not found. <Link to="/admin/users" className="text-primary">Back</Link></div>
   }
@@ -50,10 +54,11 @@ function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
       <Link to={`/admin/users/${user.id}`} className="flex items-center gap-1 text-sm text-muted">
         <IoArrowBackOutline className="size-4" /> {user.fullName}
       </Link>
-      <div>
-        <div className="text-xl md:text-2xl font-bold">{user.fullName} · {title}</div>
-        <div className="text-sm text-muted">Search and filter this user’s {kind}.</div>
-      </div>
+      <AdminPageHeader
+        icon={kind === "listings" ? IoBagHandleOutline : IoSwapHorizontalOutline}
+        title={`${user.fullName} · ${title}`}
+        subtitle={`Search and filter this user’s ${kind}.`}
+      />
       <div className="flex flex-col md:flex-row gap-3">
         <div className="flex-1">
           <RaSearchBar
@@ -73,10 +78,10 @@ function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
             </>
           ) : (
             <>
+              <option value="Pending">Pending</option>
               <option value="Active">Active</option>
               <option value="Completed">Completed</option>
               <option value="Cancelled">Cancelled</option>
-              <option value="Failed">Failed</option>
             </>
           )}
         </select>
@@ -88,7 +93,7 @@ function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
                   <img src={listing.image} alt="" className="size-14 rounded-xl object-cover" />
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold truncate">{listing.title}</div>
-                    <div className="text-sm text-muted">#{listing.id} · {listing.location}</div>
+                    <div className="text-sm text-muted">#{listing.id.slice(0, 8)} · {listing.location}</div>
                   </div>
                   <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(listing.status)}`}>{listing.status}</span>
                   <Link to={`/admin/listings/${listing.id}`}>
@@ -101,7 +106,7 @@ function AdminUserActivity({ kind }: { kind: "listings" | "rentals" }) {
                   <img src={rental.image} alt="" className="size-14 rounded-xl object-cover" />
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold truncate">{rental.listingTitle}</div>
-                    <div className="text-sm text-muted">{rental.id} · {rental.startDate} → {rental.endDate}</div>
+                    <div className="text-sm text-muted">{rental.id.slice(0, 8)} · {rental.startDate} → {rental.endDate}</div>
                   </div>
                   <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(rental.status)}`}>{rental.status}</span>
                   <Link to={`/admin/rentals/${rental.id}`}>

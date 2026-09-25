@@ -1,21 +1,23 @@
 import { Link, useParams } from "react-router-dom"
 import {
+  IoBanOutline,
   IoCalendarOutline,
   IoCashOutline,
   IoLocationOutline,
   IoPricetagOutline,
   IoShieldCheckmarkOutline,
-  IoSparklesOutline,
   IoSwapHorizontalOutline,
+  IoTrashOutline,
 } from "react-icons/io5"
 import RaCard from "../../../components/card/RaCard"
 import RaButton from "../../../components/button/RaButton"
 import RaBreadcrumb from "../../../components/breadcrumb/RaBreadcrumb"
 import MediaGallery from "../../../components/mediaGallery/MediaGallery"
 import { profile01 } from "../../../utils/images"
-import { useAdminStore } from "../../../store/adminStore"
 import { raToast } from "../../../lib/raToast"
+import { apiErrorMessage } from "../../../lib/formErrors"
 import { statusClass } from "../../../components/admin/adminUi"
+import { useAdminListing, useAdminRentals, useSetAdminListingStatus } from "../../../hooks/queries/useAdmin"
 
 function Fact({
   icon: Icon,
@@ -47,17 +49,29 @@ function formatDay(iso: string) {
 
 function AdminListingDetails() {
   const { id } = useParams()
-  const listings = useAdminStore((s) => s.listings)
-  const rentals = useAdminStore((s) => s.rentals)
-  const setListingStatus = useAdminStore((s) => s.setListingStatus)
-  const listing = listings.find((item) => String(item.id) === id)
+  const { data: listing, isPending } = useAdminListing(id)
+  const { data: rentals = [] } = useAdminRentals()
+  const setListingStatus = useSetAdminListingStatus()
   const activeRental = rentals.find((item) => item.listingId === listing?.id && item.status === "Active")
+
+  if (isPending) {
+    return <div className="text-muted">Loading listing…</div>
+  }
 
   if (!listing) {
     return <div className="text-muted">Listing not found. <Link to="/admin/listings" className="text-primary">Back</Link></div>
   }
 
-  const media = listing.gallery.map((url) => ({ type: "image" as const, url }))
+  const media = listing.image ? [{ type: "image" as const, url: listing.image }] : []
+
+  const changeStatus = async (next: string, message: string) => {
+    try {
+      await setListingStatus.mutateAsync({ id: listing.id, status: next })
+      raToast.success(message)
+    } catch (error) {
+      raToast.error(apiErrorMessage(error))
+    }
+  }
 
   return (
     <div className="max-w-5xl flex flex-col gap-5">
@@ -74,7 +88,7 @@ function AdminListingDetails() {
         <span className={`text-sm font-semibold px-3 py-1 rounded-full shrink-0 ${statusClass(listing.status)}`}>{listing.status}</span>
       </div>
 
-      <MediaGallery media={media} />
+      {media.length > 0 && <MediaGallery media={media} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <div className="lg:col-span-3 flex flex-col gap-4">
@@ -82,7 +96,6 @@ function AdminListingDetails() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             <Fact icon={IoPricetagOutline} label="Category">{listing.category}</Fact>
             <Fact icon={IoLocationOutline} label="Location">{listing.location}</Fact>
-            <Fact icon={IoSparklesOutline} label="Condition">{listing.condition}</Fact>
             <Fact icon={IoCashOutline} label="Daily rate">Nrs. {listing.rate}</Fact>
             <Fact icon={IoShieldCheckmarkOutline} label="Deposit">Nrs. {listing.deposit}</Fact>
             <Fact icon={IoCalendarOutline} label="Listed">{formatDay(listing.createdAt)}</Fact>
@@ -109,7 +122,7 @@ function AdminListingDetails() {
                 <div className="flex items-center gap-3">
                   <img src={activeRental.image} alt="" className="size-12 rounded-lg object-cover" />
                   <div className="min-w-0">
-                    <div className="text-sm font-medium truncate">{activeRental.id}</div>
+                    <div className="text-sm font-medium truncate">{activeRental.id.slice(0, 8)}</div>
                     <div className="text-xs text-muted">{activeRental.startDate} → {activeRental.endDate}</div>
                   </div>
                 </div>
@@ -128,10 +141,10 @@ function AdminListingDetails() {
 
       <div className="flex gap-2">
         {listing.status === "Active" && (
-          <RaButton type="button" btnText="Disable listing" variant="outline" clickFunc={() => { setListingStatus(listing.id, "Disabled"); raToast.warning("Listing disabled") }} />
+          <RaButton type="button" btnText="Disable listing" variant="outline" icon={<IoBanOutline />} iconPosition="left" clickFunc={() => void changeStatus("Disabled", "Listing disabled")} />
         )}
         {listing.status !== "Removed" && (
-          <RaButton type="button" btnText="Remove listing" variant="danger" clickFunc={() => { setListingStatus(listing.id, "Removed"); raToast.success("Listing removed") }} />
+          <RaButton type="button" btnText="Remove listing" variant="danger" icon={<IoTrashOutline />} iconPosition="left" clickFunc={() => void changeStatus("Removed", "Listing removed")} />
         )}
       </div>
     </div>

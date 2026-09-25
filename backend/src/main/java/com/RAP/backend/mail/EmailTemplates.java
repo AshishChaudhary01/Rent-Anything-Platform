@@ -89,6 +89,7 @@ public class EmailTemplates {
 			case RENTAL -> "Rental notice";
 			case RETURN -> "Return notice";
 			case MESSAGE -> "Message";
+			case REPORT -> "Trust & safety notice";
 			case WELCOME -> "Account notice";
 		};
 	}
@@ -105,6 +106,7 @@ public class EmailTemplates {
 			case RENTAL -> "View rental";
 			case RETURN -> "View return";
 			case MESSAGE -> "Open chat";
+			case REPORT -> "Open this report";
 			case WELCOME -> "Open RAP";
 		};
 	}
@@ -121,6 +123,7 @@ public class EmailTemplates {
 			case RENTAL -> "The rental is now active. The item stays with the renter until both sides complete the return QR.";
 			case RETURN -> "The return QR was confirmed, so the rental is complete. Commitment is applied to the rent total, RAP takes platform commission, and the deposit is marked for refund on a clean return.";
 			case MESSAGE -> "You have a new chat message in RAP. Reply in the app. RAP never asks you to pay outside eSewa checkout.";
+			case REPORT -> "This is a trust and safety notice about a report. Open RAP to read the case, the decision, and any next step. RAP may warn, suspend, or remove a listing when proof supports it.";
 			case WELCOME -> "You can browse listings now. Listing an item or starting a rental needs a profile photo, complete profile details, and verified KYC.";
 		};
 	}

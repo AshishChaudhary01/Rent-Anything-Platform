@@ -1,6 +1,7 @@
-import { IoHomeOutline, IoLocationOutline, IoMailOutline, IoPersonOutline, IoShieldCheckmarkOutline } from "react-icons/io5"
+import { IoCallOutline, IoHomeOutline, IoLocationOutline, IoMailOutline, IoPersonOutline, IoShieldCheckmarkOutline } from "react-icons/io5"
 import RaCard from "../../../components/card/RaCard"
 import RaInput from "../../../components/input/RaInput"
+import AdminPageHeader from "../../../components/admin/AdminPageHeader"
 import { useAuthStore } from "../../../store/authStore"
 import { useAccountStore } from "../../../store/accountStore"
 
@@ -10,10 +11,11 @@ function AdminProfile() {
 
   return (
     <div className="max-w-xl flex flex-col gap-6">
-      <div>
-        <div className="text-xl md:text-2xl font-bold">Profile</div>
-        <div className="text-sm text-muted">View-only staff profile. Contact a super admin to change these details.</div>
-      </div>
+      <AdminPageHeader
+        icon={IoPersonOutline}
+        title="Profile"
+        subtitle="View-only staff profile. Contact a super admin to change these details."
+      />
 
       <RaCard round="round" styleClass="flex items-center gap-4 p-4!">
         <img
@@ -30,7 +32,7 @@ function AdminProfile() {
       <RaCard round="round" styleClass="flex flex-col gap-y-4">
         <RaInput name="fullName" label="Full name" Icon={IoPersonOutline} value={fullName} disabled />
         <RaInput name="email" label="Email" Icon={IoMailOutline} value={email} disabled />
-        <RaInput name="phone" label="Phone" Icon={IoPersonOutline} value={phone} disabled />
+        <RaInput name="phone" label="Phone" Icon={IoCallOutline} value={phone} disabled />
         <RaInput name="role" label="Role" Icon={IoShieldCheckmarkOutline} value={role === "SUPER_ADMIN" ? "Super admin" : "Admin"} disabled />
         <RaInput name="addressLine" label="Address" Icon={IoHomeOutline} value={addressLine} disabled />
         <RaInput name="city" label="City / municipality" Icon={IoLocationOutline} value={city} disabled />

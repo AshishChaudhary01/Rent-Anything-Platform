@@ -3,8 +3,11 @@ import { IoCheckmarkOutline, IoChevronForwardOutline, IoNotificationsOutline } f
 import { Link } from "react-router-dom";
 import NotificationItem from "./NotificationItem";
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications } from "../../hooks/queries/useNotifications";
+import { useAuthStore } from "../../store/authStore";
 
 const NotificationDropdown = () => {
+  const role = useAuthStore((s) => s.role);
+  const inbox = role === "USER" ? "/user/notifications" : "/admin/notifications";
   const [isOpen, setIsOpen] = useState(false);
   const { data } = useNotifications(0, 4);
   const markRead = useMarkNotificationRead();
@@ -60,7 +63,7 @@ const NotificationDropdown = () => {
               ))
             )}
           </div>
-          <Link to="/user/notifications" onClick={() => setIsOpen(false)} className="m-2 p-3 rounded-sm bg-gray-100 text-xs text-muted font-semibold flex justify-center gap-x-2">
+          <Link to={inbox} onClick={() => setIsOpen(false)} className="m-2 p-3 rounded-sm bg-gray-100 text-xs text-muted font-semibold flex justify-center gap-x-2">
             View all notifications <IoChevronForwardOutline />
           </Link>
         </div>

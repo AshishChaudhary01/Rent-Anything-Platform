@@ -69,6 +69,28 @@ public class UserReport {
 	@Column(nullable = false, length = 16)
 	private ReportStatus status = ReportStatus.PENDING;
 
+	@Column(name = "resolution_action", length = 80)
+	private String resolutionAction;
+
+	@Column(name = "resolution_notes", length = 2000)
+	private String resolutionNotes;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "resolver_id")
+	private User resolver;
+
+	@Column(name = "resolver_name", length = 120)
+	private String resolverName;
+
+	@Column(name = "resolver_role", length = 32)
+	private String resolverRole;
+
+	@Column(name = "resolver_email", length = 191)
+	private String resolverEmail;
+
+	@Column(name = "resolved_at")
+	private Instant resolvedAt;
+
 	@Column(name = "created_at", nullable = false)
 	private Instant createdAt;
 

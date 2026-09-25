@@ -125,6 +125,9 @@ public class RentalService {
 		}
 		Listing listing = listingRepository.findById(request.listingId())
 				.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Listing not found"));
+		if (!AccountReadiness.canTransact(listing.getOwner())) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "This lister is not verified yet");
+		}
 		if (listing.getOwner().getId().equals(renter.getId())) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "You cannot rent your own listing");
 		}
@@ -422,6 +425,12 @@ public class RentalService {
 		Rental rental = requireParticipant(id, owner);
 		if (!rental.getOwner().getId().equals(owner.getId())) {
 			throw new ApiException(HttpStatus.FORBIDDEN, "Only the owner can accept this request");
+		}
+		if (!AccountReadiness.canTransact(owner)) {
+			throw new ApiException(
+					HttpStatus.FORBIDDEN,
+					"Complete your profile photo, details, and verified KYC before accepting requests"
+			);
 		}
 		if (rental.getStatus() != RentalStatus.REQUESTED) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "This request is no longer pending");

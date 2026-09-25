@@ -1,37 +1,45 @@
 import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
-import { IoArrowBackOutline } from "react-icons/io5"
+import { IoArrowBackOutline, IoCheckmarkCircleOutline, IoCloseCircleOutline } from "react-icons/io5"
 import RaCard from "../../../components/card/RaCard"
 import RaButton from "../../../components/button/RaButton"
 import RaInput from "../../../components/input/RaInput"
-import { useAdminStore } from "../../../store/adminStore"
-import { useAuthStore } from "../../../store/authStore"
 import { raToast } from "../../../lib/raToast"
+import { apiErrorMessage } from "../../../lib/formErrors"
 import { statusClass } from "../../../components/admin/adminUi"
+import { useAdminKycCase, useReviewAdminKyc } from "../../../hooks/queries/useAdmin"
 
 function AdminKycDetails() {
   const { id } = useParams()
-  const kycCases = useAdminStore((s) => s.kycCases)
-  const users = useAdminStore((s) => s.users)
-  const reviewKyc = useAdminStore((s) => s.reviewKyc)
-  const authUserId = useAuthStore((s) => s.userId)
-  const item = kycCases.find((row) => row.id === id)
-  const me = users.find((u) => u.id === authUserId)
-  const [notes, setNotes] = useState(item?.notes ?? "")
+  const { data: item, isPending } = useAdminKycCase(id)
+  const reviewKyc = useReviewAdminKyc()
+  const [notes, setNotes] = useState("")
   const [notesError, setNotesError] = useState("")
+
+  if (isPending) {
+    return <div className="text-muted">Loading KYC case…</div>
+  }
 
   if (!item) {
     return <div className="text-muted">KYC case not found. <Link to="/admin/kyc" className="text-primary">Back</Link></div>
   }
 
-  const decide = (status: "Verified" | "Rejected") => {
-    if (status === "Rejected" && !notes.trim()) {
+  const decide = async (approved: boolean) => {
+    if (!approved && !notes.trim()) {
       setNotesError("Add a reason when rejecting")
       return
     }
     setNotesError("")
-    reviewKyc(item.id, status, me?.fullName || "Admin", notes.trim() || "Document matches profile.")
-    raToast.success(status === "Verified" ? "KYC verified" : "KYC rejected")
+    try {
+      await reviewKyc.mutateAsync({
+        id: item.id,
+        approved,
+        notes: notes.trim() || "Document matches profile.",
+      })
+      raToast.success(approved ? "KYC verified" : "KYC rejected")
+    } catch (error) {
+      raToast.error(apiErrorMessage(error))
+    }
   }
 
   return (
@@ -41,45 +49,52 @@ function AdminKycDetails() {
       </Link>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-xl font-bold">{item.userName}</div>
-          <div className="text-sm text-muted">{item.id} · submitted {item.submitted}</div>
+          <div className="text-xl font-bold">{item.fullName}</div>
+          <div className="text-sm text-muted">{item.id} · joined {item.joined}</div>
         </div>
-        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(item.status)}`}>{item.status}</span>
+        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(item.kycStatus)}`}>{item.kycStatus}</span>
       </div>
 
       <RaCard round="round" styleClass="flex flex-col gap-2 text-sm">
-        <div className="flex justify-between"><span className="text-muted">User</span><Link className="text-primary" to={`/admin/users/${item.userId}`}>{item.userName}</Link></div>
-        <div className="flex justify-between"><span className="text-muted">Legal name</span><span>{item.fullName}</span></div>
-        <div className="flex justify-between"><span className="text-muted">Date of birth</span><span>{item.dateOfBirth}</span></div>
-        <div className="flex justify-between"><span className="text-muted">Document</span><span>{item.docType}</span></div>
-        <div className="flex justify-between"><span className="text-muted">Document no.</span><span>{item.docNumber}</span></div>
+        <div className="flex justify-between"><span className="text-muted">User</span><Link className="text-primary" to={`/admin/users/${item.id}`}>{item.fullName}</Link></div>
+        <div className="flex justify-between"><span className="text-muted">Legal name</span><span>{item.kycFullName || "—"}</span></div>
+        <div className="flex justify-between"><span className="text-muted">Date of birth</span><span>{item.kycDateOfBirth || "—"}</span></div>
+        <div className="flex justify-between"><span className="text-muted">Document</span><span>{item.kycDocumentType || "—"}</span></div>
+        <div className="flex justify-between"><span className="text-muted">Document no.</span><span>{item.kycDocumentNumber || "—"}</span></div>
       </RaCard>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <div className="text-sm font-medium mb-2">Front</div>
-          <img src={item.frontImage} alt="Front of ID" className="w-full rounded-2xl object-cover aspect-4/3 bg-surface" />
+          {item.kycFrontUrl ? (
+            <img src={item.kycFrontUrl} alt="Front of ID" className="w-full rounded-2xl object-cover aspect-4/3 bg-surface" />
+          ) : (
+            <div className="w-full rounded-2xl aspect-4/3 bg-surface text-sm text-muted flex items-center justify-center">No front image</div>
+          )}
         </div>
         <div>
           <div className="text-sm font-medium mb-2">Back</div>
-          <img src={item.backImage} alt="Back of ID" className="w-full rounded-2xl object-cover aspect-4/3 bg-surface" />
+          {item.kycBackUrl ? (
+            <img src={item.kycBackUrl} alt="Back of ID" className="w-full rounded-2xl object-cover aspect-4/3 bg-surface" />
+          ) : (
+            <div className="w-full rounded-2xl aspect-4/3 bg-surface text-sm text-muted flex items-center justify-center">No back image</div>
+          )}
         </div>
       </div>
 
-      {(item.reviewer || item.status !== "Pending") && (
+      {item.kycNotes && (
         <RaCard round="round" styleClass="flex flex-col gap-2 text-sm">
-          <div className="font-semibold">Review</div>
-          {item.reviewer && <div className="flex justify-between"><span className="text-muted">Reviewer</span><span>{item.reviewer}</span></div>}
-          {item.notes && <p className="text-muted">{item.notes}</p>}
+          <div className="font-semibold">Review notes</div>
+          <p className="text-muted">{item.kycNotes}</p>
         </RaCard>
       )}
 
-      {item.status === "Pending" && (
+      {item.kycStatus === "Pending" && (
         <RaCard round="round" styleClass="flex flex-col gap-4">
           <RaInput name="kycNotes" label="Reviewer notes" value={notes} error={notesError} onChange={(e) => { setNotes(e.target.value); setNotesError("") }} placeholderText="Match notes or rejection reason" />
           <div className="flex gap-2">
-            <RaButton type="button" btnText="Verify" clickFunc={() => decide("Verified")} />
-            <RaButton type="button" btnText="Reject" variant="danger" clickFunc={() => decide("Rejected")} />
+            <RaButton type="button" btnText="Verify" icon={<IoCheckmarkCircleOutline />} iconPosition="left" clickFunc={() => void decide(true)} />
+            <RaButton type="button" btnText="Reject" variant="danger" icon={<IoCloseCircleOutline />} iconPosition="left" clickFunc={() => void decide(false)} />
           </div>
         </RaCard>
       )}

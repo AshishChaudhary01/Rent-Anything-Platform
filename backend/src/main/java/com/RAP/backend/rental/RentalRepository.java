@@ -12,6 +12,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface RentalRepository extends JpaRepository<Rental, UUID> {
 
+	@Query("select distinct r from Rental r join fetch r.listing l left join fetch l.media join fetch r.owner join fetch r.renter")
+	List<Rental> findAllWithParties();
+
 	List<Rental> findByRenterOrderByCreatedAtDesc(User renter);
 
 	List<Rental> findByOwnerOrderByCreatedAtDesc(User owner);

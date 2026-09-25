@@ -81,6 +81,9 @@ public class User {
 	@Column(name = "kyc_back_url", length = 500)
 	private String kycBackUrl;
 
+	@Column(name = "kyc_notes", length = 1000)
+	private String kycNotes;
+
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 32)
 	private Role role = Role.USER;

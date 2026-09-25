@@ -4,10 +4,14 @@ import com.RAP.backend.auth.CurrentUser;
 import com.RAP.backend.common.ApiException;
 import com.RAP.backend.listing.Listing;
 import com.RAP.backend.listing.ListingRepository;
+import com.RAP.backend.listing.ListingStatus;
 import com.RAP.backend.media.StorageService;
+import com.RAP.backend.notify.NotificationKind;
+import com.RAP.backend.notify.NotificationService;
 import com.RAP.backend.rental.Rental;
 import com.RAP.backend.rental.RentalRepository;
 import com.RAP.backend.report.dto.ReportResponse;
+import com.RAP.backend.user.Role;
 import com.RAP.backend.user.User;
 import com.RAP.backend.user.UserRepository;
 import java.util.ArrayList;
@@ -28,6 +32,7 @@ public class ReportService {
 	private final UserRepository userRepository;
 	private final StorageService storageService;
 	private final CurrentUser currentUser;
+	private final NotificationService notificationService;
 
 	public ReportService(
 			UserReportRepository reportRepository,
@@ -35,7 +40,8 @@ public class ReportService {
 			RentalRepository rentalRepository,
 			UserRepository userRepository,
 			StorageService storageService,
-			CurrentUser currentUser
+			CurrentUser currentUser,
+			NotificationService notificationService
 	) {
 		this.reportRepository = reportRepository;
 		this.listingRepository = listingRepository;
@@ -43,6 +49,7 @@ public class ReportService {
 		this.userRepository = userRepository;
 		this.storageService = storageService;
 		this.currentUser = currentUser;
+		this.notificationService = notificationService;
 	}
 
 	@Transactional(readOnly = true)
@@ -128,6 +135,108 @@ public class ReportService {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Add at least one photo or video as proof");
 		}
 		report.setProofUrls(String.join(",", urls));
-		return ReportResponse.from(reportRepository.save(report));
+		UserReport saved = reportRepository.save(report);
+		notifyStaff(saved);
+		return ReportResponse.from(saved);
+	}
+
+	@Transactional(readOnly = true)
+	public List<ReportResponse> adminAll() {
+		currentUser.requireStaff();
+		return reportRepository.findAllByOrderByCreatedAtDesc().stream().map(ReportResponse::from).toList();
+	}
+
+	@Transactional(readOnly = true)
+	public ReportResponse adminGet(UUID id) {
+		currentUser.requireStaff();
+		return ReportResponse.from(requireReport(id));
+	}
+
+	@Transactional
+	public ReportResponse resolve(UUID id, String action, String notes) {
+		User staff = currentUser.requireStaff();
+		if (notes == null || notes.isBlank()) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Add resolution notes before closing");
+		}
+		UserReport report = requireReport(id);
+		if (report.getStatus() == ReportStatus.RESOLVED) {
+			return ReportResponse.from(report);
+		}
+		String decided = action == null || action.isBlank() ? "No action — dismissed" : action.trim();
+		report.setStatus(ReportStatus.RESOLVED);
+		report.setResolutionAction(decided);
+		report.setResolutionNotes(notes.trim());
+		String resolverLabel = staff.getFullName() == null || staff.getFullName().isBlank()
+				? staff.getEmail()
+				: staff.getFullName().trim();
+		report.setResolver(staff);
+		report.setResolverName(resolverLabel);
+		report.setResolverRole(staff.getRole().name());
+		report.setResolverEmail(staff.getEmail());
+		report.setResolvedAt(java.time.Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS));
+		if (decided.toLowerCase(Locale.ROOT).contains("suspend") && report.getAccused() != null) {
+			report.getAccused().setAccountLocked(true);
+			report.getAccused().setLockedAt(java.time.Instant.now());
+			userRepository.save(report.getAccused());
+		}
+		if (decided.toLowerCase(Locale.ROOT).contains("listing") && report.getListing() != null) {
+			report.getListing().setStatus(ListingStatus.REMOVED);
+			listingRepository.save(report.getListing());
+		}
+		UserReport saved = reportRepository.save(report);
+		String listingTitle = saved.getListing() == null ? "a RAP listing" : saved.getListing().getTitle();
+		String path = "/user/reports/" + saved.getId();
+		String staffPath = "/admin/reports/" + saved.getId();
+		notificationService.notify(
+				saved.getReporter(),
+				NotificationKind.REPORT,
+				"Your report was reviewed",
+				"RAP closed your report about " + listingTitle + ". Decision: " + decided + ". Reviewed by " + resolverLabel + ".",
+				path,
+				null,
+				true
+		);
+		if (saved.getAccused() != null) {
+			notificationService.notify(
+					saved.getAccused(),
+					NotificationKind.REPORT,
+					"A report about you was closed",
+					"RAP reviewed a report involving " + listingTitle + ". Decision: " + decided + ".",
+					"/user",
+					null,
+					true
+			);
+		}
+		notificationService.notify(
+				staff,
+				NotificationKind.REPORT,
+				"Report closed",
+				"You closed a report about " + listingTitle + ".",
+				staffPath,
+				null,
+				false
+		);
+		return ReportResponse.from(saved);
+	}
+
+	private UserReport requireReport(UUID id) {
+		return reportRepository.findById(id)
+				.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Report not found"));
+	}
+
+	private void notifyStaff(UserReport report) {
+		String listingTitle = report.getListing() == null ? "a RAP listing" : report.getListing().getTitle();
+		String path = "/admin/reports/" + report.getId();
+		for (User staff : userRepository.findByRoleIn(List.of(Role.ADMIN, Role.SUPER_ADMIN))) {
+			notificationService.notify(
+					staff,
+					NotificationKind.REPORT,
+					"New report to review",
+					report.getReporter().getFullName() + " reported " + listingTitle + " (" + report.getReason() + ").",
+					path,
+					null,
+					true
+			);
+		}
 	}
 }

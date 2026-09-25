@@ -58,6 +58,10 @@ import AdminUserActivity from "../pages/admin/users/AdminUserActivity"
 import AdminKyc from "../pages/admin/kyc/AdminKyc"
 import AdminKycDetails from "../pages/admin/kyc/AdminKycDetails"
 import AdminProfile from "../pages/admin/profile/AdminProfile";
+import AdminNotifications from "../pages/admin/notifications/AdminNotifications";
+import AdminStaff from "../pages/admin/staff/AdminStaff";
+import AdminStaffCreate from "../pages/admin/staff/AdminStaffCreate";
+import AdminStaffDetails from "../pages/admin/staff/AdminStaffDetails";
 import ReportIssue from "../pages/user/core/reports/ReportIssue";
 import MyReports from "../pages/user/core/reports/MyReports";
 import MyReportDetails from "../pages/user/core/reports/MyReportDetails";
@@ -168,7 +172,11 @@ const router = createBrowserRouter([
       { path: "rentals", element: <AdminRentals /> },
       { path: "rentals/:id", element: <AdminRentalDetails /> },
       { path: "settings", element: <AdminSettings /> },
+      { path: "staff", element: <AdminStaff /> },
+      { path: "staff/new", element: <AdminStaffCreate /> },
+      { path: "staff/:id", element: <AdminStaffDetails /> },
       { path: "profile", element: <AdminProfile /> },
+      { path: "notifications", element: <AdminNotifications /> },
     ],
   }
 ]);

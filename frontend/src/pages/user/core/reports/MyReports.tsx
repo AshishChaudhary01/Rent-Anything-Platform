@@ -4,7 +4,7 @@ import RaContainerPadding from "../../../../components/container/RaContainerPadd
 import RaBreadcrumb from "../../../../components/breadcrumb/RaBreadcrumb"
 import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
-import { statusClass } from "../../../../components/admin/adminUi"
+import { formatNptDateTime, statusClass } from "../../../../components/admin/adminUi"
 import { useMyReports } from "../../../../hooks/queries/useReports"
 
 function MyReports() {
@@ -31,7 +31,12 @@ function MyReports() {
                 <RaCard key={report.id} round="round" styleClass="p-4! flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold">{report.reason}</div>
-                    <div className="text-sm text-muted truncate">{report.listingTitle}</div>
+                    <div className="text-sm text-muted truncate">
+                      {report.listingTitle}
+                      {report.status === "RESOLVED" && report.resolvedAt
+                        ? ` · Closed ${formatNptDateTime(report.resolvedAt)}${report.resolverName ? ` by ${report.resolverName}` : ""}`
+                        : ""}
+                    </div>
                   </div>
                   <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusClass(report.status === "PENDING" ? "Pending" : "Resolved")}`}>{report.status === "PENDING" ? "Pending" : "Resolved"}</span>
                   <Link to={`/user/reports/${report.id}`}>

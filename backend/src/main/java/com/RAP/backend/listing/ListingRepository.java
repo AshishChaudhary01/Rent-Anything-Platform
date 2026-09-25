@@ -11,6 +11,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface ListingRepository extends JpaRepository<Listing, UUID> {
 
+	@Query("select distinct l from Listing l left join fetch l.owner left join fetch l.media")
+	List<Listing> findAllWithOwnerAndMedia();
+
 	List<Listing> findByOwnerOrderByCreatedAtDesc(User owner);
 
 	List<Listing> findByOwnerAndStatusInOrderByUpdatedAtDesc(User owner, java.util.Collection<ListingStatus> statuses);

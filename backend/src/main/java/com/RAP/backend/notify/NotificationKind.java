@@ -8,5 +8,6 @@ public enum NotificationKind {
 	PICKUP,
 	RENTAL,
 	RETURN,
-	MESSAGE
+	MESSAGE,
+	REPORT
 }

@@ -8,6 +8,7 @@ import {
   IoCubeOutline,
   IoScanOutline,
   IoSparklesOutline,
+  IoWarningOutline,
 } from "react-icons/io5"
 import type { AppNotification, NotificationKind } from "../../services/notification.service"
 
@@ -20,6 +21,7 @@ const kindIcon: Record<NotificationKind, typeof IoCubeOutline> = {
   RETURN: IoScanOutline,
   PAYMENT: IoCardOutline,
   WELCOME: IoSparklesOutline,
+  REPORT: IoWarningOutline,
 }
 
 function relativeTime(iso: string) {

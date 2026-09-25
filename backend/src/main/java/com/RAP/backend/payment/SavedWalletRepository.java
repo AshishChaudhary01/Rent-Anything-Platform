@@ -15,4 +15,6 @@ public interface SavedWalletRepository extends JpaRepository<SavedWallet, UUID> 
 	Optional<SavedWallet> findByIdAndUser(UUID id, User user);
 
 	long countByUser(User user);
+
+	void deleteByUser(User user);
 }

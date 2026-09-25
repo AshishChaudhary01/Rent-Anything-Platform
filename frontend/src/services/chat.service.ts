@@ -54,11 +54,20 @@ export type UserReport = {
   detail: string
   listingTitle: string
   listingId: string | null
+  reporterName?: string
+  reporterId?: string | null
   accusedName: string
   accusedId: string | null
   rentalId: string | null
   proofs: string[]
   status: "PENDING" | "RESOLVED"
+  resolutionAction?: string | null
+  resolutionNotes?: string | null
+  resolverId?: string | null
+  resolverName?: string | null
+  resolverRole?: string | null
+  resolverEmail?: string | null
+  resolvedAt?: string | null
   createdAt: string
 }
 

@@ -9,17 +9,21 @@ import {
   IoMenuOutline,
   IoPeopleOutline,
   IoSettingsOutline,
+  IoShieldOutline,
   IoSwapHorizontalOutline,
+  IoLogOutOutline,
 } from "react-icons/io5"
 import { logoHorizontal } from "../../utils/images"
 import { useAuthStore } from "../../store/authStore"
 import { useAccountStore } from "../../store/accountStore"
 import { useLogout } from "../../hooks/queries/useAccount"
+import NotificationDropdown from "../notificationDropdown/NotificationDropdown"
 
-const links = [
+const allLinks = [
   { to: "/admin", label: "Dashboard", icon: IoGridOutline, end: true },
   { to: "/admin/listings", label: "Listings", icon: IoBagHandleOutline },
   { to: "/admin/users", label: "Users", icon: IoPeopleOutline },
+  { to: "/admin/staff", label: "Admins", icon: IoShieldOutline, superAdmin: true },
   { to: "/admin/kyc", label: "KYC", icon: IoIdCardOutline },
   { to: "/admin/reports", label: "Reports", icon: IoAlertCircleOutline },
   { to: "/admin/rentals", label: "Rentals", icon: IoSwapHorizontalOutline },
@@ -29,6 +33,7 @@ const links = [
 function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   const role = useAuthStore((s) => s.role)
+  const links = allLinks.filter((link) => !link.superAdmin || role === "SUPER_ADMIN")
   const { mutate: logout } = useLogout()
   const { fullName, avatarUrl } = useAccountStore()
   const avatar = avatarUrl || "https://ui-avatars.com/api/?name=Admin"
@@ -98,14 +103,16 @@ function AdminShell({ children }: { children: React.ReactNode }) {
           </button>
           <div className="font-semibold hidden lg:block">Admin</div>
           <div className="flex items-center gap-4 ml-auto">
+            <NotificationDropdown />
             <Link to="/admin/profile" className="flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary">
               <img src={avatar} alt="" className="size-8 rounded-full object-cover ring-2 ring-primary/20" />
             </Link>
             <button
               type="button"
-              className="text-sm text-primary font-semibold cursor-pointer"
+              className="text-sm text-primary font-semibold cursor-pointer flex items-center gap-1.5"
               onClick={() => logout()}
             >
+              <IoLogOutOutline className="size-4" />
               Log out
             </button>
           </div>

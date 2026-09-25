@@ -9,6 +9,7 @@ export type NotificationKind =
   | "RENTAL"
   | "RETURN"
   | "MESSAGE"
+  | "REPORT"
 
 export type AppNotification = {
   id: string
