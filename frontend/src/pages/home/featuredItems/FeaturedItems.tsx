@@ -4,92 +4,14 @@ import RaContainerPadding from "../../../components/container/RaContainerPadding
 import { IoArrowForward } from "react-icons/io5";
 import RaItemPreviewContainer from "../../../components/container/RaItemPreviewContainer";
 import RaItemPreviewCard from "../../../components/card/RaItemPreviewCard";
-import { backpack01, ladder01, pressureWasher01, tent01, tools01 } from "../../../utils/images";
-
-const listItems = [
-  {
-    id: 1,
-    image: ladder01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 2,
-    image: tent01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 3,
-    image: backpack01,
-    title: "A Title that is very looooooooooooooooooooooong",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 4,
-    image: tools01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 5,
-    image: pressureWasher01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 6,
-    image: ladder01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 7,
-    image: tent01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 8,
-    image: backpack01,
-    title: "A Title that is very looooooooooooooooooooooong",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 9,
-    image: tools01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-  {
-    id: 10,
-    image: pressureWasher01,
-    title: "Demo title",
-    rate: 1000,
-    unit: "day",
-    location: "KTM"
-  },
-]
+import { useListings } from "../../../hooks/queries/useListings";
+import { toListingCard } from "../../../types/listing.types";
+import RaPageLoader from "../../../components/feedback/RaPageLoader";
 
 const FeaturedItems = () => {
+  const { data, isPending, isError } = useListings({ size: 10, sort: "newest" })
+  const items = (data?.items ?? []).map(toListingCard)
+
   return (
     <section className="py-16">
       <RaContainer>
@@ -100,11 +22,19 @@ const FeaturedItems = () => {
               View All<IoArrowForward />
             </Link>
           </div>
-          <RaItemPreviewContainer>
-            {listItems.map((item) => (
-              <RaItemPreviewCard item={item} />
-            ))}
-          </RaItemPreviewContainer>
+          {isPending ? (
+            <RaPageLoader label="Loading listings…" />
+          ) : isError ? (
+            <p className="text-muted py-10">Could not load listings. Try again in a moment.</p>
+          ) : items.length === 0 ? (
+            <p className="text-muted py-10">No listings yet. Be the first to share an item nearby.</p>
+          ) : (
+            <RaItemPreviewContainer>
+              {items.map((item) => (
+                <RaItemPreviewCard key={item.id} item={item} />
+              ))}
+            </RaItemPreviewContainer>
+          )}
         </RaContainerPadding>
       </RaContainer>
     </section>

@@ -83,10 +83,9 @@ function Register() {
             error={errors.password?.message}
           />
 
-          {/* Terms*/}
-          {/* <label className="flex items-center gap-2 cursor-pointer select-none">
+          <label className="flex items-center gap-2 cursor-pointer select-none mt-2">
             <input
-            required
+              required
               type="checkbox"
               className="w-4 h-4 rounded-full cursor-pointer"
             />
@@ -106,7 +105,7 @@ function Register() {
                 Privacy Policy
               </Link>
             </span>
-          </label> */}
+          </label>
 
           {/* Register */}
           <RaButton

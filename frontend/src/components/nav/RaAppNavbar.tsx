@@ -3,7 +3,7 @@ import { IoCloseOutline, IoMenu } from "react-icons/io5";
 import RaContainer from "../container/RaContainer";
 import { logoHorizontal } from "../../utils/images";
 import RaNavlink from "./RaNavlink";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import RaButton from "../button/RaButton";
 import RaMobileNavLink from "./RaMobileNavlink";
 
@@ -14,17 +14,19 @@ export interface INavbarProps {
 
 const navLinks = [
   { id: 1, path: "/", name: "Home" },
-  { id: 2, path: "/#about", name: "About" },
-  { id: 3, path: "/#how-it-works", name: "How It Works" },
-  { id: 4, path: "/#safety", name: "Safety" }
+  { id: 2, path: "/about", name: "About" },
+  { id: 3, path: "/how-it-works", name: "How It Works" },
+  { id: 4, path: "/safety", name: "Safety" },
+  { id: 5, path: "/contact", name: "Contact" },
 ];
 
 function RaAppNavbar() {
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   const [scrolled, setScrolled] = useState<boolean>(false);
 
-  const [activeLink, setActiveLink] = useState<string>("/");
+  const activeLink = location.pathname === "/" ? "/" : location.pathname;
 
   const handleToggleNav = () => {
     setIsMenuOpen((prev) => !prev);
@@ -62,9 +64,9 @@ function RaAppNavbar() {
     >
       <RaContainer>
         <div className="flex items-center justify-between h-16">
-          <div className="h-7 lg:h-12 cursor-pointer flex flex-col">
-            <img src={logoHorizontal} alt="Logo" className="w-full h-full" />
-          </div>
+          <Link to="/" className="h-7 lg:h-12 cursor-pointer flex flex-col">
+            <img src={logoHorizontal} alt="Rent Anything" className="w-auto h-full object-contain" />
+          </Link>
 
           <div className="hidden lg:flex items-center md:gap-5 lg:gap-8">
             {navLinks.map((link) => (
@@ -73,7 +75,7 @@ function RaAppNavbar() {
                 path={link.path}
                 name={link.name}
                 activeLink={activeLink}
-                setActiveLink={setActiveLink}
+                setActiveLink={() => undefined}
               />
             ))}
           </div>
@@ -99,9 +101,9 @@ function RaAppNavbar() {
           >
             <div className="fixed top-0 z-50 right-0 h-full w-[78vw] max-w-xs bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out lg:hidden">
               <div className="flex items-center justify-between px-6 py-5">
-                <div className="h-7 lg:h-8 cursor-pointer">
-                  <img src={logoHorizontal} alt="Logo" className="w-full h-full" />
-                </div>
+                <Link to="/" className="h-7 lg:h-8 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
+                  <img src={logoHorizontal} alt="Rent Anything" className="w-auto h-full object-contain" />
+                </Link>
                 <button
                   onClick={handleToggleNav}
                   className="p-1.5 rounded-md text-muted hover:text-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer"
@@ -116,7 +118,7 @@ function RaAppNavbar() {
                     path={link.path}
                     name={link.name}
                     activeLink={activeLink}
-                    setActiveLink={setActiveLink}
+                    setActiveLink={() => setIsMenuOpen(false)}
                   />
                 ))}
               </div>

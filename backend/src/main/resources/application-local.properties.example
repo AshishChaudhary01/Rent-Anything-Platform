@@ -15,6 +15,9 @@
 # EMAIL_USERNAME=ac9949044@gmail.com
 # EMAIL_PASSWORD=
 
+# Public contact form inbox (defaults to EMAIL_USERNAME)
+# CONTACT_INBOX=hello@rentanything.np
+
 # eSewa sandbox uses public EPAYTEST credentials by default (no real money).
 # Optional override: ESEWA_SECRET= (do not commit live merchant secrets)
 

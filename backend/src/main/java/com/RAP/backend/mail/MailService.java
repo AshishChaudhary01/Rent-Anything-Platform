@@ -30,10 +30,14 @@ public class MailService {
 	}
 
 	public void sendHtml(String to, String subject, String html) {
-		sendHtml(to, subject, html, true);
+		sendHtml(to, subject, html, true, null);
 	}
 
 	public void sendHtml(String to, String subject, String html, boolean required) {
+		sendHtml(to, subject, html, required, null);
+	}
+
+	public void sendHtml(String to, String subject, String html, boolean required, String replyTo) {
 		if (to == null || to.isBlank()) {
 			if (required) {
 				throw new IllegalStateException("Missing recipient");
@@ -53,6 +57,9 @@ public class MailService {
 			MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
 			helper.setFrom(from);
 			helper.setTo(to);
+			if (replyTo != null && !replyTo.isBlank()) {
+				helper.setReplyTo(replyTo);
+			}
 			helper.setSubject(subject);
 			helper.setText(html, true);
 			sender.send(message);

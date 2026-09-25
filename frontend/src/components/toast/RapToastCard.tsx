@@ -40,7 +40,7 @@ function RapToastCard({
   const style = styles[kind]
   const Icon = style.icon
   return (
-    <div className={`rap-toast flex items-start gap-3 min-w-[18rem] max-w-[22rem] rounded-2xl border px-3.5 py-3 shadow-lg ${style.wrap}`}>
+    <div className={`rap-toast flex items-start gap-3 min-w-[18rem] max-w-22rem rounded-2xl border px-3.5 py-3 shadow-lg ${style.wrap}`}>
       <Icon className="size-5 shrink-0 mt-0.5" />
       <p className="text-sm font-semibold flex-1 leading-snug">{message}</p>
       {actionLabel && onAction ? (

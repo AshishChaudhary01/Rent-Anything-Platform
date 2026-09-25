@@ -67,16 +67,24 @@ import HelpCenter from "../pages/user/core/help/HelpCenter";
 import MyReports from "../pages/user/core/reports/MyReports";
 import MyReportDetails from "../pages/user/core/reports/MyReportDetails";
 import ReportIssue from "../pages/user/core/reports/ReportIssue";
+import About from "../pages/site/About";
+import HowItWorks from "../pages/site/HowItWorks";
+import TrustSafety from "../pages/site/TrustSafety";
+import Contact from "../pages/site/Contact";
+import Privacy from "../pages/site/Privacy";
+import Terms from "../pages/site/Terms";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
   },
-  {
-    path: "/how-it-works",
-    element: <Home />,
-  },
+  { path: "/about", element: <About /> },
+  { path: "/how-it-works", element: <HowItWorks /> },
+  { path: "/safety", element: <TrustSafety /> },
+  { path: "/contact", element: <Contact /> },
+  { path: "/privacy", element: <Privacy /> },
+  { path: "/terms", element: <Terms /> },
   {
     path: "/auth",
     element: <Auth />,

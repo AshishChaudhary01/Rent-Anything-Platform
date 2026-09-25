@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 import { IoHelpCircleOutline } from "react-icons/io5"
 import RaContainer from "../../../../components/container/RaContainer"
 import RaContainerPadding from "../../../../components/container/RaContainerPadding"
@@ -75,11 +76,23 @@ function HelpCenter() {
                       />
                     </>
                   ) : null}
-                </RaCard>
-              )
-            })
-          )}
-        </div>
+                  </RaCard>
+                )
+              })
+            )}
+            <p className="text-sm text-muted">
+              More about RAP:{" "}
+              <Link className="text-primary font-medium" to="/how-it-works">How it works</Link>
+              {" · "}
+              <Link className="text-primary font-medium" to="/safety">Trust &amp; safety</Link>
+              {" · "}
+              <Link className="text-primary font-medium" to="/contact">Contact</Link>
+              {" · "}
+              <Link className="text-primary font-medium" to="/terms">Terms</Link>
+              {" · "}
+              <Link className="text-primary font-medium" to="/privacy">Privacy</Link>
+            </p>
+          </div>
       </RaContainerPadding>
     </RaContainer>
   )

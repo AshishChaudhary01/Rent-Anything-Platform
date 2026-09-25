@@ -43,6 +43,24 @@ public class EmailTemplates {
 		return wrap("Payment receipt", render("receipt", values));
 	}
 
+	public String contactStaff(String name, String email, String message) {
+		String body = "<p style=\"margin:0 0 12px;font-size:16px;line-height:1.6;\">"
+				+ escape(name) + " wrote from the RAP contact form.</p>"
+				+ "<p style=\"margin:0 0 12px;font-size:14px;line-height:1.6;color:#5B5F67;\">"
+				+ escape(email) + "</p>"
+				+ "<p style=\"margin:0;font-size:16px;line-height:1.7;white-space:pre-wrap;\">"
+				+ escape(message) + "</p>";
+		return wrap("New contact message", body);
+	}
+
+	public String contactAck(String name) {
+		String body = "<p style=\"margin:0 0 12px;font-size:16px;line-height:1.6;\">Hi "
+				+ escape(name) + ",</p>"
+				+ "<p style=\"margin:0;font-size:16px;line-height:1.6;\">We received your message. "
+				+ "The RAP team will reply to this email address.</p>";
+		return wrap("We received your message", body);
+	}
+
 	public String wrap(String title, String body) {
 		return renderRaw(load("layout"), Map.of("title", escape(title), "body", body));
 	}

@@ -87,6 +87,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/listings/mine").authenticated()
 						.requestMatchers(HttpMethod.GET, "/listings", "/listings/*", "/listings/*/reviews").permitAll()
 						.requestMatchers(HttpMethod.GET, "/account/profiles/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/contact").permitAll()
 						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, exception) -> {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
