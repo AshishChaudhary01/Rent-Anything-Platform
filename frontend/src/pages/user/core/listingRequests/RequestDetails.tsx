@@ -22,6 +22,7 @@ import ReturnFlowHeader from "../../rent/ReturnFlowHeader"
 import ChatLink from "../chat/ChatLink"
 import ReportLink from "../../../../components/report/ReportLink"
 import { raToast } from "../../../../lib/raToast"
+import { runConfirmedAction } from "../../../../lib/criticalAction"
 import { useAcceptRental, useDeclineRental, useRental } from "../../../../hooks/queries/useRentals"
 import type { Rental } from "../../../../types/rental.types"
 import RaPageLoader from "../../../../components/feedback/RaPageLoader"
@@ -66,9 +67,15 @@ function Actions({ rental }: { rental: Rental }) {
             icon={<IoClose />}
             iconPosition="left"
             clickFunc={() =>
-              decline.mutate(rental.id, {
-                onSuccess: () => raToast.warning("Request declined"),
-                onError: (error) => raToast.fromError(error, "Could not decline"),
+              void runConfirmedAction({
+                confirm: {
+                  title: "Decline this request?",
+                  body: `${rental.renterName} will be notified. This cannot be undone from here.`,
+                  confirmText: "Decline",
+                  danger: true,
+                },
+                run: () => decline.mutateAsync(rental.id),
+                success: "Request declined",
               })
             }
           />

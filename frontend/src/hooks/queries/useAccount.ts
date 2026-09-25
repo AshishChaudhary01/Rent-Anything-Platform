@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
+import { raToast } from "../../lib/raToast"
 import { authKeys } from "../../lib/queryKeys"
 import {
   changePassword,
@@ -99,6 +100,7 @@ export function useLogout() {
       clearAuth()
       resetAccount()
       queryClient.removeQueries({ queryKey: authKeys.all() })
+      raToast.info("Signed out")
       navigate("/auth/login")
     },
   })

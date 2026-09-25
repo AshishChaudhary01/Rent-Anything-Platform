@@ -14,8 +14,7 @@ import RaButton from "../../../components/button/RaButton"
 import RaBreadcrumb from "../../../components/breadcrumb/RaBreadcrumb"
 import MediaGallery from "../../../components/mediaGallery/MediaGallery"
 import { profile01 } from "../../../utils/images"
-import { raToast } from "../../../lib/raToast"
-import { apiErrorMessage } from "../../../lib/formErrors"
+import { runConfirmedAction } from "../../../lib/criticalAction"
 import { statusClass } from "../../../components/admin/adminUi"
 import { useAdminListing, useAdminRentals, useSetAdminListingStatus } from "../../../hooks/queries/useAdmin"
 import RaPageLoader from "../../../components/feedback/RaPageLoader"
@@ -65,13 +64,14 @@ function AdminListingDetails() {
 
   const media = listing.image ? [{ type: "image" as const, url: listing.image }] : []
 
-  const changeStatus = async (next: string, message: string) => {
-    try {
-      await setListingStatus.mutateAsync({ id: listing.id, status: next })
-      raToast.success(message)
-    } catch (error) {
-      raToast.error(apiErrorMessage(error))
-    }
+  const changeStatus = async (next: string, message: string, confirm: { title: string; body: string; confirmText: string }) => {
+    const previous = listing.status
+    await runConfirmedAction({
+      confirm: { ...confirm, danger: true },
+      run: () => setListingStatus.mutateAsync({ id: listing.id, status: next }),
+      success: message,
+      undo: () => setListingStatus.mutateAsync({ id: listing.id, status: previous }),
+    })
   }
 
   return (
@@ -142,10 +142,10 @@ function AdminListingDetails() {
 
       <div className="flex gap-2">
         {listing.status === "Active" && (
-          <RaButton type="button" btnText="Disable listing" variant="outline" icon={<IoBanOutline />} iconPosition="left" clickFunc={() => void changeStatus("Disabled", "Listing disabled")} />
+          <RaButton type="button" btnText="Disable listing" variant="outline" icon={<IoBanOutline />} iconPosition="left" clickFunc={() => void changeStatus("Disabled", "Listing disabled", { title: "Disable this listing?", body: "It will be hidden from browse until restored.", confirmText: "Disable" })} />
         )}
         {listing.status !== "Removed" && (
-          <RaButton type="button" btnText="Remove listing" variant="danger" icon={<IoTrashOutline />} iconPosition="left" clickFunc={() => void changeStatus("Removed", "Listing removed")} />
+          <RaButton type="button" btnText="Remove listing" variant="danger" icon={<IoTrashOutline />} iconPosition="left" clickFunc={() => void changeStatus("Removed", "Listing removed", { title: "Remove this listing?", body: "The listing will be taken down. You can undo this from the toast if it was a mistake.", confirmText: "Remove" })} />
         )}
       </div>
     </div>

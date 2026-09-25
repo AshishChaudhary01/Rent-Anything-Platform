@@ -10,6 +10,7 @@ import RentHint from "../RentHint"
 import RentFlowLeave from "../RentFlowLeave"
 import { RENT_STEPS } from "../returnSteps"
 import { raToast } from "../../../../lib/raToast"
+import { runConfirmedAction } from "../../../../lib/criticalAction"
 import { useCancelRental, usePaymentConfig, useRental } from "../../../../hooks/queries/useRentals"
 import RaButton from "../../../../components/button/RaButton"
 import { initiatePayment, submitEsewaForm } from "../../../../services/rental.service"
@@ -169,12 +170,17 @@ function Checkout() {
             variant="danger"
             disabled={cancelRental.isPending}
             clickFunc={() =>
-              cancelRental.mutate(rental.id, {
-                onSuccess: () => {
-                  raToast.success("Request cancelled")
-                  navigate("/user/my-rentals")
+              void runConfirmedAction({
+                confirm: {
+                  title: "Cancel this request?",
+                  body: "The owner will be notified. You will need to send a new request later.",
+                  confirmText: "Cancel request",
+                  danger: true,
                 },
-                onError: (error) => raToast.fromError(error, "Could not cancel"),
+                run: () => cancelRental.mutateAsync(rental.id),
+                success: "Request cancelled",
+              }).then((ok) => {
+                if (ok) navigate("/user/my-rentals")
               })
             }
           />

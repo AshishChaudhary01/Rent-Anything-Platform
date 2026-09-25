@@ -10,6 +10,7 @@ import { profile01 } from "../../../utils/images"
 import { useAuthStore } from "../../../store/authStore"
 import { raToast } from "../../../lib/raToast"
 import { apiErrorMessage } from "../../../lib/formErrors"
+import { runConfirmedAction } from "../../../lib/criticalAction"
 import { useAdminStaffMember, useDeleteAdminAccount, useSetAdminStaffStatus, useUpdateAdminAccount } from "../../../hooks/queries/useAdmin"
 import RaPageLoader from "../../../components/feedback/RaPageLoader"
 
@@ -55,13 +56,16 @@ function AdminStaffDetails() {
     return <div className="text-muted">Admin not found. <Link to="/admin/staff" className="text-primary">Back</Link></div>
   }
 
-  const changeStatus = async (status: string, message: string) => {
-    try {
-      await setStatus.mutateAsync({ id: admin.id, status })
-      raToast.success(message)
-    } catch (error) {
-      raToast.error(apiErrorMessage(error))
-    }
+  const changeStatus = async (status: string, message: string, confirm: { title: string; body: string; confirmText: string; danger?: boolean }, undo?: boolean) => {
+    const previous = admin.status
+    await runConfirmedAction({
+      confirm: { ...confirm, danger: confirm.danger ?? true },
+      run: () => setStatus.mutateAsync({ id: admin.id, status }),
+      success: message,
+      undo: undo
+        ? () => setStatus.mutateAsync({ id: admin.id, status: previous })
+        : undefined,
+    })
   }
 
   return (
@@ -128,7 +132,7 @@ function AdminStaffDetails() {
             variant="outline"
             icon={<IoBanOutline />}
             iconPosition="left"
-            clickFunc={() => void changeStatus("Banned", `${admin.fullName} disabled`)}
+            clickFunc={() => void changeStatus("Banned", `${admin.fullName} disabled`, { title: "Disable this admin?", body: `${admin.fullName} will not be able to sign in until restored.`, confirmText: "Disable" }, true)}
           />
         ) : (
           <RaButton
@@ -137,7 +141,7 @@ function AdminStaffDetails() {
             variant="outline"
             icon={<IoRefreshOutline />}
             iconPosition="left"
-            clickFunc={() => void changeStatus("Active", "Admin restored")}
+            clickFunc={() => void changeStatus("Active", "Admin restored", { title: "Restore this admin?", body: `${admin.fullName} will regain admin access.`, confirmText: "Restore", danger: false })}
           />
         )}
         <RaButton
@@ -147,14 +151,19 @@ function AdminStaffDetails() {
           icon={<IoTrashOutline />}
           iconPosition="left"
           clickFunc={async () => {
-            if (!window.confirm(`Delete ${admin.fullName}? This cannot be undone.`)) return
-            try {
-              await removeAdmin.mutateAsync(admin.id)
-              raToast.success("Admin deleted")
-              navigate("/admin/staff")
-            } catch (error) {
-              raToast.error(apiErrorMessage(error))
-            }
+            await runConfirmedAction({
+              confirm: {
+                title: `Delete ${admin.fullName}?`,
+                body: "This permanently removes the admin account and cannot be undone.",
+                confirmText: "Delete",
+                danger: true,
+              },
+              run: async () => {
+                await removeAdmin.mutateAsync(admin.id)
+                navigate("/admin/staff")
+              },
+              success: "Admin deleted",
+            })
           }}
         />
       </div>

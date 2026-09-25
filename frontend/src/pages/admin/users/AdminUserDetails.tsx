@@ -3,8 +3,7 @@ import { IoArrowBackOutline, IoBagHandleOutline, IoBanOutline, IoPauseOutline, I
 import { AdminSectionTitle } from "../../../components/admin/AdminPageHeader"
 import RaCard from "../../../components/card/RaCard"
 import RaButton from "../../../components/button/RaButton"
-import { raToast } from "../../../lib/raToast"
-import { apiErrorMessage } from "../../../lib/formErrors"
+import { runConfirmedAction } from "../../../lib/criticalAction"
 import { statusClass } from "../../../components/admin/adminUi"
 import { profile01 } from "../../../utils/images"
 import { useAdminListings, useAdminRentals, useAdminUser, useSetAdminUserStatus } from "../../../hooks/queries/useAdmin"
@@ -39,13 +38,16 @@ function AdminUserDetails() {
   const listingPreview = theirListings.slice(0, 3)
   const rentalPreview = theirRentals.slice(0, 3)
 
-  const changeStatus = async (status: string, message: string) => {
-    try {
-      await setUserStatus.mutateAsync({ id: user.id, status })
-      raToast.success(message)
-    } catch (error) {
-      raToast.error(apiErrorMessage(error))
-    }
+  const changeStatus = async (status: string, message: string, confirm: { title: string; body: string; confirmText: string; danger?: boolean }, undo?: boolean) => {
+    const previous = user.status
+    await runConfirmedAction({
+      confirm: { ...confirm, danger: confirm.danger ?? true },
+      run: () => setUserStatus.mutateAsync({ id: user.id, status }),
+      success: message,
+      undo: undo
+        ? () => setUserStatus.mutateAsync({ id: user.id, status: previous })
+        : undefined,
+    })
   }
 
   return (
@@ -85,13 +87,13 @@ function AdminUserDetails() {
       {user.role === "USER" && (
         <div className="flex gap-2">
           {user.status !== "Suspended" && (
-            <RaButton type="button" btnText="Suspend" variant="outline" icon={<IoPauseOutline />} iconPosition="left" clickFunc={() => void changeStatus("Suspended", `${user.fullName} suspended`)} />
+            <RaButton type="button" btnText="Suspend" variant="outline" icon={<IoPauseOutline />} iconPosition="left" clickFunc={() => void changeStatus("Suspended", `${user.fullName} suspended`, { title: "Suspend this account?", body: `${user.fullName} will not be able to rent or list until restored.`, confirmText: "Suspend" }, true)} />
           )}
           {user.status !== "Banned" && (
-            <RaButton type="button" btnText="Ban user" variant="danger" icon={<IoBanOutline />} iconPosition="left" clickFunc={() => void changeStatus("Banned", `${user.fullName} banned`)} />
+            <RaButton type="button" btnText="Ban user" variant="danger" icon={<IoBanOutline />} iconPosition="left" clickFunc={() => void changeStatus("Banned", `${user.fullName} banned`, { title: "Ban this account?", body: `${user.fullName} will be blocked from RAP until restored.`, confirmText: "Ban", danger: true }, true)} />
           )}
           {user.status !== "Active" && (
-            <RaButton type="button" btnText="Restore" variant="outline" icon={<IoRefreshOutline />} iconPosition="left" clickFunc={() => void changeStatus("Active", "Account restored")} />
+            <RaButton type="button" btnText="Restore" variant="outline" icon={<IoRefreshOutline />} iconPosition="left" clickFunc={() => void changeStatus("Active", "Account restored", { title: "Restore this account?", body: `${user.fullName} will be able to use RAP again.`, confirmText: "Restore", danger: false })} />
           )}
         </div>
       )}

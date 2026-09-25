@@ -3,7 +3,7 @@ import { IoClose } from "react-icons/io5"
 import RaCard from "../../../../components/card/RaCard"
 import RaButton from "../../../../components/button/RaButton"
 import ChatLink from "../chat/ChatLink"
-import { raToast } from "../../../../lib/raToast"
+import { runConfirmedAction } from "../../../../lib/criticalAction"
 import { useCancelRental } from "../../../../hooks/queries/useRentals"
 
 export type PendingRental = {
@@ -52,9 +52,15 @@ function PendingRentalCard({ item }: { item: PendingRental }) {
                 icon={<IoClose />}
                 iconPosition="left"
                 clickFunc={() =>
-                  cancelRental.mutate(String(item.id), {
-                    onSuccess: () => raToast.success("Request cancelled"),
-                    onError: (error) => raToast.fromError(error, "Could not cancel"),
+                  void runConfirmedAction({
+                    confirm: {
+                      title: "Cancel this request?",
+                      body: "The owner will be notified. You will need to send a new request later.",
+                      confirmText: "Cancel request",
+                      danger: true,
+                    },
+                    run: () => cancelRental.mutateAsync(String(item.id)),
+                    success: "Request cancelled",
                   })
                 }
               />

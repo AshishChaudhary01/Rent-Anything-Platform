@@ -11,6 +11,7 @@ import RentFlowLeave from "../RentFlowLeave"
 import { RENT_STEPS } from "../returnSteps"
 import ChatLink from "../../core/chat/ChatLink"
 import { raToast } from "../../../../lib/raToast"
+import { runConfirmedAction } from "../../../../lib/criticalAction"
 import { useCancelRental, useRental } from "../../../../hooks/queries/useRentals"
 import RaPageLoader from "../../../../components/feedback/RaPageLoader"
 
@@ -84,12 +85,17 @@ function RequestWaiting() {
             variant="danger"
             disabled={cancelRental.isPending}
             clickFunc={() =>
-              cancelRental.mutate(rental.id, {
-                onSuccess: () => {
-                  raToast.success("Request cancelled")
-                  navigate("/user/my-rentals")
+              void runConfirmedAction({
+                confirm: {
+                  title: "Cancel this request?",
+                  body: "The owner will be notified. You will need to send a new request later.",
+                  confirmText: "Cancel request",
+                  danger: true,
                 },
-                onError: (error) => raToast.fromError(error, "Could not cancel"),
+                run: () => cancelRental.mutateAsync(rental.id),
+                success: "Request cancelled",
+              }).then((ok) => {
+                if (ok) navigate("/user/my-rentals")
               })
             }
           />

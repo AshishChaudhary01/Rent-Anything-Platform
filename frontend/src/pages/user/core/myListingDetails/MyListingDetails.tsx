@@ -8,6 +8,7 @@ import MyListingDetailsMain from "./MyListingDetailsMain"
 import MyListingDetailsSummary from "./MyListingDetailsSummary"
 import type { MediaItem } from "../../../../components/mediaGallery/MediaGallery"
 import { raToast } from "../../../../lib/raToast"
+import { runConfirmedAction } from "../../../../lib/criticalAction"
 import { useListing, useUpdateListing } from "../../../../hooks/queries/useListings"
 import type { Listing } from "../../../../types/listing.types"
 import RaPageLoader from "../../../../components/feedback/RaPageLoader"
@@ -43,7 +44,7 @@ function MyListingDetails() {
   const { id } = useParams()
   const isMobile = useMediaQuery({ maxWidth: 768 })
   const { data, isPending, isError } = useListing(id)
-  const { mutate: saveListing, isPending: saving } = useUpdateListing()
+  const { mutate: saveListing, mutateAsync: saveListingAsync, isPending: saving } = useUpdateListing()
   const [editing, setEditing] = useState(false)
   const [listing, setListing] = useState<ListingDraft | null>(null)
   const [saved, setSaved] = useState<ListingDraft | null>(null)
@@ -62,36 +63,41 @@ function MyListingDetails() {
     return <div className="px-6 py-10 text-muted">This listing is not available.</div>
   }
 
+  const applyDraft = (updated: Listing) => {
+    const next = toDraft(updated)
+    setListing(next)
+    setSaved(next)
+    setEditing(false)
+  }
+
+  const listingPayload = (draft: ListingDraft, extras?: { status?: Listing["status"] }) => {
+    const keepUrls = draft.media.filter((item) => !item.file).map((item) => item.url)
+    const files = draft.media.filter((item) => item.file).map((item) => item.file!)
+    return {
+      title: draft.title,
+      description: draft.description,
+      dailyRate: draft.rate,
+      deposit: draft.deposit || "0",
+      location: draft.location,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      status: extras?.status ?? draft.status,
+      keepUrls,
+      files,
+    }
+  }
+
   const persist = (draft: ListingDraft, extras?: { status?: Listing["status"] }) => {
     if (!id) return
     if (data.status === "RENTED" || data.activeBooking) {
       raToast.error("You cannot update a listing while it is busy with a rental")
       return
     }
-    const keepUrls = draft.media.filter((item) => !item.file).map((item) => item.url)
-    const files = draft.media.filter((item) => item.file).map((item) => item.file!)
     saveListing(
-      {
-        id,
-        payload: {
-          title: draft.title,
-          description: draft.description,
-          dailyRate: draft.rate,
-          deposit: draft.deposit || "0",
-          location: draft.location,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          status: extras?.status ?? draft.status,
-          keepUrls,
-          files,
-        },
-      },
+      { id, payload: listingPayload(draft, extras) },
       {
         onSuccess: (updated) => {
-          const next = toDraft(updated)
-          setListing(next)
-          setSaved(next)
-          setEditing(false)
+          applyDraft(updated)
           raToast.success("Listing updated")
         },
         onError: (error) => raToast.fromError(error, "Could not update listing"),
@@ -100,16 +106,45 @@ function MyListingDetails() {
   }
 
   const pauseListing = () => {
+    if (!id) return
     if (listing.status === "RENTED") {
       raToast.error("You cannot pause a listing while it is currently rented")
       return
     }
     if (listing.status === "AVAILABLE") {
-      persist(listing, { status: "UNAVAILABLE" })
+      void runConfirmedAction({
+        confirm: {
+          title: "Pause this listing?",
+          body: "It will be hidden from browse until you resume it.",
+          confirmText: "Pause",
+          danger: true,
+        },
+        run: async () => {
+          const updated = await saveListingAsync({ id, payload: listingPayload(listing, { status: "UNAVAILABLE" }) })
+          applyDraft(updated)
+        },
+        success: "Listing paused",
+        undo: async () => {
+          const updated = await saveListingAsync({ id, payload: listingPayload(listing, { status: "AVAILABLE" }) })
+          applyDraft(updated)
+        },
+      })
       return
     }
     if (listing.status === "UNAVAILABLE") {
-      persist(listing, { status: "AVAILABLE" })
+      void runConfirmedAction({
+        confirm: {
+          title: "Resume this listing?",
+          body: "It will show up in browse again.",
+          confirmText: "Resume",
+          danger: false,
+        },
+        run: async () => {
+          const updated = await saveListingAsync({ id, payload: listingPayload(listing, { status: "AVAILABLE" }) })
+          applyDraft(updated)
+        },
+        success: "Listing resumed",
+      })
       return
     }
     raToast.error("Only an active listing can be paused")

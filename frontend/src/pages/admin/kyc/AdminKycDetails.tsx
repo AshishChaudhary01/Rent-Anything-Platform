@@ -4,8 +4,7 @@ import { IoArrowBackOutline, IoCheckmarkCircleOutline, IoCloseCircleOutline } fr
 import RaCard from "../../../components/card/RaCard"
 import RaButton from "../../../components/button/RaButton"
 import RaInput from "../../../components/input/RaInput"
-import { raToast } from "../../../lib/raToast"
-import { apiErrorMessage } from "../../../lib/formErrors"
+import { runConfirmedAction } from "../../../lib/criticalAction"
 import { statusClass } from "../../../components/admin/adminUi"
 import { useAdminKycCase, useReviewAdminKyc } from "../../../hooks/queries/useAdmin"
 import RaPageLoader from "../../../components/feedback/RaPageLoader"
@@ -31,16 +30,28 @@ function AdminKycDetails() {
       return
     }
     setNotesError("")
-    try {
-      await reviewKyc.mutateAsync({
-        id: item.id,
-        approved,
-        notes: notes.trim() || "Document matches profile.",
-      })
-      raToast.success(approved ? "KYC verified" : "KYC rejected")
-    } catch (error) {
-      raToast.error(apiErrorMessage(error))
-    }
+    await runConfirmedAction({
+      confirm: approved
+        ? {
+            title: "Verify this KYC?",
+            body: `${item.fullName} will be marked as identity-verified.`,
+            confirmText: "Verify",
+            danger: false,
+          }
+        : {
+            title: "Reject this KYC?",
+            body: "The user will need to submit again. This cannot be undone from the toast.",
+            confirmText: "Reject",
+            danger: true,
+          },
+      run: () =>
+        reviewKyc.mutateAsync({
+          id: item.id,
+          approved,
+          notes: notes.trim() || "Document matches profile.",
+        }),
+      success: approved ? "KYC verified" : "KYC rejected",
+    })
   }
 
   return (

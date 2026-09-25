@@ -10,6 +10,7 @@ import RaBadge from "../../../../components/badge/RaBadge"
 import RaSearchBar from "../../../../components/searchbar/RaSearchbar"
 import { PAGE_SIZE } from "../../../../data/catalog"
 import { raToast } from "../../../../lib/raToast"
+import { runConfirmedAction } from "../../../../lib/criticalAction"
 import { useAcceptRental, useDeclineRental, useOwnedRentals } from "../../../../hooks/queries/useRentals"
 import type { Rental, RentalStatus } from "../../../../types/rental.types"
 import RaPageLoader from "../../../../components/feedback/RaPageLoader"
@@ -73,8 +74,21 @@ function ListingRequests() {
 
   const decide = (req: Rental, next: "accept" | "decline") => {
     const run = next === "accept" ? accept : decline
+    if (next === "decline") {
+      void runConfirmedAction({
+        confirm: {
+          title: `Decline ${req.renterName}?`,
+          body: "They will be notified and this request cannot be reopened from here.",
+          confirmText: "Decline",
+          danger: true,
+        },
+        run: () => run.mutateAsync(req.id),
+        success: `Declined ${req.renterName}`,
+      })
+      return
+    }
     run.mutate(req.id, {
-      onSuccess: () => raToast.success(next === "accept" ? `Accepted ${req.renterName}` : `Declined ${req.renterName}`),
+      onSuccess: () => raToast.success(`Accepted ${req.renterName}`),
       onError: (error) => raToast.fromError(error, "Could not update request"),
     })
   }

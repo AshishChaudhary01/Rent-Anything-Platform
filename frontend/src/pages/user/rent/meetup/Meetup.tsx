@@ -21,6 +21,7 @@ import RentFlowLeave from "../RentFlowLeave"
 import { RENT_STEPS } from "../returnSteps"
 import ChatLink from "../../core/chat/ChatLink"
 import { raToast } from "../../../../lib/raToast"
+import { runConfirmedAction } from "../../../../lib/criticalAction"
 import ReportLink from "../../../../components/report/ReportLink"
 import { useRental, useStartRental, useReportNoShow } from "../../../../hooks/queries/useRentals"
 import { decodeQrFromFile, decodeQrFromVideo } from "../../../../lib/decodeQr"
@@ -271,12 +272,19 @@ function Meetup() {
               variant="danger"
               disabled={noShow.isPending}
               clickFunc={() =>
-                noShow.mutate(rental.id, {
-                  onSuccess: () => {
-                    raToast.success(rental.owner ? "No-show recorded. Commitment paid to you." : "No-show recorded. Commitment refunded.")
-                    navigate(rental.owner ? `/user/request-details/${rental.id}` : "/user/my-rentals")
+                void runConfirmedAction({
+                  confirm: {
+                    title: rental.owner ? "Record renter no-show?" : "Record owner no-show?",
+                    body: "This settles the commitment fee and cannot be undone from the app.",
+                    confirmText: "Record no-show",
+                    danger: true,
                   },
-                  onError: (error) => raToast.fromError(error, "Could not record no-show"),
+                  run: () => noShow.mutateAsync(rental.id),
+                  success: rental.owner
+                    ? "No-show recorded. Commitment paid to you."
+                    : "No-show recorded. Commitment refunded.",
+                }).then((ok) => {
+                  if (ok) navigate(rental.owner ? `/user/request-details/${rental.id}` : "/user/my-rentals")
                 })
               }
             />

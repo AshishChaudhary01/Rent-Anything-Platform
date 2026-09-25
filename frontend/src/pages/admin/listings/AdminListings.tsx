@@ -5,8 +5,7 @@ import RaCard from "../../../components/card/RaCard"
 import AdminPageHeader from "../../../components/admin/AdminPageHeader"
 import RaButton from "../../../components/button/RaButton"
 import RaSearchBar from "../../../components/searchbar/RaSearchbar"
-import { raToast } from "../../../lib/raToast"
-import { apiErrorMessage } from "../../../lib/formErrors"
+import { runConfirmedAction } from "../../../lib/criticalAction"
 import AdminPagination from "../../../components/admin/AdminPagination"
 import { matchesSearch, paginate, selectClass, statusClass } from "../../../components/admin/adminUi"
 import { useAdminListings, useSetAdminListingStatus } from "../../../hooks/queries/useAdmin"
@@ -29,13 +28,13 @@ function AdminListings() {
 
   const { current, slice } = paginate(filtered, page)
 
-  const changeStatus = async (id: string, next: string, message: string) => {
-    try {
-      await setListingStatus.mutateAsync({ id, status: next })
-      raToast.success(message)
-    } catch (error) {
-      raToast.error(apiErrorMessage(error))
-    }
+  const changeStatus = async (id: string, previous: string, next: string, message: string, confirm: { title: string; body: string; confirmText: string }) => {
+    await runConfirmedAction({
+      confirm: { ...confirm, danger: true },
+      run: () => setListingStatus.mutateAsync({ id, status: next }),
+      success: message,
+      undo: () => setListingStatus.mutateAsync({ id, status: previous }),
+    })
   }
 
   return (
@@ -82,7 +81,7 @@ function AdminListings() {
                     size="sm"
                     variant="outline"
                     widthFill={false}
-                    clickFunc={() => void changeStatus(item.id, "Disabled", "Listing disabled")}
+                    clickFunc={() => void changeStatus(item.id, item.status, "Disabled", "Listing disabled", { title: "Disable this listing?", body: `${item.title} will be hidden from browse until restored.`, confirmText: "Disable" })}
                   />
                 )}
                 {item.status !== "Removed" && (
@@ -92,7 +91,7 @@ function AdminListings() {
                     size="sm"
                     variant="danger"
                     widthFill={false}
-                    clickFunc={() => void changeStatus(item.id, "Removed", "Listing removed")}
+                    clickFunc={() => void changeStatus(item.id, item.status, "Removed", "Listing removed", { title: "Remove this listing?", body: `${item.title} will be taken down. You can undo this from the toast if it was a mistake.`, confirmText: "Remove" })}
                   />
                 )}
               </div>

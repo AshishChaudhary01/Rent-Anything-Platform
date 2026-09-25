@@ -5,8 +5,7 @@ import { AdminSectionTitle } from "../../../components/admin/AdminPageHeader"
 import RaCard from "../../../components/card/RaCard"
 import RaButton from "../../../components/button/RaButton"
 import RaInput from "../../../components/input/RaInput"
-import { raToast } from "../../../lib/raToast"
-import { apiErrorMessage } from "../../../lib/formErrors"
+import { runConfirmedAction } from "../../../lib/criticalAction"
 import { selectClass, statusClass, formatNptDateTime, staffRoleLabel } from "../../../components/admin/adminUi"
 import TicketResolution, { resolverDisplayName } from "../../../components/report/TicketResolution"
 import ProofGallery from "../../../components/report/ProofGallery"
@@ -42,12 +41,16 @@ function AdminReportDetails() {
       return
     }
     setNotesError("")
-    try {
-      await resolveReport.mutateAsync({ id: report.id, action, notes: notes.trim() })
-      raToast.success("Case closed")
-    } catch (error) {
-      raToast.error(apiErrorMessage(error))
-    }
+    await runConfirmedAction({
+      confirm: {
+        title: "Close this ticket?",
+        body: "The reporter and accused will be notified. This cannot be undone from the app.",
+        confirmText: "Close case",
+        danger: true,
+      },
+      run: () => resolveReport.mutateAsync({ id: report.id, action, notes: notes.trim() }),
+      success: "Case closed",
+    })
   }
 
   return (
@@ -144,14 +147,19 @@ function AdminReportDetails() {
                 variant="outline"
                 icon={<IoPauseOutline />}
                 iconPosition="left"
-                clickFunc={async () => {
-                  try {
-                    await setUserStatus.mutateAsync({ id: report.accusedId!, status: "Suspended" })
-                    raToast.warning(`${report.accusedName} suspended`)
-                  } catch (error) {
-                    raToast.error(apiErrorMessage(error))
-                  }
-                }}
+                clickFunc={() =>
+                  void runConfirmedAction({
+                    confirm: {
+                      title: `Suspend ${report.accusedName}?`,
+                      body: "They will not be able to rent or list until restored.",
+                      confirmText: "Suspend",
+                      danger: true,
+                    },
+                    run: () => setUserStatus.mutateAsync({ id: report.accusedId!, status: "Suspended" }),
+                    success: `${report.accusedName} suspended`,
+                    undo: () => setUserStatus.mutateAsync({ id: report.accusedId!, status: "Active" }),
+                  })
+                }
               />
             )}
             {report.listingId && (
@@ -161,14 +169,19 @@ function AdminReportDetails() {
                 variant="danger"
                 icon={<IoTrashOutline />}
                 iconPosition="left"
-                clickFunc={async () => {
-                  try {
-                    await setListingStatus.mutateAsync({ id: report.listingId!, status: "Removed" })
-                    raToast.success("Listing removed")
-                  } catch (error) {
-                    raToast.error(apiErrorMessage(error))
-                  }
-                }}
+                clickFunc={() =>
+                  void runConfirmedAction({
+                    confirm: {
+                      title: "Remove this listing?",
+                      body: `${report.listingTitle || "This listing"} will be taken down. You can undo this from the toast if it was a mistake.`,
+                      confirmText: "Remove",
+                      danger: true,
+                    },
+                    run: () => setListingStatus.mutateAsync({ id: report.listingId!, status: "Removed" }),
+                    success: "Listing removed",
+                    undo: () => setListingStatus.mutateAsync({ id: report.listingId!, status: "Active" }),
+                  })
+                }
               />
             )}
           </div>
